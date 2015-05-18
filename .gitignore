@@ -1,9 +1,2 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/Release
-/Debug
-*.opensdf
+Debug/
 *.suo
-*.sdf
