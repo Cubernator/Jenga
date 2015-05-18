@@ -156,9 +156,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shader\common.hlsli">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
     <FxCompile Include="shader\Diffuse_vs.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
@@ -166,6 +163,9 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="shader\VertexColor_ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\Diffuse_ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
@@ -191,13 +191,13 @@
     <None Include="bin\PhysX3GpuDEBUG_x86.dll">
       <Filter>Dlls</Filter>
     </None>
-    <None Include="shader\Diffuse_ps.hlsl">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="shader\Diffuse.hlsli">
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shader\VertexColor.hlsli">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shader\common.hlsli">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
