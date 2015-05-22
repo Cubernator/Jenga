@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <windowsx.h>
 #include "Engine.h"
-#include "TestScene.h"
+#include "MainScene.h"
 
 // include the Direct3D Library file
 #pragma comment(lib,"d3d11.lib")
@@ -68,7 +68,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	try {
 		Engine e(hWnd);
 
-		e.enterScene<TestScene>();
+		e.enterScene<MainScene>();
 		result = e.run();
 	}
 	catch (std::exception&) {

@@ -65,9 +65,6 @@
     <ClInclude Include="include\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\TestScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -93,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MainScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -130,9 +130,6 @@
     <ClCompile Include="src\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\TestScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -152,6 +149,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DefaultTransform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MainScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

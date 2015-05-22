@@ -11,12 +11,15 @@ Block::Block(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTrans
 
 	setColor(XMFLOAT4(.6f, .6f, .6f, 1.f));
 
-	if (dynamic)
-		m_actor = PxCreateDynamic(*physics, t, PxBoxGeometry(halfSize), *m, 480.f);
-	else
-		m_actor = PxCreateStatic(*physics, t, PxBoxGeometry(halfSize), *m);
+	PxRigidActor * actor;
 
-	m_transform.reset(new PhysicsTransform(this, m_actor));
+	if (dynamic)
+		actor = PxCreateDynamic(*physics, t, PxBoxGeometry(halfSize), *m, 4.8f);
+	else
+		actor = PxCreateStatic(*physics, t, PxBoxGeometry(halfSize), *m);
+
+	setActor(actor);
+	m_transform.reset(new PhysicsTransform(this, actor));
 
 	setRenderer(m_renderer.get());
 	setTransform(m_transform.get());
@@ -24,12 +27,7 @@ Block::Block(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTrans
 
 Block::~Block()
 {
-	m_actor->release();
-}
-
-PxRigidActor * Block::getActor()
-{
-	return m_actor;
+	getActor()->release();
 }
 
 void Block::setColor(const XMFLOAT4& c)

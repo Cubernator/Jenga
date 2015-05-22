@@ -70,11 +70,12 @@ void ObjectManager::draw(float alpha)
 					ID3D11Buffer * matBuffer = r->getConstantBuffer();
 					if (matBuffer != m_constantBuffers[CB_Material]) {
 						m_constantBuffers[CB_Material] = matBuffer;
-						setConstantBuffers();
 					}
-
-					r->draw();
 				}
+
+				setConstantBuffers();
+
+				r->draw();
 			}
 		}
 	}
