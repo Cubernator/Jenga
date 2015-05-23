@@ -2,6 +2,11 @@
 #include <windows.h>
 #include <windowsx.h>
 
+#include "ObjectManager.h"
+#include "Scene.h"
+#include "PhysicsScene.h"
+#include "Input.h"
+
 // global declarations
 ID3D11Device *dev;                     // the pointer to our Direct3D device interface
 ID3D11DeviceContext *devcon;           // the pointer to our Direct3D device context
@@ -18,9 +23,9 @@ Engine::Engine(HWND hWnd) : m_time(0.f), m_delta(1.f / 60.f), m_running(true), m
 	initDirect3D();
 	initPhysX();
 
+	m_input = new Input(m_hWnd);
 	m_objectManager = new ObjectManager();
 }
-
 
 Engine::~Engine()
 {
@@ -246,6 +251,8 @@ WPARAM Engine::run()
 
 void Engine::update()
 {
+	input->preUpdate();
+
 	if (m_physicsScene) {
 		PxScene * pxs = m_physicsScene->getPhysXObj();
 		pxs->simulate(m_delta.count());
@@ -254,6 +261,8 @@ void Engine::update()
 
 	if (m_activeScene) m_activeScene->update(); // update active scene object
 	m_objectManager->update(); // update all registered game objects
+
+	m_input->update();
 }
 
 void Engine::render(float alpha)
@@ -289,6 +298,27 @@ LRESULT Engine::processMessages(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	case WM_DESTROY:
 	{
 		stop();
+		return 0;
+	} break;
+	case WM_INPUT:
+	{
+		UINT dwSize;
+
+		// get required size of input buffer
+		GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
+
+		// create buffer
+		LPBYTE lpb = new BYTE[dwSize];
+		if (lpb == NULL) return 0;
+
+		// fill buffer with input data
+		GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
+
+		// pass data to input module
+		input->handle((RAWINPUT*)lpb);
+
+		// free buffer
+		delete[] lpb;
 		return 0;
 	} break;
 	}

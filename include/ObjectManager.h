@@ -6,7 +6,7 @@
 
 struct cbPerApplication
 {
-	XMMATRIX projection;
+	XMFLOAT4X4 projection;
 };
 
 struct cbPerFrame

@@ -52,7 +52,7 @@ void ObjectManager::draw(float alpha)
 {
 	if (m_cam) {
 		m_cam->setAspectRatio(16.f / 9.f);
-		m_app.projection = m_cam->getProjectionMatrix();
+		XMStoreFloat4x4(&m_app.projection, m_cam->getProjectionMatrix());
 
 		m_frame.view = PxMat44(m_cam->getTransform()->getTransform().getInverse());
 

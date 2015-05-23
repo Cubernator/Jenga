@@ -1,7 +1,9 @@
 #include "MainScene.h"
+#include "Input.h"
+#include "ObjectManager.h"
 
 #include <random>
-
+#include <chrono>
 
 MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), m_camera(new Camera())
 {
@@ -32,7 +34,7 @@ MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), m_camera(new Camera
 	PxQuat r90(3.14159265f * 0.5f, PxVec3(0, 1, 0));
 	float gap = 0.02f, maxVariance = 0.01f;
 
-	std::default_random_engine generator;
+	std::default_random_engine generator((unsigned int)std::chrono::system_clock::now().time_since_epoch().count());
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 
 	for (int i = 0; i < 9; i++) {
@@ -79,6 +81,17 @@ MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), m_camera(new Camera
 	addObject(m_ground.get());
 }
 
+void MainScene::update()
+{
+	if (input->getKeyPressed('R')) {
+		engine->enterScene<MainScene>(); // restart
+	}
+
+	Transform * t = m_camera->getTransform();
+	PxVec3 p = t->getPosition();
+	p.y += input->getMouseDeltaY() * engine->getDelta();
+	t->setPosition(p);
+}
 
 MainScene::~MainScene()
 {

@@ -2,6 +2,7 @@
 #include "PhysicsScene.h"
 
 #include "Block.h"
+#include "Camera.h"
 
 #include <vector>
 #include <memory>
@@ -16,6 +17,8 @@ private:
 	std::unique_ptr<IndexBuffer> m_blockIndices;
 
 	PxMaterial *m_blockMat, *m_groundMat;
+
+	void update() final;
 
 public:
 	MainScene(PxSceneDesc desc);

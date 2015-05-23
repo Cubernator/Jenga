@@ -5,14 +5,15 @@
 #include <chrono>
 #include <memory>
 
-#include "ObjectManager.h"
-#include "Scene.h"
-#include "PhysicsScene.h"
-
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
 typedef std::chrono::duration<float> fsec;
+
+class Input;
+class ObjectManager;
+class Scene;
+class PhysicsScene;
 
 class Engine
 {
@@ -22,6 +23,7 @@ private:
 	bool m_running;
 
 	ObjectManager * m_objectManager;
+	Input * m_input;
 
 	std::unique_ptr<Scene> m_activeScene;
 	PhysicsScene * m_physicsScene;
