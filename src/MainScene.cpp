@@ -5,7 +5,8 @@
 #include <random>
 #include <chrono>
 
-MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), m_camera(new Camera())
+MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), m_camera(new Camera()),
+m_camX(0), m_camY(0), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f)
 {
 	m_shader.reset(new Shader(L"Diffuse_vs.cso", L"Diffuse_ps.cso"));
 
@@ -65,7 +66,7 @@ MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), m_camera(new Camera
 	}
 	m_ground.reset(new Block(m_shader.get(), m_blockIndices.get(), PxVec3(100.f, 1.0f, 100.f), PxTransform(PxVec3(0, -1, 0)), m_groundMat, false));
 
-	m_camera->getTransform()->setPosition(PxVec3(0, 20.f, -30.f));
+	m_camera->setFOV(60.0f);
 
 	Light l;
 	XMStoreFloat3(&l.direction, XMVector3Normalize(XMVectorSet(-0.8f, -1.0f, 0.4f, 0.0f)));
@@ -87,10 +88,25 @@ void MainScene::update()
 		engine->enterScene<MainScene>(); // restart
 	}
 
+	if (input->getMouseButtonDown(MBUTTON2)) {
+		m_camX += input->getMouseDeltaX() * engine->getDelta() * m_xSens;
+		m_camY += input->getMouseDeltaY() * engine->getDelta() * m_ySens;
+
+		if (m_camX < 0.0f) m_camX += 360.0f;
+		else if (m_camX >= 360.0f) m_camX -= 360.0f;
+		m_camY = max(m_camY, 0.0f);
+	}
+
+	float toRad = 3.14159265 / 180.0f;
+
+	PxQuat rot(m_camX * toRad, PxVec3(0, 1, 0));
+	PxVec3 d = rot.rotate(PxVec3(0, 0, -m_camDist));
+	rot *= PxQuat(m_camYAngle * toRad, PxVec3(1, 0, 0));
+	d.y = m_camY + m_camDist / tanf(m_camYAngle);
+
 	Transform * t = m_camera->getTransform();
-	PxVec3 p = t->getPosition();
-	p.y += input->getMouseDeltaY() * engine->getDelta();
-	t->setPosition(p);
+	t->setPosition(d);
+	t->setRotation(rot);
 }
 
 MainScene::~MainScene()
