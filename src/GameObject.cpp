@@ -16,6 +16,7 @@ void GameObject::setRenderer(Renderer * r)
 void GameObject::setActor(PxActor * a)
 {
 	m_actor = a;
+	m_actor->userData = this;
 }
 
 Transform * GameObject::getTransform()

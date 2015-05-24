@@ -4,6 +4,8 @@
 #include "Engine.h"
 #include "MainScene.h"
 
+#include "constants.h"
+
 // include the Direct3D Library file
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -14,12 +16,14 @@
 #pragma comment(lib,"PhysX3ExtensionsDEBUG.lib")
 #pragma comment(lib,"PhysX3GpuDEBUG_x86.lib")
 #pragma comment(lib,"PxTaskDEBUG.lib")
+#pragma comment(lib,"PhysXVisualDebuggerSDKDEBUG.lib")
 #else
 #pragma comment(lib,"PhysX3_x86.lib")
 #pragma comment(lib,"PhysX3Common_x86.lib")
 #pragma comment(lib,"PhysX3Extensions.lib")
 #pragma comment(lib,"PhysX3Gpu_x86.lib")
 #pragma comment(lib,"PxTask.lib")
+#pragma comment(lib,"PhysXVisualDebuggerSDK.lib")
 #endif
 
 // this is the main message handler for the program
@@ -30,10 +34,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 
 // the entry point for any Windows program
-int WINAPI WinMain(HINSTANCE hInstance,
-	HINSTANCE hPrevInstance,
-	LPSTR lpCmdLine,
-	int nCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	HWND hWnd;
 	WNDCLASSEX wc;
@@ -50,12 +51,17 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
 	RegisterClassEx(&wc);
 
+	DWORD style = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX;
+
+	RECT r = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+
+	AdjustWindowRectEx(&r, style, FALSE, NULL);
+
 	hWnd = CreateWindowEx(NULL,
 		L"WindowClass",
 		L"Jenga",
-		WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
-		0, 0,
-		1280, 720,
+		style,
+		CW_USEDEFAULT, CW_USEDEFAULT, r.right - r.left, r.bottom - r.top,
 		NULL,
 		NULL,
 		hInstance,

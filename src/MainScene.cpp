@@ -6,7 +6,7 @@
 #include <chrono>
 
 MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), m_camera(new Camera()),
-m_camX(0), m_camY(0), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f)
+m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f), m_pulledBlock(nullptr), m_spring(nullptr)
 {
 	m_shader.reset(new Shader(L"Diffuse_vs.cso", L"Diffuse_ps.cso"));
 
@@ -70,7 +70,7 @@ m_camX(0), m_camY(0), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f
 
 	Light l;
 	XMStoreFloat3(&l.direction, XMVector3Normalize(XMVectorSet(-0.8f, -1.0f, 0.4f, 0.0f)));
-	l.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	l.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	l.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	getPhysXObj()->setGravity(PxVec3(0, -9.81f, 0));
@@ -86,9 +86,59 @@ void MainScene::update()
 {
 	if (input->getKeyPressed('R')) {
 		engine->enterScene<MainScene>(); // restart
+		return;
 	}
 
-	if (input->getMouseButtonDown(MBUTTON2)) {
+	if (input->getMouseButtonPressed(MBUTTON1)) {
+		// cast ray and pick block, create spring joint
+		PxVec3 pos, dir;
+		m_camera->getPickingRay(input->getMouseX(), input->getMouseY(), pos, dir);
+		PxQueryFilterData fd;
+		fd.flags |= PxQueryFlag::eDYNAMIC;
+		fd.flags &= ~PxQueryFlag::eSTATIC;
+		PxRaycastBuffer hit;
+		if (getPhysXObj()->raycast(pos, dir, 100.0f, hit, PxHitFlag::eDEFAULT, fd)) {
+			PxRigidActor * a = hit.block.actor;
+			if (Block * b = (Block*)a->userData) {
+				m_pulledBlock = b;
+				m_springOrigin = hit.block.position;
+
+				m_spring = PxD6JointCreate(*physics, nullptr, PxTransform(PxIdentity), a, PxTransform(m_springOrigin - a->getGlobalPose().p));
+
+				m_spring->setMotion(PxD6Axis::eX, PxD6Motion::eFREE);
+				m_spring->setMotion(PxD6Axis::eY, PxD6Motion::eFREE);
+				m_spring->setMotion(PxD6Axis::eZ, PxD6Motion::eFREE);
+				m_spring->setMotion(PxD6Axis::eTWIST, PxD6Motion::eFREE);
+				m_spring->setMotion(PxD6Axis::eSWING1, PxD6Motion::eFREE);
+				m_spring->setMotion(PxD6Axis::eSWING2, PxD6Motion::eFREE);
+
+				PxD6JointDrive drive = PxD6JointDrive(1000.0f, 200.0f, PX_MAX_F32);
+				m_spring->setDrive(PxD6Drive::eX, drive);
+				m_spring->setDrive(PxD6Drive::eY, drive);
+				m_spring->setDrive(PxD6Drive::eZ, drive);
+
+				//m_spring->setDrivePosition(PxTransform(PxVec3(0, 50, 0)));
+			}
+		}
+	}
+
+	if (input->getMouseButtonDown(MBUTTON1) && m_spring) {
+		// update spring joint
+		PxVec3 pos, dir, n;
+		m_camera->getPickingRay(input->getMouseX(), input->getMouseY(), pos, dir);
+		n = (pos - m_springOrigin);
+		n.normalize();
+		PxVec3 up(0, 1, 0);
+		n = n.cross(up).cross(up);
+		float b = dir.dot(n);
+		assert(b != 0.0f);
+		PxVec3 springPos = pos + dir * (n.dot(m_springOrigin - pos) / b);
+		m_spring->setDrivePosition(PxTransform(springPos));
+		PxRigidDynamic * rd = (PxRigidDynamic*)m_pulledBlock->getActor();
+		rd->wakeUp();
+	}
+	else if (input->getMouseButtonDown(MBUTTON2)) {
+		// control camera
 		m_camX += input->getMouseDeltaX() * engine->getDelta() * m_xSens;
 		m_camY += input->getMouseDeltaY() * engine->getDelta() * m_ySens;
 
@@ -97,7 +147,13 @@ void MainScene::update()
 		m_camY = max(m_camY, 0.0f);
 	}
 
-	float toRad = 3.14159265 / 180.0f;
+	if (input->getMouseButtonReleased(MBUTTON1)) {
+		m_pulledBlock = nullptr;
+		if (m_spring) m_spring->release();
+		m_spring = nullptr;
+	}
+
+	float toRad = 3.14159265f / 180.0f;
 
 	PxQuat rot(m_camX * toRad, PxVec3(0, 1, 0));
 	PxVec3 d = rot.rotate(PxVec3(0, 0, -m_camDist));
@@ -118,6 +174,8 @@ MainScene::~MainScene()
 		removeObject(b.get());
 		objects->removeObject(b.get());
 	}
+
+	if (m_spring) m_spring->release();
 
 	m_groundMat->release();
 	m_blockMat->release();

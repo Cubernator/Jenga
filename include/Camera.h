@@ -25,5 +25,7 @@ public:
 	void setFOV(float v);
 
 	XMMATRIX getProjectionMatrix() const;
+
+	void getPickingRay(int x, int y, PxVec3& pos, PxVec3& dir) const;
 };
 

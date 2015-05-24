@@ -5,8 +5,7 @@
 #include <chrono>
 #include <memory>
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
+#include "constants.h"
 
 typedef std::chrono::duration<float> fsec;
 
@@ -45,6 +44,8 @@ private:
 	PxDefaultAllocator m_physicsAllocatorCallback;
 	PxDefaultCpuDispatcher *m_physicsCpuDispatcher;
 	PxCudaContextManager *m_cudaContextManager;
+
+	PxVisualDebuggerConnection * m_pvdConnection;
 
 	void initDirect3D();
 	void initPhysX();

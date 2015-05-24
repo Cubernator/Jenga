@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Engine.h"
 
 Camera::Camera() : m_transform(new DefaultTransform(this)), m_nearPlane(0.01f), m_farPlane(500.f), m_aspectRatio(1.f), m_fov(75.f)
 {
@@ -48,4 +49,27 @@ void Camera::setFOV(float v)
 XMMATRIX Camera::getProjectionMatrix() const
 {
 	return XMMatrixPerspectiveFovLH(XMConvertToRadians(m_fov), m_aspectRatio, m_nearPlane, m_farPlane);
+}
+
+void Camera::getPickingRay(int x, int y, PxVec3& pos, PxVec3& dir) const
+{
+	const Transform * t = getTransform();
+	XMMATRIX proj = getProjectionMatrix();
+
+	PxMat44 inverseView(t->getTransform()), inverseProj;
+	XMStoreFloat4x4((XMFLOAT4X4*)&inverseProj, XMMatrixInverse(&XMMatrixDeterminant(proj), proj));
+
+	float dx = ((float)x / (float)SCREEN_WIDTH - 0.5f) * 2.0f;
+	float dy = -((float)y / (float)SCREEN_HEIGHT - 0.5f) * 2.0f;
+
+	PxVec4 start(dx, dy, -1.0f, 1.0f), end(dx, dy, 0.0f, 1.0f);
+
+	start = inverseProj.transform(start); start /= start.w;
+	start = inverseView.transform(start); start /= start.w;
+
+	end = inverseProj.transform(end); end /= end.w;
+	end = inverseView.transform(end); end /= end.w;
+
+	pos = t->getPosition();
+	dir = (end - start).getXYZ().getNormalized();
 }

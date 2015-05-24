@@ -94,6 +94,7 @@
   <ItemGroup>
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\Component.h" />
+    <ClInclude Include="include\constants.h" />
     <ClInclude Include="include\DefaultTransform.h" />
     <ClInclude Include="include\DirectX.h" />
     <ClInclude Include="include\Engine.h" />

@@ -16,7 +16,7 @@ PxPhysics *physics;
 
 Engine * engine;
 
-Engine::Engine(HWND hWnd) : m_time(0.f), m_delta(1.f / 60.f), m_running(true), m_hWnd(hWnd), m_physicsScene(nullptr)
+Engine::Engine(HWND hWnd) : m_time(0.f), m_delta(1.f / 60.f), m_running(true), m_hWnd(hWnd), m_physicsScene(nullptr), m_pvdConnection(nullptr)
 {
 	engine = this; // set singleton instance
 
@@ -31,6 +31,8 @@ Engine::~Engine()
 {
 	m_activeScene.reset();
 	delete m_objectManager;
+
+	if (m_pvdConnection) m_pvdConnection->release();
 
 	m_cudaContextManager->release();
 	m_physicsCpuDispatcher->release();
@@ -173,11 +175,25 @@ void Engine::initPhysX()
 	physicsFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, m_physicsAllocatorCallback, m_physicsErrorCallback);
 	physics = PxCreatePhysics(PX_PHYSICS_VERSION, *physicsFoundation, PxTolerancesScale());
 
+	PxInitExtensions(*physics);
+
 	m_physicsCpuDispatcher = PxDefaultCpuDispatcherCreate(1);
 	PxCudaContextManagerDesc cudaDesc;
 	cudaDesc.graphicsDevice = dev;
 	cudaDesc.interopMode = PxCudaInteropMode::D3D11_INTEROP;
 	m_cudaContextManager = PxCreateCudaContextManager(*physicsFoundation, cudaDesc, nullptr);
+
+#if _DEBUG && USE_PVD
+	PxVisualDebuggerConnectionManager * pvdcm = physics->getPvdConnectionManager();
+	if (pvdcm) {
+		PxVisualDebugger * vd = physics->getVisualDebugger();
+		vd->setVisualDebuggerFlag(PxVisualDebuggerFlag::eTRANSMIT_CONSTRAINTS, true);
+		vd->setVisualDebuggerFlag(PxVisualDebuggerFlag::eTRANSMIT_CONTACTS, true);
+		vd->setVisualDebuggerFlag(PxVisualDebuggerFlag::eTRANSMIT_SCENEQUERIES, true);
+		PxVisualDebuggerConnectionFlags f = PxVisualDebuggerExt::getAllConnectionFlags();
+		m_pvdConnection = PxVisualDebuggerExt::createConnection(pvdcm, "127.0.0.1", 5425, 10, f);
+	}
+#endif
 }
 
 void Engine::destroyScene()

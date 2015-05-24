@@ -16,6 +16,11 @@ private:
 	std::unique_ptr<Shader> m_shader;
 	std::unique_ptr<IndexBuffer> m_blockIndices;
 
+	PxVec3 m_springOrigin;
+
+	Block * m_pulledBlock;
+
+	PxD6Joint * m_spring;
 	PxMaterial *m_blockMat, *m_groundMat;
 
 	float m_camX, m_camY, m_camDist, m_camYAngle;
