@@ -2,7 +2,7 @@
 
 Input * input;
 
-Input::Input(HWND hWnd) : m_mx(0), m_my(0), m_mxDelta(0), m_myDelta(0), m_hWnd(hWnd)
+Input::Input(HWND hWnd) : m_mx(0), m_my(0), m_mxDelta(0), m_myDelta(0), m_wheelDelta(0), m_hWnd(hWnd)
 {
 	input = this;
 
@@ -58,6 +58,8 @@ void Input::update()
 		bp.second.pressed = false;
 		bp.second.released = false;
 	}
+
+	m_wheelDelta = 0;
 }
 
 void Input::updateButton(Button& b, bool down)
@@ -93,6 +95,10 @@ void Input::handle(RAWINPUT * raw)
 		}
 		if (USHORT mb = f & MBUTTON5) {
 			updateButton(m_mouseButtons[MBUTTON5], mb == RI_MOUSE_BUTTON_5_DOWN);
+		}
+
+		if ((f & RI_MOUSE_WHEEL) == RI_MOUSE_WHEEL) {
+			m_wheelDelta = (short)raw->data.mouse.usButtonData / 120;
 		}
 
 		/* we will do this differently for now, since the cursor will probably always be visible
@@ -155,4 +161,9 @@ int Input::getMouseDeltaX() const
 int Input::getMouseDeltaY() const
 {
 	return m_myDelta;
+}
+
+int Input::getMouseWheelDelta() const
+{
+	return m_wheelDelta;
 }

@@ -25,7 +25,7 @@ class Input
 private:
 	std::unordered_map<USHORT, Button> m_keyboardState;
 	std::unordered_map<MouseButton, Button> m_mouseButtons;
-	int m_mx, m_my, m_mxDelta, m_myDelta;
+	int m_mx, m_my, m_mxDelta, m_myDelta, m_wheelDelta;
 
 	HWND m_hWnd;
 
@@ -53,6 +53,8 @@ public:
 	int getMouseY() const;
 	int getMouseDeltaX() const;
 	int getMouseDeltaY() const;
+
+	int getMouseWheelDelta() const;
 };
 
 extern Input * input;

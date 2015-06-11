@@ -27,8 +27,8 @@ m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySen
 
 	m_blockIndices.reset(new IndexBuffer(indices, 36));
 
-	m_blockMat = physics->createMaterial(0.6f, 0.6f, 0.1f);
-	m_groundMat = physics->createMaterial(0.3f, 0.35f, 0.0f);
+	m_blockMat = physics->createMaterial(0.3f, 0.5f, 0.2f);
+	m_groundMat = physics->createMaterial(0.4f, 0.8f, 0.1f);
 
 	XMFLOAT4 blockColor(0.f, 1.f, .5f, 1.f);
 	PxVec3 blockHSize(3.75f, 0.75f, 1.25f);
@@ -97,13 +97,14 @@ void MainScene::update()
 		fd.flags |= PxQueryFlag::eDYNAMIC;
 		fd.flags &= ~PxQueryFlag::eSTATIC;
 		PxRaycastBuffer hit;
-		if (getPhysXObj()->raycast(pos, dir, 100.0f, hit, PxHitFlag::eDEFAULT, fd)) {
+		if (getPhysXObj()->raycast(pos, dir, 1000.0f, hit, PxHitFlag::eDEFAULT, fd)) {
 			PxRigidActor * a = hit.block.actor;
 			if (Block * b = (Block*)a->userData) {
 				m_pulledBlock = b;
+				m_pulledBlock->setColor(XMFLOAT4(1, 0, 1, 1));
 				m_springOrigin = hit.block.position;
 
-				m_spring = PxD6JointCreate(*physics, nullptr, PxTransform(PxIdentity), a, PxTransform(m_springOrigin - a->getGlobalPose().p));
+				m_spring = PxD6JointCreate(*physics, nullptr, PxTransform(PxIdentity), a, PxTransform(a->getGlobalPose().transformInv(m_springOrigin)));
 
 				m_spring->setMotion(PxD6Axis::eX, PxD6Motion::eFREE);
 				m_spring->setMotion(PxD6Axis::eY, PxD6Motion::eFREE);
@@ -112,12 +113,12 @@ void MainScene::update()
 				m_spring->setMotion(PxD6Axis::eSWING1, PxD6Motion::eFREE);
 				m_spring->setMotion(PxD6Axis::eSWING2, PxD6Motion::eFREE);
 
-				PxD6JointDrive drive = PxD6JointDrive(1000.0f, 200.0f, PX_MAX_F32);
-				m_spring->setDrive(PxD6Drive::eX, drive);
-				m_spring->setDrive(PxD6Drive::eY, drive);
-				m_spring->setDrive(PxD6Drive::eZ, drive);
+				PxD6JointDrive posDrive = PxD6JointDrive(2000.0f, 500.0f, PX_MAX_F32);
 
-				//m_spring->setDrivePosition(PxTransform(PxVec3(0, 50, 0)));
+				m_spring->setDrive(PxD6Drive::eX, posDrive);
+				m_spring->setDrive(PxD6Drive::eY, posDrive);
+				m_spring->setDrive(PxD6Drive::eZ, posDrive);
+				m_spring->setDrive(PxD6Drive::eSLERP, PxD6JointDrive(0.0f, 2000.0f, PX_MAX_F32));
 			}
 		}
 	}
@@ -126,15 +127,15 @@ void MainScene::update()
 		// update spring joint
 		PxVec3 pos, dir, n;
 		m_camera->getPickingRay(input->getMouseX(), input->getMouseY(), pos, dir);
-		n = (pos - m_springOrigin);
-		n.normalize();
-		PxVec3 up(0, 1, 0);
+		PxVec3 up(0, 1, 0), forward(0, 0, 1);
+		n = (m_camera->getTransform()->getRotation().rotate(forward));
 		n = n.cross(up).cross(up);
+		n.normalize();
 		float b = dir.dot(n);
 		assert(b != 0.0f);
 		PxVec3 springPos = pos + dir * (n.dot(m_springOrigin - pos) / b);
-		m_spring->setDrivePosition(PxTransform(springPos));
 		PxRigidDynamic * rd = (PxRigidDynamic*)m_pulledBlock->getActor();
+		m_spring->setDrivePosition(PxTransform(springPos));
 		rd->wakeUp();
 	}
 	else if (input->getMouseButtonDown(MBUTTON2)) {
@@ -148,9 +149,15 @@ void MainScene::update()
 	}
 
 	if (input->getMouseButtonReleased(MBUTTON1)) {
+		if (m_pulledBlock) m_pulledBlock->setColor(XMFLOAT4(0.f, 1.f, .5f, 1.f));
 		m_pulledBlock = nullptr;
 		if (m_spring) m_spring->release();
 		m_spring = nullptr;
+	}
+
+	int md = input->getMouseWheelDelta();
+	if (md != 0) {
+		m_camDist = max(min(m_camDist - md * 2.0f, 100.0f), 6.0f);
 	}
 
 	float toRad = 3.14159265f / 180.0f;
