@@ -106,6 +106,7 @@
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\MeshRenderer.h" />
     <ClInclude Include="include\ObjectManager.h" />
+    <ClInclude Include="include\Physics.h" />
     <ClInclude Include="include\PhysicsScene.h" />
     <ClInclude Include="include\PhysicsTransform.h" />
     <ClInclude Include="include\PhysX.h" />
@@ -132,6 +133,7 @@
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\MeshRenderer.cpp" />
     <ClCompile Include="src\ObjectManager.cpp" />
+    <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\PhysicsScene.cpp" />
     <ClCompile Include="src\PhysicsTransform.cpp" />
     <ClCompile Include="src\Scene.cpp" />

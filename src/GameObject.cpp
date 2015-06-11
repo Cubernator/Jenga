@@ -48,3 +48,14 @@ const PxActor * GameObject::getActor() const
 {
 	return m_actor;
 }
+
+GameObject::CollisionCallbackFlags GameObject::getCollisionCallbackFlags() const
+{
+	return m_ccFlags;
+}
+
+void GameObject::setCollisionCallbackFlags(CollisionCallbackFlags f)
+{
+	m_ccFlags = f;
+}
+

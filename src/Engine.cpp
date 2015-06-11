@@ -4,25 +4,22 @@
 
 #include "ObjectManager.h"
 #include "Scene.h"
-#include "PhysicsScene.h"
+#include "Physics.h"
 #include "Input.h"
 
 // global declarations
 ID3D11Device *dev;                     // the pointer to our Direct3D device interface
 ID3D11DeviceContext *devcon;           // the pointer to our Direct3D device context
 
-PxFoundation *physicsFoundation;
-PxPhysics *physics;
-
 Engine * engine;
 
-Engine::Engine(HWND hWnd) : m_time(0.f), m_delta(1.f / 60.f), m_running(true), m_hWnd(hWnd), m_physicsScene(nullptr), m_pvdConnection(nullptr)
+Engine::Engine(HWND hWnd) : m_time(0.f), m_delta(1.f / 60.f), m_running(true), m_hWnd(hWnd)
 {
 	engine = this; // set singleton instance
 
 	initDirect3D();
-	initPhysX();
 
+	m_physics = new PhysicsInterface();
 	m_input = new Input(m_hWnd);
 	m_objectManager = new ObjectManager();
 }
@@ -31,13 +28,8 @@ Engine::~Engine()
 {
 	m_activeScene.reset();
 	delete m_objectManager;
-
-	if (m_pvdConnection) m_pvdConnection->release();
-
-	m_cudaContextManager->release();
-	m_physicsCpuDispatcher->release();
-	physics->release();
-	physicsFoundation->release();
+	delete m_input;
+	delete m_physics;
 
 	// close and release all existing COM objects
 	m_rasterizerState->Release();
@@ -170,41 +162,6 @@ void Engine::initDirect3D()
 	m_viewport.MaxDepth = 1.0f;
 }
 
-void Engine::initPhysX()
-{
-	physicsFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, m_physicsAllocatorCallback, m_physicsErrorCallback);
-	physics = PxCreatePhysics(PX_PHYSICS_VERSION, *physicsFoundation, PxTolerancesScale());
-
-	PxInitExtensions(*physics);
-
-	m_physicsCpuDispatcher = PxDefaultCpuDispatcherCreate(1);
-	PxCudaContextManagerDesc cudaDesc;
-	cudaDesc.graphicsDevice = dev;
-	cudaDesc.interopMode = PxCudaInteropMode::D3D11_INTEROP;
-	m_cudaContextManager = PxCreateCudaContextManager(*physicsFoundation, cudaDesc, nullptr);
-
-#if _DEBUG && USE_PVD
-	PxVisualDebuggerConnectionManager * pvdcm = physics->getPvdConnectionManager();
-	if (pvdcm) {
-		PxVisualDebugger * vd = physics->getVisualDebugger();
-		vd->setVisualDebuggerFlag(PxVisualDebuggerFlag::eTRANSMIT_CONSTRAINTS, true);
-		vd->setVisualDebuggerFlag(PxVisualDebuggerFlag::eTRANSMIT_CONTACTS, true);
-		vd->setVisualDebuggerFlag(PxVisualDebuggerFlag::eTRANSMIT_SCENEQUERIES, true);
-		PxVisualDebuggerConnectionFlags f = PxVisualDebuggerExt::getAllConnectionFlags();
-		m_pvdConnection = PxVisualDebuggerExt::createConnection(pvdcm, "127.0.0.1", 5425, 10, f);
-	}
-#endif
-}
-
-void Engine::destroyScene()
-{
-}
-
-void Engine::setScene(Scene * s)
-{
-	m_activeScene.reset(s);
-}
-
 float Engine::getTime() const
 {
 	return m_time.count();
@@ -267,13 +224,9 @@ WPARAM Engine::run()
 
 void Engine::update()
 {
-	input->preUpdate();
+	m_input->preUpdate();
 
-	if (m_physicsScene) {
-		PxScene * pxs = m_physicsScene->getPhysXObj();
-		pxs->simulate(m_delta.count());
-		pxs->fetchResults(true);
-	}
+	m_physics->simulate(m_delta.count());
 
 	if (m_activeScene) m_activeScene->update(); // update active scene object
 	m_objectManager->update(); // update all registered game objects
@@ -331,7 +284,7 @@ LRESULT Engine::processMessages(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
 
 		// pass data to input module
-		input->handle((RAWINPUT*)lpb);
+		m_input->handle((RAWINPUT*)lpb);
 
 		// free buffer
 		delete[] lpb;

@@ -1,9 +1,10 @@
 #pragma once
 
 #include "DirectX.h"
-#include "PhysX.h"
 #include <chrono>
 #include <memory>
+
+#include "Physics.h"
 
 #include "constants.h"
 
@@ -12,7 +13,6 @@ typedef std::chrono::duration<float> fsec;
 class Input;
 class ObjectManager;
 class Scene;
-class PhysicsScene;
 
 class Engine
 {
@@ -23,9 +23,9 @@ private:
 
 	ObjectManager * m_objectManager;
 	Input * m_input;
+	PhysicsInterface * m_physics;
 
 	std::unique_ptr<Scene> m_activeScene;
-	PhysicsScene * m_physicsScene;
 
 	HWND m_hWnd;
 
@@ -40,21 +40,10 @@ private:
 
 	D3D11_VIEWPORT m_viewport;
 
-	PxDefaultErrorCallback m_physicsErrorCallback;
-	PxDefaultAllocator m_physicsAllocatorCallback;
-	PxDefaultCpuDispatcher *m_physicsCpuDispatcher;
-	PxCudaContextManager *m_cudaContextManager;
-
-	PxVisualDebuggerConnection * m_pvdConnection;
-
 	void initDirect3D();
-	void initPhysX();
 
 	void update();
 	void render(float alpha);
-
-	void destroyScene();
-	void setScene(Scene * s);
 
 	template<class SceneType, bool, class... Args>
 	struct enterSceneImpl
@@ -70,14 +59,7 @@ private:
 	{
 		static SceneType * construct(Engine * e, Args&&... args)
 		{
-			PxSceneDesc desc(physics->getTolerancesScale());
-			desc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
-			desc.cpuDispatcher = e->m_physicsCpuDispatcher;
-			desc.gpuDispatcher = e->m_cudaContextManager->getGpuDispatcher();
-			desc.filterShader = &PxDefaultSimulationFilterShader;
-			SceneType * newScene = new SceneType(desc, std::forward<Args>(args)...);
-			e->m_physicsScene = newScene;
-			return newScene;
+			return e->m_physics->constructScene<SceneType>(std::forward<Args>(args)...);
 		}
 	};
 
@@ -98,7 +80,6 @@ public:
 	void enterScene(Args&&... args)
 	{
 		m_activeScene.reset(); // destroy current scene
-		if (m_physicsScene) m_physicsScene = nullptr;
 
 		// the wonders of C++ template programming at work right here... *sigh*
 		SceneType * s = enterSceneImpl<SceneType, std::is_base_of<PhysicsScene, SceneType>::value, Args...>::construct(this, std::forward<Args>(args)...);

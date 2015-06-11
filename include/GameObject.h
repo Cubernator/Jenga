@@ -2,17 +2,34 @@
 
 #include "Transform.h"
 #include "Renderer.h"
+#include "Physics.h"
 
 class GameObject
 {
+public:
+	enum CollisionCallbackFlags
+	{
+		NONE = 0,
+		ENTER = 1<<0,
+		STAY = 1<<1,
+		EXIT = 1<<2
+	};
+
 private:
 	Transform * m_transform;
 	Renderer * m_renderer;
 	PxActor * m_actor;
 
+	CollisionCallbackFlags m_ccFlags;
+
 	virtual void update() { }
 
+	virtual void onCollisionEnter(const Collision& collision) { }
+	virtual void onCollisionStay(const Collision& collision) { }
+	virtual void onCollisionExit(const Collision& collision) { }
+
 	friend class ObjectManager;
+	friend class PhysicsInterface;
 
 protected:
 	void setTransform(Transform * t);
@@ -31,5 +48,8 @@ public:
 
 	PxActor * getActor();
 	const PxActor * getActor() const;
+
+	CollisionCallbackFlags getCollisionCallbackFlags() const;
+	void setCollisionCallbackFlags(CollisionCallbackFlags f);
 };
 
