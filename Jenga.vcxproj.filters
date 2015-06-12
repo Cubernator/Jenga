@@ -83,9 +83,6 @@
     <ClInclude Include="include\PhysicsTransform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Block.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -102,6 +99,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Physics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Brick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Ground.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Tower.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -151,9 +157,6 @@
     <ClCompile Include="src\PhysicsTransform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Block.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\utility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -167,6 +170,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Physics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Brick.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ground.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tower.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

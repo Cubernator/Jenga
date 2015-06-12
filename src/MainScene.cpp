@@ -2,11 +2,8 @@
 #include "Input.h"
 #include "ObjectManager.h"
 
-#include <random>
-#include <chrono>
-
-MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), m_camera(new Camera()),
-m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f), m_pulledBlock(nullptr), m_spring(nullptr)
+MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), 
+m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f), m_pulledBrick(nullptr), m_spring(nullptr), m_controlMode(false)
 {
 	m_shader.reset(new Shader(L"Diffuse_vs.cso", L"Diffuse_ps.cso"));
 
@@ -25,47 +22,22 @@ m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySen
 		23, 22, 21
 	};
 
-	m_blockIndices.reset(new IndexBuffer(indices, 36));
+	m_brickIndices.reset(new IndexBuffer(indices, 36));
 
-	m_blockMat = physics->createMaterial(0.3f, 0.5f, 0.2f);
+	m_brickMat = physics->createMaterial(0.3f, 0.5f, 0.2f);
 	m_groundMat = physics->createMaterial(0.4f, 0.8f, 0.1f);
 
-	XMFLOAT4 blockColor(0.f, 1.f, .5f, 1.f);
-	PxVec3 blockHSize(3.75f, 0.75f, 1.25f);
-	PxQuat r90(3.14159265f * 0.5f, PxVec3(0, 1, 0));
-	float gap = 0.02f, maxVariance = 0.01f;
+	unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
 
-	std::default_random_engine generator((unsigned int)std::chrono::system_clock::now().time_since_epoch().count());
-	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
-
-	for (int i = 0; i < 9; i++) {
-		for (int j = 0; j < 2; j++) {
-			float y = ((i*2 + j)*2 + 1) * (blockHSize.y + gap);
-			for (int k = 0; k < 3; k++) {
-				float x = 0.0f, z = (k-1)*2 * (blockHSize.z + gap);
-
-				PxTransform blockTrans(PxVec3(x, y, z));
-				if (j > 0) {
-					blockTrans.q = r90;
-					blockTrans.p.x = z;
-					blockTrans.p.z = 0.0f;
-				}
-
-				PxVec3 s = blockHSize;
-				s.x += distribution(generator) * maxVariance;
-				s.y += distribution(generator) * maxVariance;
-				s.z += distribution(generator) * maxVariance;
-
-				Block * b = new Block(m_shader.get(), m_blockIndices.get(), s, blockTrans, m_blockMat);
-				b->setColor(blockColor);
-				m_blocks.emplace_back(b);
-				objects->addObject(b);
-				addObject(b);
-			}
-		}
+	m_tower.reset(new Tower(m_shader.get(), m_brickIndices.get(), m_brickMat, seed));
+	for (std::unique_ptr<Brick>& b : m_tower->getBricks()) {
+		objects->addObject(b.get());
+		addObject(b.get());
 	}
-	m_ground.reset(new Block(m_shader.get(), m_blockIndices.get(), PxVec3(100.f, 1.0f, 100.f), PxTransform(PxVec3(0, -1, 0)), m_groundMat, false));
 
+	m_ground.reset(new Ground(m_shader.get(), m_brickIndices.get(), PxVec3(100.f, 1.0f, 100.f), PxTransform(PxVec3(0, -1, 0)), m_groundMat));
+
+	m_camera.reset(new Camera());
 	m_camera->setFOV(60.0f);
 
 	Light l;
@@ -90,7 +62,7 @@ void MainScene::update()
 	}
 
 	if (input->getMouseButtonPressed(MBUTTON1)) {
-		// cast ray and pick block, create spring joint
+		// cast ray and pick brick, create spring joint
 		PxVec3 pos, dir;
 		m_camera->getPickingRay(input->getMouseX(), input->getMouseY(), pos, dir);
 		PxQueryFilterData fd;
@@ -99,65 +71,98 @@ void MainScene::update()
 		PxRaycastBuffer hit;
 		if (getPhysXObj()->raycast(pos, dir, 1000.0f, hit, PxHitFlag::eDEFAULT, fd)) {
 			PxRigidActor * a = hit.block.actor;
-			if (Block * b = (Block*)a->userData) {
-				m_pulledBlock = b;
-				m_pulledBlock->setColor(XMFLOAT4(1, 0, 1, 1));
-				m_springOrigin = hit.block.position;
+			if (Brick * b = (Brick*)a->userData) {
+				if (b->canPickUp() && ((!m_pulledBrick) || (b == m_pulledBrick) || m_pulledBrick->isAligned())) {
+					if (m_pulledBrick) {
+						if (m_pulledBrick->isAligned() && b != m_pulledBrick) {
+							if (m_tower->attemptPutBrickOnTop(m_pulledBrick, false)) m_pulledBrick->setState(TOP);
+						}
+					}
 
-				m_spring = PxD6JointCreate(*physics, nullptr, PxTransform(PxIdentity), a, PxTransform(a->getGlobalPose().transformInv(m_springOrigin)));
+					m_pulledBrick = b;
+					m_pulledBrick->setState(PULLING);
+					m_springOrigin = hit.block.position;
+					m_controlMode = false;
 
-				m_spring->setMotion(PxD6Axis::eX, PxD6Motion::eFREE);
-				m_spring->setMotion(PxD6Axis::eY, PxD6Motion::eFREE);
-				m_spring->setMotion(PxD6Axis::eZ, PxD6Motion::eFREE);
-				m_spring->setMotion(PxD6Axis::eTWIST, PxD6Motion::eFREE);
-				m_spring->setMotion(PxD6Axis::eSWING1, PxD6Motion::eFREE);
-				m_spring->setMotion(PxD6Axis::eSWING2, PxD6Motion::eFREE);
+					m_spring = PxD6JointCreate(*physics, nullptr, PxTransform(PxIdentity), a, PxTransform(a->getGlobalPose().transformInv(m_springOrigin)));
 
-				PxD6JointDrive posDrive = PxD6JointDrive(2000.0f, 500.0f, PX_MAX_F32);
+					m_spring->setMotion(PxD6Axis::eX, PxD6Motion::eFREE);
+					m_spring->setMotion(PxD6Axis::eY, PxD6Motion::eFREE);
+					m_spring->setMotion(PxD6Axis::eZ, PxD6Motion::eFREE);
+					m_spring->setMotion(PxD6Axis::eTWIST, PxD6Motion::eFREE);
+					m_spring->setMotion(PxD6Axis::eSWING1, PxD6Motion::eFREE);
+					m_spring->setMotion(PxD6Axis::eSWING2, PxD6Motion::eFREE);
 
-				m_spring->setDrive(PxD6Drive::eX, posDrive);
-				m_spring->setDrive(PxD6Drive::eY, posDrive);
-				m_spring->setDrive(PxD6Drive::eZ, posDrive);
-				m_spring->setDrive(PxD6Drive::eSLERP, PxD6JointDrive(0.0f, 2000.0f, PX_MAX_F32));
+					PxD6JointDrive posDrive = PxD6JointDrive(2000.0f, 500.0f, PX_MAX_F32);
+
+					m_spring->setDrive(PxD6Drive::eX, posDrive);
+					m_spring->setDrive(PxD6Drive::eY, posDrive);
+					m_spring->setDrive(PxD6Drive::eZ, posDrive);
+					m_spring->setDrive(PxD6Drive::eSLERP, PxD6JointDrive(0.0f, 2000.0f, PX_MAX_F32));
+				}
 			}
 		}
 	}
 
 	if (input->getMouseButtonDown(MBUTTON1) && m_spring) {
+
+		if (input->getMouseButtonPressed(MBUTTON2)) {
+			m_controlMode = !m_controlMode;
+			m_springOrigin = m_springPos;
+		}
+
 		// update spring joint
 		PxVec3 pos, dir, n;
 		m_camera->getPickingRay(input->getMouseX(), input->getMouseY(), pos, dir);
-		PxVec3 up(0, 1, 0), forward(0, 0, 1);
-		n = (m_camera->getTransform()->getRotation().rotate(forward));
+		PxVec3 right(1, 0, 0), up(0, 1, 0), forward(0, 0, 1);
+		PxQuat camRot = m_camera->getTransform()->getRotation();
+		n = (camRot.rotate(forward));
 		n = n.cross(up).cross(up);
 		n.normalize();
 		float b = dir.dot(n);
 		assert(b != 0.0f);
-		PxVec3 springPos = pos + dir * (n.dot(m_springOrigin - pos) / b);
-		PxRigidDynamic * rd = (PxRigidDynamic*)m_pulledBlock->getActor();
-		m_spring->setDrivePosition(PxTransform(springPos));
-		rd->wakeUp();
-	}
-	else if (input->getMouseButtonDown(MBUTTON2)) {
-		// control camera
-		m_camX += input->getMouseDeltaX() * engine->getDelta() * m_xSens;
-		m_camY += input->getMouseDeltaY() * engine->getDelta() * m_ySens;
+		m_springPos = pos + dir * (n.dot(m_springOrigin - pos) / b);
 
-		if (m_camX < 0.0f) m_camX += 360.0f;
-		else if (m_camX >= 360.0f) m_camX -= 360.0f;
-		m_camY = max(m_camY, 0.0f);
+		if (m_controlMode) {
+			right = camRot.rotate(right);
+			right.normalize();
+			m_springPos = m_springOrigin + PxQuat(3.14159265f / 2.0f, right).rotate(m_springPos - m_springOrigin);
+		}
+
+		PxRigidDynamic * rd = (PxRigidDynamic*)m_pulledBrick->getActor();
+		m_spring->setDrivePosition(PxTransform(m_springPos));
+		rd->wakeUp();
+	} else {
+		if (input->getMouseButtonDown(MBUTTON2)) {
+			// control camera
+			m_camX += input->getMouseDeltaX() * engine->getDelta() * m_xSens;
+			m_camY += input->getMouseDeltaY() * engine->getDelta() * m_ySens;
+
+			if (m_camX < 0.0f) m_camX += 360.0f;
+			else if (m_camX >= 360.0f) m_camX -= 360.0f;
+			m_camY = max(m_camY, 0.0f);
+		}
+
+		int md = input->getMouseWheelDelta();
+		if (md != 0) {
+			m_camDist = max(min(m_camDist - md * 2.0f, 100.0f), 6.0f);
+		}
 	}
 
 	if (input->getMouseButtonReleased(MBUTTON1)) {
-		if (m_pulledBlock) m_pulledBlock->setColor(XMFLOAT4(0.f, 1.f, .5f, 1.f));
-		m_pulledBlock = nullptr;
+		if (m_pulledBrick) {
+			BrickState s = SELECTED;
+			if (m_tower->attemptPutBrickOnTop(m_pulledBrick, true)) {
+				s = ALIGNED;
+			}  else if (m_tower->attemptPutBrickBack(m_pulledBrick)) {
+				s = (m_pulledBrick->getRowIndex() == 0) ? BASE : TOWER;
+				m_pulledBrick = nullptr;
+			}
+
+			m_pulledBrick->setState(s);
+		}
 		if (m_spring) m_spring->release();
 		m_spring = nullptr;
-	}
-
-	int md = input->getMouseWheelDelta();
-	if (md != 0) {
-		m_camDist = max(min(m_camDist - md * 2.0f, 100.0f), 6.0f);
 	}
 
 	float toRad = 3.14159265f / 180.0f;
@@ -177,7 +182,7 @@ MainScene::~MainScene()
 	removeObject(m_ground.get());
 	objects->removeObject(m_ground.get());
 
-	for (std::unique_ptr<Block>& b : m_blocks) {
+	for (std::unique_ptr<Brick>& b : m_tower->getBricks()) {
 		removeObject(b.get());
 		objects->removeObject(b.get());
 	}
@@ -185,5 +190,5 @@ MainScene::~MainScene()
 	if (m_spring) m_spring->release();
 
 	m_groundMat->release();
-	m_blockMat->release();
+	m_brickMat->release();
 }

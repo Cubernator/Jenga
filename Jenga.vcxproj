@@ -99,6 +99,7 @@
     <ClInclude Include="include\DirectX.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\GameObject.h" />
+    <ClInclude Include="include\Ground.h" />
     <ClInclude Include="include\IndexBuffer.h" />
     <ClInclude Include="include\Input.h" />
     <ClInclude Include="include\Light.h" />
@@ -113,7 +114,8 @@
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Scene.h" />
     <ClInclude Include="include\Shader.h" />
-    <ClInclude Include="include\Block.h" />
+    <ClInclude Include="include\Brick.h" />
+    <ClInclude Include="include\Tower.h" />
     <ClInclude Include="include\Transform.h" />
     <ClInclude Include="include\utility.h" />
     <ClInclude Include="include\Vertex.h" />
@@ -126,6 +128,7 @@
     <ClCompile Include="src\DefaultTransform.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
+    <ClCompile Include="src\Ground.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\Jenga.cpp" />
@@ -138,7 +141,8 @@
     <ClCompile Include="src\PhysicsTransform.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\Shader.cpp" />
-    <ClCompile Include="src\Block.cpp" />
+    <ClCompile Include="src\Brick.cpp" />
+    <ClCompile Include="src\Tower.cpp" />
     <ClCompile Include="src\utility.cpp" />
     <ClCompile Include="src\Vertex.cpp" />
     <ClCompile Include="src\VertexBufferBase.cpp" />
