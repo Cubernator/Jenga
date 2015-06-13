@@ -14,7 +14,8 @@ enum BrickState
 	TOP,		// bricks in the top row. if the top row isn't complete, also bricks in the row below that
 	PULLING,	// the brick which is currently attached to the mouse, if there is
 	SELECTED,	// the brick which was last attached to the mouse and has not left the tower or been aligned
-	ALIGNED		// the brick which was last attached to the mouse and has successfully been aligned with the top row
+	ALIGNED,	// the brick which was last attached to the mouse and has successfully been aligned with the top row
+	FAULTED		// bricks which have touched the floor when they shouldn't (responsible for loss)
 };
 
 class Brick : public GameObject

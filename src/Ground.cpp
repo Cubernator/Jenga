@@ -19,7 +19,7 @@ Ground::Ground(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTra
 	setRenderer(m_renderer.get());
 	setTransform(m_transform.get());
 
-	setCollisionCallbackFlags(STAY);
+	setCollisionCallbackFlags(ENTER);
 }
 
 Ground::~Ground()
@@ -27,12 +27,13 @@ Ground::~Ground()
 	getActor()->release();
 }
 
-void Ground::onCollisionStay(const Collision& collision)
+void Ground::onCollisionEnter(const Collision& collision)
 {
 	if (GameObject * obj = collision.getOtherObject()) {
 		if (Brick * b = dynamic_cast<Brick*>(obj)) {
 			if (!b->canTouchGround()) {
-				m_renderer->updateConstantBuffer(XMFLOAT4(1.0f, 0.6f, 0.6f, 1.0f));
+				m_renderer->updateConstantBuffer(XMFLOAT4(1.0f, 0.3f, 0.3f, 1.0f));
+				b->setState(FAULTED);
 			}
 		}
 	}

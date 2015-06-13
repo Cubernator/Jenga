@@ -1,6 +1,7 @@
 #include "MainScene.h"
 #include "Input.h"
 #include "ObjectManager.h"
+#include "utility.h"
 
 MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), 
 m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f), m_pulledBrick(nullptr), m_spring(nullptr), m_controlMode(false)
@@ -24,8 +25,8 @@ m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySen
 
 	m_brickIndices.reset(new IndexBuffer(indices, 36));
 
-	m_brickMat = physics->createMaterial(0.3f, 0.5f, 0.2f);
-	m_groundMat = physics->createMaterial(0.4f, 0.8f, 0.1f);
+	m_brickMat = physics->createMaterial(0.6f, 0.3f, 0.1f);
+	m_groundMat = physics->createMaterial(0.4f, 0.8f, 0.5f);
 
 	unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
 
@@ -126,7 +127,7 @@ void MainScene::update()
 		if (m_controlMode) {
 			right = camRot.rotate(right);
 			right.normalize();
-			m_springPos = m_springOrigin + PxQuat(3.14159265f / 2.0f, right).rotate(m_springPos - m_springOrigin);
+			m_springPos = m_springOrigin + PxQuat(toRadf(90.0f), right).rotate(m_springPos - m_springOrigin);
 		}
 
 		PxRigidDynamic * rd = (PxRigidDynamic*)m_pulledBrick->getActor();
@@ -147,29 +148,33 @@ void MainScene::update()
 		if (md != 0) {
 			m_camDist = max(min(m_camDist - md * 2.0f, 100.0f), 6.0f);
 		}
+
+		if (m_pulledBrick && input->getKeyPressed('B')) {
+			BrickState s = (m_pulledBrick->getRowIndex() == 0) ? BASE : TOWER;
+			m_pulledBrick->setState(s);
+			m_pulledBrick = nullptr;
+		}
 	}
 
 	if (input->getMouseButtonReleased(MBUTTON1)) {
 		if (m_pulledBrick) {
-			BrickState s = SELECTED;
 			if (m_tower->attemptPutBrickOnTop(m_pulledBrick, true)) {
-				s = ALIGNED;
-			}  else if (m_tower->attemptPutBrickBack(m_pulledBrick)) {
-				s = (m_pulledBrick->getRowIndex() == 0) ? BASE : TOWER;
+				m_pulledBrick->setState(ALIGNED);
+			} else if (m_tower->attemptPutBrickBack(m_pulledBrick)) {
+				BrickState s = (m_pulledBrick->getRowIndex() == 0) ? BASE : TOWER;
+				m_pulledBrick->setState(s);
 				m_pulledBrick = nullptr;
+			} else {
+				m_pulledBrick->setState(SELECTED);
 			}
-
-			m_pulledBrick->setState(s);
 		}
 		if (m_spring) m_spring->release();
 		m_spring = nullptr;
 	}
 
-	float toRad = 3.14159265f / 180.0f;
-
-	PxQuat rot(m_camX * toRad, PxVec3(0, 1, 0));
+	PxQuat rot(toRadf(m_camX), PxVec3(0, 1, 0));
 	PxVec3 d = rot.rotate(PxVec3(0, 0, -m_camDist));
-	rot *= PxQuat(m_camYAngle * toRad, PxVec3(1, 0, 0));
+	rot *= PxQuat(toRadf(m_camYAngle), PxVec3(1, 0, 0));
 	d.y = m_camY + m_camDist / tanf(m_camYAngle);
 
 	Transform * t = m_camera->getTransform();

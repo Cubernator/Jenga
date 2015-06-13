@@ -30,7 +30,7 @@ private:
 
 	float m_positionTolerance, m_rotationTolerance;
 
-	PxVec3 m_brickSize;
+	const PxVec3 m_brickSize;
 
 public:
 	Tower(Shader * s, IndexBuffer * ib, PxMaterial * m, unsigned int seed);

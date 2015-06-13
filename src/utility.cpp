@@ -1,5 +1,7 @@
 #include "utility.h"
 
+float PIF = (float)M_PI;
+
 VertexBuffer<VertexPosNormal> * createCuboidBuffer(float xs, float ys, float zs)
 {
 	VertexPosNormal vertices[] = {

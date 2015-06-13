@@ -1,6 +1,7 @@
 #include "Tower.h"
 
 #include "ObjectManager.h"
+#include "utility.h"
 
 #include <random>
 #include <algorithm>
@@ -38,30 +39,46 @@ bool Tower::Row::isValid() const
 	return false;
 }
 
-Tower::Tower(Shader * s, IndexBuffer * ib, PxMaterial * m, unsigned int seed) : m_positionTolerance(0.3f), m_rotationTolerance(0.05f), m_brickSize(7.5f, 1.5f, 2.5f)
+Tower::Tower(Shader * s, IndexBuffer * ib, PxMaterial * m, unsigned int seed) : m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
 {
 	PxVec3 brickHSize = m_brickSize / 2.0f;
-	PxQuat r90(3.14159265f * 0.5f, PxVec3(0, 1, 0));
-	float gap = 0.02f, maxVariance = 0.01f, maxVariance2 = 0.003f;
+	PxQuat r90(toRadf(-90.0f), PxVec3(0, 1, 0));
+	float hgap = 0.01f, vgap = 0.005f, maxVariance = 0.02f;
 
-	std::default_random_engine generator(seed);
-	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+	std::default_random_engine gen(seed);
+	std::uniform_real_distribution<float> dist1(-1.0f, 0.0f);
 	std::uniform_int_distribution<int> dist2(0, 2);
+	std::bernoulli_distribution dist3(0.2f);
 
 	m_rows.resize(18);
+
+	std::array<float, 3> sizes;
+	float y = 0.0f;
 
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 2; j++) {
 			int rowIndex = i * 2 + j;
-			float y = ((rowIndex)* 2 + 1) * (brickHSize.y + gap);
 
 			Row& row = m_rows[rowIndex];
 			row.index = rowIndex;
 
-			int d = dist2(generator);
+			int d = dist2(gen);
 
 			for (int k = 0; k < 3; k++) {
-				float x = 0.0f, z = (k - 1) * 2 * (brickHSize.z + gap);
+				sizes[k] = brickHSize.y;
+				if (d == k) {
+					float o = dist1(gen) * maxVariance;
+					if (k == 1 && dist3(gen)) o = -o;
+					sizes[k] += o;
+				}
+			}
+
+			float rowSize = *std::max_element(sizes.begin(), sizes.end());
+
+			y += rowSize + vgap;
+
+			for (int k = 0; k < 3; k++) {
+				float x = 0.0f, z = (k - 1) * 2 * (brickHSize.z + hgap);
 
 				PxTransform brickTrans(PxVec3(x, y, z));
 				if (j > 0) {
@@ -71,15 +88,15 @@ Tower::Tower(Shader * s, IndexBuffer * ib, PxMaterial * m, unsigned int seed) : 
 				}
 
 				PxVec3 size = brickHSize;
-				size.x += distribution(generator) * maxVariance;
-				size.y += distribution(generator) * (d == k) ? maxVariance : maxVariance2;
-				size.z += distribution(generator) * maxVariance;
+				size.y = sizes[k];
 
 				Brick * b = new Brick(s, ib, size, brickTrans, m);
 
 				m_bricks.emplace_back(b);
 				row.setBrickAt(b, k);
 			}
+
+			y += rowSize;
 		}
 	}
 
@@ -97,36 +114,34 @@ std::vector<std::unique_ptr<Brick>>& Tower::getBricks()
 	return m_bricks;
 }
 
-bool Tower::testBrickAlignment(Brick * brick, int rowIndex, int& newBrickIndex) const
-{
-	Row row = m_rows[rowIndex];
-	unsigned int bc = row.getBrickCount();
-	if (bc == 1) {
-		
-	} else if (bc == 2) {
-
-	}
-	return false;
-}
 
 bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) const
 {
-	const Row& topRow = m_rows[rowBelow];
-	Transform *t0 = topRow.bricks[0]->getTransform(), *t2 = topRow.bricks[2]->getTransform();
+	PxVec3 topRowCenter, topRowDir;
 	PxVec3 f(1, 0, 0), u(0, 1, 0);
-	PxVec3 d0 = t0->getRotation().rotate(f), d2 = t2->getRotation().rotate(f);
-	if (d0.dot(d2) < 0.0f) d2 = -d2;
-	PxVec3 topRowDir = (d0 + d2) / 2.0f;
-	topRowDir.normalize();
+
+	if (rowBelow < 0) {
+		topRowCenter = PxVec3(0, -m_brickSize.y / 2.0f, 0);
+		topRowDir = PxVec3(0, 0, 1);
+	} else {
+		const Row& topRow = m_rows[rowBelow];
+		Transform *t0 = topRow.bricks[0]->getTransform(), *t2 = topRow.bricks[2]->getTransform();
+		PxVec3 d0 = t0->getRotation().rotate(f), d2 = t2->getRotation().rotate(f);
+		if (d0.dot(d2) < 0.0f) d2 = -d2;
+
+		topRowCenter = (t0->getPosition() + t2->getPosition()) / 2.0f;
+		topRowDir = (d0 + d2) / 2.0f;
+		topRowDir.normalize();
+	}
 
 	Transform * bt = brick->getTransform();
 	PxVec3 bdir = bt->getRotation().rotate(f);
 
 	if ((bdir.dot(topRowDir) <= m_rotationTolerance) && (bdir.dot(u) <= m_rotationTolerance)) {
-		PxVec3 topRowCenter = (t0->getPosition() + t2->getPosition()) / 2.0f;
 		topRowCenter.y += m_brickSize.y;
 		for (int i = -1; i < 2; ++i) {
-			PxVec3 diff = (topRowCenter + (i * topRowDir * m_brickSize.z)) - bt->getPosition();
+			PxVec3 bc = bt->getPosition();
+			PxVec3 diff = (topRowCenter + ((float)i * topRowDir * m_brickSize.z)) - bc;
 			if (diff.magnitude() <= m_positionTolerance) {
 				newBrickIndex = i + 1;
 				return true;
@@ -139,8 +154,8 @@ bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) 
 
 bool Tower::attemptPutBrickBack(Brick * brick)
 {
-	int bi;
-	bool a = testBrickAlignment(brick, brick->getRowIndex(), bi);
+	int bi, ri = brick->getRowIndex();
+	bool a = testBrickValidSpot(brick, ri-1, bi);
 	return a && (bi == brick->getBrickIndex());
 }
 

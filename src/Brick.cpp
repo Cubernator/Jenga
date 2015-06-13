@@ -48,6 +48,8 @@ XMFLOAT4 Brick::getStateColor() const
 		return XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 	case ALIGNED:
 		return XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	case FAULTED:
+		return XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 	default:
 		return XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
 	}
@@ -86,7 +88,7 @@ bool Brick::canTouchGround() const
 
 bool Brick::canPickUp() const
 {
-	return m_state != TOP;
+	return m_state != TOP && m_state != FAULTED;
 }
 
 bool Brick::isAligned() const

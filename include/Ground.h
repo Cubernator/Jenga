@@ -14,7 +14,7 @@ private:
 	std::unique_ptr<MeshRenderer> m_renderer;
 	std::unique_ptr<VertexBuffer<VertexPosNormal>> m_vbuffer;
 
-	void onCollisionStay(const Collision& collision) override;
+	void onCollisionEnter(const Collision& collision) override;
 
 public:
 	Ground(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m);
