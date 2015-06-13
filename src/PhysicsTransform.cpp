@@ -1,7 +1,8 @@
 #include "PhysicsTransform.h"
-
+#include "GameObject.h"
 
 PhysicsTransform::PhysicsTransform(GameObject * parent, PxRigidActor * actor) : Transform(parent), m_actor(actor) { }
+PhysicsTransform::PhysicsTransform(GameObject * parent) : PhysicsTransform(parent, parent->getActor()) {}
 
 PxMat44 PhysicsTransform::getMatrix() const
 {

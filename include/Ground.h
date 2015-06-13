@@ -10,6 +10,8 @@
 class Ground : public GameObject
 {
 private:
+	px_ptr<PxMaterial> m_mat;
+	px_ptr<PxRigidStatic> m_actor;
 	std::unique_ptr<PhysicsTransform> m_transform;
 	std::unique_ptr<MeshRenderer> m_renderer;
 	std::unique_ptr<VertexBuffer<VertexPosNormal>> m_vbuffer;
@@ -17,6 +19,5 @@ private:
 	void onCollisionEnter(const Collision& collision) override;
 
 public:
-	Ground(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m);
-	~Ground();
+	Ground(Shader * s, IndexBuffer * ib);
 };

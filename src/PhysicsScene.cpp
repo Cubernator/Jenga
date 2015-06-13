@@ -12,12 +12,12 @@ PhysicsScene::~PhysicsScene()
 	m_physXScene->release();
 }
 
-PxScene * PhysicsScene::getPhysXObj()
+PxScene * PhysicsScene::getPxScene()
 {
 	return m_physXScene;
 }
 
-const PxScene * PhysicsScene::getPhysXObj() const
+const PxScene * PhysicsScene::getPxScene() const
 {
 	return m_physXScene;
 }

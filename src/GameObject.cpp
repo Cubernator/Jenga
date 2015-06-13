@@ -13,7 +13,7 @@ void GameObject::setRenderer(Renderer * r)
 	m_renderer = r;
 }
 
-void GameObject::setActor(PxActor * a)
+void GameObject::setActor(PxRigidActor * a)
 {
 	m_actor = a;
 	m_actor->userData = this;
@@ -39,12 +39,12 @@ const Renderer * GameObject::getRenderer() const
 	return m_renderer;
 }
 
-PxActor * GameObject::getActor()
+PxRigidActor * GameObject::getActor()
 {
 	return m_actor;
 }
 
-const PxActor * GameObject::getActor() const
+const PxRigidActor * GameObject::getActor() const
 {
 	return m_actor;
 }

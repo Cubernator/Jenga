@@ -21,6 +21,7 @@ enum BrickState
 class Brick : public GameObject
 {
 private:
+	px_ptr<PxRigidDynamic> m_actor;
 	std::unique_ptr<PhysicsTransform> m_transform;
 	std::unique_ptr<MeshRenderer> m_renderer;
 	std::unique_ptr<VertexBuffer<VertexPosNormal>> m_vbuffer;
@@ -33,7 +34,6 @@ private:
 
 public:
 	Brick(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m);
-	~Brick();
 
 	void setColor(const XMFLOAT4& c);
 

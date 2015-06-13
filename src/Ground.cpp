@@ -2,29 +2,24 @@
 #include "Brick.h"
 #include "utility.h"
 
-Ground::Ground(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m)
+Ground::Ground(Shader * s, IndexBuffer * ib)
 {
-	m_vbuffer.reset(createCuboidBuffer(halfSize.x, halfSize.y, halfSize.z));
-	m_renderer.reset(new MeshRenderer(this, s, m_vbuffer.get(), ib));
-	m_renderer->createConstantBuffer<XMFLOAT4>();
-	m_renderer->updateConstantBuffer(XMFLOAT4(.6f, .6f, .6f, 1.f));
+	PxVec3 halfSize(100.f, 1.0f, 100.f);
 
-	PxRigidActor * actor;
+	m_mat.reset(physics->createMaterial(0.4f, 0.8f, 0.5f));
 
-	actor = PxCreateStatic(*physics, t, PxBoxGeometry(halfSize), *m);
+	m_actor.reset(PxCreateStatic(*physics, PxTransform(PxVec3(0, -1, 0)), PxBoxGeometry(halfSize), *m_mat.get()));
+	setActor(m_actor.get());
 
-	setActor(actor);
-	m_transform.reset(new PhysicsTransform(this, actor));
-
-	setRenderer(m_renderer.get());
+	m_transform.reset(new PhysicsTransform(this));
 	setTransform(m_transform.get());
 
-	setCollisionCallbackFlags(ENTER);
-}
+	m_vbuffer.reset(createCuboidBuffer(halfSize.x, halfSize.y, halfSize.z));
+	m_renderer.reset(new MeshRenderer(this, s, m_vbuffer.get(), ib));
+	m_renderer->createConstantBuffer(XMFLOAT4(.6f, .6f, .6f, 1.f));
+	setRenderer(m_renderer.get());
 
-Ground::~Ground()
-{
-	getActor()->release();
+	setCollisionCallbackFlags(ENTER);
 }
 
 void Ground::onCollisionEnter(const Collision& collision)

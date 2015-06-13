@@ -18,7 +18,7 @@ public:
 private:
 	Transform * m_transform;
 	Renderer * m_renderer;
-	PxActor * m_actor;
+	PxRigidActor * m_actor;
 
 	CollisionCallbackFlags m_ccFlags;
 
@@ -34,7 +34,7 @@ private:
 protected:
 	void setTransform(Transform * t);
 	void setRenderer(Renderer * r);
-	void setActor(PxActor * a);
+	void setActor(PxRigidActor * a);
 
 public:
 	GameObject();
@@ -46,8 +46,8 @@ public:
 	Renderer * getRenderer();
 	const Renderer * getRenderer() const;
 
-	PxActor * getActor();
-	const PxActor * getActor() const;
+	PxRigidActor * getActor();
+	const PxRigidActor * getActor() const;
 
 	CollisionCallbackFlags getCollisionCallbackFlags() const;
 	void setCollisionCallbackFlags(CollisionCallbackFlags f);

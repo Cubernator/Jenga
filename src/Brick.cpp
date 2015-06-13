@@ -5,26 +5,18 @@
 
 Brick::Brick(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m) : m_rowIndex(0)
 {
+	m_actor.reset(PxCreateDynamic(*physics, t, PxBoxGeometry(halfSize), *m, 4.8f));
+	setActor(m_actor.get());
+
+	m_transform.reset(new PhysicsTransform(this));
+	setTransform(m_transform.get());
+
 	m_vbuffer.reset(createCuboidBuffer(halfSize.x, halfSize.y, halfSize.z));
 	m_renderer.reset(new MeshRenderer(this, s, m_vbuffer.get(), ib));
 	m_renderer->createConstantBuffer<XMFLOAT4>();
-
-	PxRigidActor * actor;
-
-	actor = PxCreateDynamic(*physics, t, PxBoxGeometry(halfSize), *m, 4.8f);
-
-	setActor(actor);
-	m_transform.reset(new PhysicsTransform(this, actor));
-
 	setRenderer(m_renderer.get());
-	setTransform(m_transform.get());
 
 	setState(TOWER);
-}
-
-Brick::~Brick()
-{
-	getActor()->release();
 }
 
 void Brick::setColor(const XMFLOAT4& c)

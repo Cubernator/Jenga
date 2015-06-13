@@ -13,8 +13,8 @@ public:
 	PhysicsScene(PxSceneDesc sceneDesc);
 	~PhysicsScene();
 
-	PxScene * getPhysXObj();
-	const PxScene * getPhysXObj() const;
+	PxScene * getPxScene();
+	const PxScene * getPxScene() const;
 
 	void addActor(PxActor * a);
 	void removeActor(PxActor * a);

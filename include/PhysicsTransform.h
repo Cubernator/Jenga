@@ -7,6 +7,7 @@ private:
 
 public:
 	PhysicsTransform(GameObject * parent, PxRigidActor * actor);
+	PhysicsTransform(GameObject * parent);
 
 	PxMat44 getMatrix() const final;
 

@@ -9,6 +9,27 @@ private:
 
 	virtual void draw() const = 0;
 
+	template<typename T>
+	void createConstantBufferInternal(const T* data)
+	{
+		D3D11_BUFFER_DESC cbd;
+		ZeroMemory(&cbd, sizeof(D3D11_BUFFER_DESC));
+
+		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		cbd.CPUAccessFlags = 0;
+		cbd.Usage = D3D11_USAGE_DEFAULT;
+		cbd.ByteWidth = sizeof(T);
+
+		D3D11_SUBRESOURCE_DATA srd;
+		ZeroMemory(&srd, sizeof(D3D11_SUBRESOURCE_DATA));
+		srd.pSysMem = data;
+
+		D3D11_SUBRESOURCE_DATA* srdp = &srd;
+		if (!data) srdp = NULL;
+
+		dev->CreateBuffer(&cbd, srdp, &m_cbuffer);
+	}
+
 	friend class ObjectManager;
 
 protected:
@@ -24,17 +45,15 @@ public:
 	ID3D11Buffer * getConstantBuffer() const { return m_cbuffer; }
 
 	template<typename T>
+	void createConstantBuffer(const T& data)
+	{
+		createConstantBufferInternal(&data);
+	}
+
+	template<typename T>
 	void createConstantBuffer()
 	{
-		D3D11_BUFFER_DESC cbd;
-		ZeroMemory(&cbd, sizeof(D3D11_BUFFER_DESC));
-
-		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cbd.CPUAccessFlags = 0;
-		cbd.Usage = D3D11_USAGE_DEFAULT;
-
-		cbd.ByteWidth = sizeof(T);
-		dev->CreateBuffer(&cbd, NULL, &m_cbuffer);
+		createConstantBufferInternal<T>(NULL);
 	}
 
 	template<typename T>

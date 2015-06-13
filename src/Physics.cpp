@@ -44,7 +44,7 @@ PhysicsInterface::~PhysicsInterface()
 void PhysicsInterface::simulate(float step)
 {
 	if (m_physicsScene) {
-		PxScene * pxs = m_physicsScene->getPhysXObj();
+		PxScene * pxs = m_physicsScene->getPxScene();
 		pxs->simulate(step);
 		pxs->fetchResults(true);
 	}
