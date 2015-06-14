@@ -115,35 +115,53 @@ std::vector<std::unique_ptr<Brick>>& Tower::getBricks()
 	return m_bricks;
 }
 
-
 bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) const
 {
-	PxVec3 topRowCenter, topRowDir;
+	return testBrickValidSpot(brick, rowBelow, newBrickIndex, m_positionTolerance, m_rotationTolerance);
+}
+
+bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float posTolerance, float rotTolerance) const
+{
+	PxVec3 topRowCenter, topRowDir, topRowUp;
 	PxVec3 f(1, 0, 0), u(0, 1, 0);
 
 	if (rowBelow < 0) {
 		topRowCenter = PxVec3(0, -m_brickSize.y / 2.0f, 0);
 		topRowDir = PxVec3(0, 0, 1);
+		topRowUp = u;
 	} else {
 		const Row& topRow = m_rows[rowBelow];
-		Transform *t0 = topRow.bricks[0]->getTransform(), *t2 = topRow.bricks[2]->getTransform();
-		PxVec3 d0 = t0->getRotation().rotate(f), d2 = t2->getRotation().rotate(f);
-		if (d0.dot(d2) < 0.0f) d2 = -d2;
+		Transform *t0 = topRow.bricks[0]->getTransform(), *t1 = topRow.bricks[1]->getTransform(), *t2 = topRow.bricks[2]->getTransform();
+		PxQuat q0 = t0->getRotation(), q1 = t1->getRotation(), q2 = t2->getRotation();
 
-		topRowCenter = (t0->getPosition() + t2->getPosition()) / 2.0f;
-		topRowDir = (d0 + d2) / 2.0f;
-		topRowDir.normalize();
+		PxVec3 d0 = q0.rotate(f), d1 = q1.rotate(f), d2 = q2.rotate(f);
+		if (d1.dot(d0) < 0.0f) d0 = -d0;
+		if (d1.dot(d2) < 0.0f) d2 = -d2;
+
+		topRowDir = (d0 + d1 + d2) / 3.0f;
+		topRowDir.normalize(); // average direction of top 3 bricks
+
+		PxVec3 u0 = q0.rotate(u), u1 = q1.rotate(u), u2 = q2.rotate(u);
+		if (u0.dot(u) < 0.0f) u0 = -u0;
+		if (u1.dot(u) < 0.0f) u1 = -u1;
+		if (u2.dot(u) < 0.0f) u2 = -u2;
+
+		topRowUp = (u0 + u1 + u2) / 3.0f;
+		topRowUp.normalize(); // average up direction of top 3 bricks
+
+		topRowCenter = (t0->getPosition() + t1->getPosition() + t2->getPosition()) / 3.0f; // average position of top 3 bricks (center of row)
 	}
+
+	topRowCenter += m_brickSize.y * topRowUp;
 
 	Transform * bt = brick->getTransform();
 	PxVec3 bdir = bt->getRotation().rotate(f);
 
-	if ((bdir.dot(topRowDir) <= m_rotationTolerance) && (bdir.dot(u) <= m_rotationTolerance)) {
-		topRowCenter.y += m_brickSize.y;
+	if ((bdir.dot(topRowDir) <= rotTolerance) && (bdir.dot(topRowUp) <= rotTolerance)) {
 		for (int i = -1; i < 2; ++i) {
 			PxVec3 bc = bt->getPosition();
 			PxVec3 diff = (topRowCenter + ((float)i * topRowDir * m_brickSize.z)) - bc;
-			if (diff.magnitude() <= m_positionTolerance) {
+			if (diff.magnitude() <= posTolerance) {
 				newBrickIndex = i + 1;
 				return true;
 			}
@@ -156,7 +174,7 @@ bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) 
 bool Tower::attemptPutBrickBack(Brick * brick)
 {
 	int bi, ri = brick->getRowIndex();
-	bool a = testBrickValidSpot(brick, ri-1, bi);
+	bool a = testBrickValidSpot(brick, ri-1, bi, 1.0f, sinf(toRadf(10.0f)));
 	return a && (bi == brick->getBrickIndex());
 }
 

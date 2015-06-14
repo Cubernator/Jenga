@@ -40,7 +40,7 @@ public:
 	unsigned int getHeight() const;
 	std::vector<std::unique_ptr<Brick>>& getBricks();
 
-	bool testBrickAlignment(Brick * brick, int rowIndex, int& newBrickIndex) const;
+	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float posTolerance, float rotTolerance) const;
 	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) const;
 
 	bool attemptPutBrickBack(Brick * brick);
