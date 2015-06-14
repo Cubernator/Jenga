@@ -23,9 +23,13 @@ Shader::Shader(const std::wstring& vShaderPath, const std::wstring& pShaderPath)
 	dev->CreatePixelShader(m_pByteCode->GetBufferPointer(), m_pByteCode->GetBufferSize(), NULL, &m_pixelShader);
 }
 
-
 Shader::~Shader()
 {
 	m_vertexShader->Release();
 	m_pixelShader->Release();
 }
+
+ID3D11VertexShader * Shader::getVertexShader() { return m_vertexShader; }
+ID3D11PixelShader * Shader::getPixelShader() { return m_pixelShader; }
+ID3D10Blob * Shader::getVertexByteCode() { return m_vByteCode; }
+ID3D10Blob * Shader::getPixelByteCode() { return m_pByteCode; }

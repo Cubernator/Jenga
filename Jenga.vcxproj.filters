@@ -110,6 +110,12 @@
     <ClInclude Include="include\Tower.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\DebugArrow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DebugLineRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp">
@@ -179,6 +185,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Tower.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DebugLineRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DebugArrow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

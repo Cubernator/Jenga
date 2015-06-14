@@ -25,6 +25,8 @@ private:
 		bool isValid() const;
 	};
 
+	px_ptr<PxMaterial> m_brickMat;
+
 	std::vector<std::unique_ptr<Brick>> m_bricks;
 	std::vector<Row> m_rows;
 
@@ -33,7 +35,7 @@ private:
 	const PxVec3 m_brickSize;
 
 public:
-	Tower(Shader * s, IndexBuffer * ib, PxMaterial * m, unsigned int seed);
+	Tower(Shader * s, IndexBuffer * ib, unsigned int seed);
 
 	unsigned int getHeight() const;
 	std::vector<std::unique_ptr<Brick>>& getBricks();

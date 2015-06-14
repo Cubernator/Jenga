@@ -11,13 +11,14 @@ struct cbPerApplication
 
 struct cbPerFrame
 {
-	PxMat44 view;
+	XMFLOAT4X4 view;
 	Light light;
 };
 
 struct cbPerObject
 {
-	PxMat44 world;
+	XMFLOAT4X4 world;
+	XMFLOAT4X4 mvp;
 };
 
 class ObjectManager

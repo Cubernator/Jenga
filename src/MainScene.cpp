@@ -7,6 +7,7 @@ MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc),
 m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f), m_pickedBrick(nullptr), m_controlMode(false)
 {
 	m_shader.reset(new Shader(L"Diffuse_vs.cso", L"Diffuse_ps.cso"));
+	m_debugShader.reset(new Shader(L"VertexColor_vs.cso", L"VertexColor_ps.cso"));
 
 	UINT16 indices[] = {
 		0, 1, 2,
@@ -25,11 +26,9 @@ m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySen
 
 	m_brickIndices.reset(new IndexBuffer(indices, 36));
 
-	m_brickMat.reset(physics->createMaterial(0.6f, 0.3f, 0.1f));
-
 	unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
 
-	m_tower.reset(new Tower(m_shader.get(), m_brickIndices.get(), m_brickMat.get(), seed));
+	m_tower.reset(new Tower(m_shader.get(), m_brickIndices.get(), seed));
 	for (std::unique_ptr<Brick>& b : m_tower->getBricks()) {
 		objects->addObject(b.get());
 		addObject(b.get());
@@ -45,11 +44,15 @@ m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySen
 	l.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	l.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
+	m_springVisualizer.reset(new DebugArrow(m_debugShader.get(), XMFLOAT4(1, 1, 1, 1)));
+	m_springVisualizer->getRenderer()->setEnabled(false);
+
 	getPxScene()->setGravity(PxVec3(0, -9.81f, 0));
 
 	objects->setLight(l);
 	objects->setCamera(m_camera.get());
 	objects->addObject(m_ground.get());
+	objects->addObject(m_springVisualizer.get());
 
 	addObject(m_ground.get());
 }
@@ -58,6 +61,7 @@ MainScene::~MainScene()
 {
 	removeObject(m_ground.get());
 	objects->removeObject(m_ground.get());
+	objects->removeObject(m_springVisualizer.get());
 
 	for (std::unique_ptr<Brick>& b : m_tower->getBricks()) {
 		removeObject(b.get());
@@ -95,6 +99,12 @@ void MainScene::update()
 	}
 
 	setCamPos();
+
+	if (m_spring) {
+		PxVec3 lp = m_spring->getLocalPose(PxJointActorIndex::eACTOR1).p;
+		lp = m_pickedBrick->getTransform()->getTransform().transform(lp);
+		m_springVisualizer->setProps(lp, m_springPos);
+	}
 }
 
 void MainScene::tryPickBrick()
@@ -141,6 +151,8 @@ void MainScene::tryPickBrick()
 				m_spring->setDrive(PxD6Drive::eY, posDrive);
 				m_spring->setDrive(PxD6Drive::eZ, posDrive);
 				m_spring->setDrive(PxD6Drive::eSLERP, PxD6JointDrive(0.0f, 2000.0f, PX_MAX_F32));
+
+				m_springVisualizer->getRenderer()->setEnabled(true);
 			}
 		}
 	}
@@ -209,6 +221,8 @@ void MainScene::releaseBrick()
 		}
 	}
 	m_spring.reset();
+
+	m_springVisualizer->getRenderer()->setEnabled(false);
 }
 
 void MainScene::setCamPos()

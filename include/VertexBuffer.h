@@ -27,5 +27,10 @@ public:
 
 		setBuffer(b);
 	}
+
+	void updateData(VertexType *pData)
+	{
+		devcon->UpdateSubresource(getBuffer(), 0, NULL, pData, 0, 0);
+	}
 };
 

@@ -4,6 +4,7 @@
 #include "Tower.h"
 #include "Ground.h"
 #include "Camera.h"
+#include "DebugArrow.h"
 
 #include <vector>
 #include <memory>
@@ -13,13 +14,14 @@ class MainScene : public PhysicsScene
 private:
 	std::unique_ptr<Ground> m_ground;
 	std::unique_ptr<Camera> m_camera;
-	std::unique_ptr<Shader> m_shader;
+	std::unique_ptr<Shader> m_shader, m_debugShader;
 	std::unique_ptr<IndexBuffer> m_brickIndices;
 
 	std::unique_ptr<Tower> m_tower;
 
+	std::unique_ptr<DebugArrow> m_springVisualizer;
+
 	px_ptr<PxD6Joint> m_spring;
-	px_ptr<PxMaterial> m_brickMat;
 
 	PxVec3 m_springOrigin, m_springPos;
 	bool m_controlMode;

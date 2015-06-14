@@ -39,11 +39,13 @@ bool Tower::Row::isValid() const
 	return false;
 }
 
-Tower::Tower(Shader * s, IndexBuffer * ib, PxMaterial * m, unsigned int seed) : m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
+Tower::Tower(Shader * s, IndexBuffer * ib, unsigned int seed) : m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
 {
 	PxVec3 brickHSize = m_brickSize / 2.0f;
 	PxQuat r90(toRadf(-90.0f), PxVec3(0, 1, 0));
-	float hgap = 0.01f, vgap = 0.005f, maxVariance = 0.02f;
+	float hgap = 0.01f, vgap = 0.001f, maxVariance = 0.025f;
+
+	m_brickMat.reset(physics->createMaterial(0.7f, 0.4f, 0.1f));
 
 	std::default_random_engine gen(seed);
 	std::uniform_real_distribution<float> dist1(-1.0f, 0.0f);
@@ -75,12 +77,11 @@ Tower::Tower(Shader * s, IndexBuffer * ib, PxMaterial * m, unsigned int seed) : 
 
 			float rowSize = *std::max_element(sizes.begin(), sizes.end());
 
-			y += rowSize + vgap;
-
+			
 			for (int k = 0; k < 3; k++) {
 				float x = 0.0f, z = (k - 1) * 2 * (brickHSize.z + hgap);
 
-				PxTransform brickTrans(PxVec3(x, y, z));
+				PxTransform brickTrans(PxVec3(x, y + sizes[k], z));
 				if (j > 0) {
 					brickTrans.q = r90;
 					brickTrans.p.x = z;
@@ -90,13 +91,13 @@ Tower::Tower(Shader * s, IndexBuffer * ib, PxMaterial * m, unsigned int seed) : 
 				PxVec3 size = brickHSize;
 				size.y = sizes[k];
 
-				Brick * b = new Brick(s, ib, size, brickTrans, m);
+				Brick * b = new Brick(s, ib, size, brickTrans, m_brickMat.get());
 
 				m_bricks.emplace_back(b);
 				row.setBrickAt(b, k);
 			}
 
-			y += rowSize;
+			y += rowSize * 2.0f + vgap;
 		}
 	}
 

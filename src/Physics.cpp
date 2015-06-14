@@ -1,6 +1,7 @@
 #include "Physics.h"
 #include "PhysicsScene.h"
 #include "GameObject.h"
+#include "constants.h"
 
 PxFoundation *physicsFoundation;
 PxPhysics *physics;

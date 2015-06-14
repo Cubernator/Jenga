@@ -52,19 +52,30 @@ void ObjectManager::draw(float alpha)
 {
 	if (m_cam) {
 		m_cam->setAspectRatio(16.f / 9.f);
-		XMStoreFloat4x4(&m_app.projection, m_cam->getProjectionMatrix());
+		XMMATRIX proj = m_cam->getProjectionMatrix();
+		XMStoreFloat4x4(&m_app.projection, proj);
 
-		m_frame.view = PxMat44(m_cam->getTransform()->getTransform().getInverse());
+		PxMat44 vm(m_cam->getTransform()->getTransform().getInverse());
+		XMMATRIX view = XMLoadFloat4x4((XMFLOAT4X4*)&vm);
+		//XMVECTOR det = XMMatrixDeterminant(view);
+		//view = XMMatrixInverse(&det, view);
+		XMStoreFloat4x4(&m_frame.view, view);
 
 		devcon->UpdateSubresource(m_constantBuffers[CB_Application], 0, NULL, &m_app, 0, 0);
 		devcon->UpdateSubresource(m_constantBuffers[CB_Frame], 0, NULL, &m_frame, 0, 0);
+
+		XMMATRIX world;
+		PxMat44 wm;
 
 		for (GameObject * obj : m_objects) {
 			const Renderer * r = obj->getRenderer();
 			if (r && r->getEnabled()) {
 				const Transform * t = obj->getTransform();
 				if (t && t->getEnabled()) {
-					m_object.world = t->getMatrix();
+					wm = t->getMatrix();
+					world = XMLoadFloat4x4((XMFLOAT4X4*)&wm);
+					XMStoreFloat4x4(&m_object.world, world);
+					XMStoreFloat4x4(&m_object.mvp, world * view * proj);
 					devcon->UpdateSubresource(m_constantBuffers[CB_Object], 0, NULL, &m_object, 0, 0);
 
 					ID3D11Buffer * matBuffer = r->getConstantBuffer();

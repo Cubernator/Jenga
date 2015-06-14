@@ -19,4 +19,5 @@ cbuffer PerFrame : register(b1)
 cbuffer PerObject : register(b2)
 {
 	matrix world;
+	matrix mvp;
 }

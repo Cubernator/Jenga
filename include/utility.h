@@ -13,3 +13,8 @@ inline float toRadf(float deg)
 {
 	return PIF * deg / 180.0f;
 }
+
+inline PxQuat fromToRotation(const PxVec3& from, const PxVec3& to) // to and from must be normalized!
+{
+	return PxQuat(acosf(from.dot(to)), from.cross(to).getNormalized());
+}
