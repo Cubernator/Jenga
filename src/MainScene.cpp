@@ -47,12 +47,16 @@ m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySen
 	m_springVisualizer.reset(new DebugArrow(m_debugShader.get(), XMFLOAT4(1, 1, 1, 1)));
 	m_springVisualizer->getRenderer()->setEnabled(false);
 
+	m_planeVisualizer.reset(new DebugPlane(200.0f, 100, m_debugShader.get(), XMFLOAT4(1, 1, 1, 1)));
+	m_planeVisualizer->getRenderer()->setEnabled(false);
+
 	getPxScene()->setGravity(PxVec3(0, -9.81f, 0));
 
 	objects->setLight(l);
 	objects->setCamera(m_camera.get());
 	objects->addObject(m_ground.get());
 	objects->addObject(m_springVisualizer.get());
+	objects->addObject(m_planeVisualizer.get());
 
 	addObject(m_ground.get());
 }
@@ -62,6 +66,7 @@ MainScene::~MainScene()
 	removeObject(m_ground.get());
 	objects->removeObject(m_ground.get());
 	objects->removeObject(m_springVisualizer.get());
+	objects->removeObject(m_planeVisualizer.get());
 
 	for (std::unique_ptr<Brick>& b : m_tower->getBricks()) {
 		removeObject(b.get());
@@ -153,6 +158,7 @@ void MainScene::tryPickBrick()
 				m_spring->setDrive(PxD6Drive::eSLERP, PxD6JointDrive(0.0f, 2000.0f, PX_MAX_F32));
 
 				m_springVisualizer->getRenderer()->setEnabled(true);
+				m_planeVisualizer->getRenderer()->setEnabled(true);
 			}
 		}
 	}
@@ -174,14 +180,26 @@ void MainScene::updateSpringPos()
 	n = (camRot.rotate(forward));
 	n = n.cross(up).cross(up);
 	n.normalize();
-	float b = dir.dot(n);
-	assert(b != 0.0f);
-	m_springPos = pos + dir * (n.dot(m_springOrigin - pos) / b);
+
+	float nd = n.dot(m_springOrigin - pos);
+
+	m_springPos = pos + dir * (nd / dir.dot(n));
+
+	Transform * pt = m_planeVisualizer->getTransform();
 
 	if (m_controlMode) {
 		right = camRot.rotate(right);
 		right.normalize();
-		m_springPos = m_springOrigin + PxQuat(toRadf(90.0f), right).rotate(m_springPos - m_springOrigin);
+		PxQuat r90(toRadf(90.0f), right);
+		m_springPos = m_springOrigin + r90.rotate(m_springPos - m_springOrigin);
+
+		pt->setPosition(PxVec3(0, m_springOrigin.y, 0));
+		pt->setRotation(PxQuat(PxIdentity));
+	} else {
+		PxQuat pr = fromToRotation(PxVec3(0, 0, 1), n) * PxQuat(toRadf(90.0f), right);
+		PxVec3 cf = camRot.rotate(forward);
+		pt->setPosition(pos + cf * (nd / cf.dot(n)));
+		pt->setRotation(pr);
 	}
 
 	PxRigidDynamic * rd = (PxRigidDynamic*)m_pickedBrick->getActor();
@@ -223,6 +241,7 @@ void MainScene::releaseBrick()
 	m_spring.reset();
 
 	m_springVisualizer->getRenderer()->setEnabled(false);
+	m_planeVisualizer->getRenderer()->setEnabled(false);
 }
 
 void MainScene::setCamPos()

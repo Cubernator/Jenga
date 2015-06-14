@@ -5,6 +5,7 @@
 #include "Ground.h"
 #include "Camera.h"
 #include "DebugArrow.h"
+#include "DebugPlane.h"
 
 #include <vector>
 #include <memory>
@@ -20,6 +21,7 @@ private:
 	std::unique_ptr<Tower> m_tower;
 
 	std::unique_ptr<DebugArrow> m_springVisualizer;
+	std::unique_ptr<DebugPlane> m_planeVisualizer;
 
 	px_ptr<PxD6Joint> m_spring;
 

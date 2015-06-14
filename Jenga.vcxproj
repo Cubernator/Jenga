@@ -96,6 +96,7 @@
     <ClInclude Include="include\Component.h" />
     <ClInclude Include="include\constants.h" />
     <ClInclude Include="include\DebugArrow.h" />
+    <ClInclude Include="include\DebugPlane.h" />
     <ClInclude Include="include\DefaultTransform.h" />
     <ClInclude Include="include\DirectX.h" />
     <ClInclude Include="include\Engine.h" />
@@ -129,6 +130,7 @@
     <ClCompile Include="src\Component.cpp" />
     <ClCompile Include="src\DebugArrow.cpp" />
     <ClCompile Include="src\DebugLineRenderer.cpp" />
+    <ClCompile Include="src\DebugPlane.cpp" />
     <ClCompile Include="src\DefaultTransform.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
