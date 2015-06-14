@@ -4,7 +4,7 @@
 #include "utility.h"
 
 MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), 
-m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f), m_pickedBrick(nullptr), m_controlMode(false)
+m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f), m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false)
 {
 	m_shader.reset(new Shader(L"Diffuse_vs.cso", L"Diffuse_ps.cso"));
 	m_debugShader.reset(new Shader(L"VertexColor_vs.cso", L"VertexColor_ps.cso"));
@@ -79,6 +79,17 @@ void MainScene::update()
 	if (input->getKeyPressed('R')) {
 		engine->enterScene<MainScene>(); // restart
 		return;
+	}
+
+	if (input->getKeyPressed('D')) {
+		m_showDebug = !m_showDebug;
+		if (!m_showDebug) {
+			m_springVisualizer->getRenderer()->setEnabled(false);
+			m_planeVisualizer->getRenderer()->setEnabled(false);
+		} else if (m_spring) {
+			m_springVisualizer->getRenderer()->setEnabled(true);
+			m_planeVisualizer->getRenderer()->setEnabled(true);
+		}
 	}
 
 	if (input->getMouseButtonPressed(MBUTTON1)) {
@@ -157,8 +168,10 @@ void MainScene::tryPickBrick()
 				m_spring->setDrive(PxD6Drive::eZ, posDrive);
 				m_spring->setDrive(PxD6Drive::eSLERP, PxD6JointDrive(0.0f, 2000.0f, PX_MAX_F32));
 
-				m_springVisualizer->getRenderer()->setEnabled(true);
-				m_planeVisualizer->getRenderer()->setEnabled(true);
+				if (m_showDebug) {
+					m_springVisualizer->getRenderer()->setEnabled(true);
+					m_planeVisualizer->getRenderer()->setEnabled(true);
+				}
 			}
 		}
 	}

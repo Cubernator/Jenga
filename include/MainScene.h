@@ -26,7 +26,7 @@ private:
 	px_ptr<PxD6Joint> m_spring;
 
 	PxVec3 m_springOrigin, m_springPos;
-	bool m_controlMode;
+	bool m_controlMode, m_showDebug;
 
 	Brick * m_pickedBrick;
 

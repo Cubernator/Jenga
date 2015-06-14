@@ -10,7 +10,7 @@ DebugPlane::DebugPlane(float size, int numLines, Shader * s, const XMFLOAT4& col
 
 	float hs = size / 2.0f, cs = size / (numLines-1);
 
-	for (size_t i = 0; i < numLines; ++i) {
+	for (int i = 0; i < numLines; ++i) {
 		int x = i * 4;
 		points[x + 0] = { { i*cs - hs, 0, -hs }, color };
 		points[x + 1] = { { i*cs - hs, 0, hs }, color };
