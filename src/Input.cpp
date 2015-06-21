@@ -1,4 +1,5 @@
 #include "Input.h"
+#include "constants.h"
 
 Input * input;
 
@@ -166,4 +167,19 @@ int Input::getMouseDeltaY() const
 int Input::getMouseWheelDelta() const
 {
 	return m_wheelDelta;
+}
+
+void Input::setMousePos(int x, int y)
+{
+	x = max(min(x, SCREEN_WIDTH), 0);
+	y = max(min(y, SCREEN_HEIGHT), 0);
+
+	POINT pt;
+	pt.x = x;
+	pt.y = y;
+	ClientToScreen(m_hWnd, &pt);
+	SetCursorPos(pt.x, pt.y);
+
+	m_mx = x;
+	m_my = y;
 }

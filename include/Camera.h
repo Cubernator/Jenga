@@ -27,5 +27,6 @@ public:
 	XMMATRIX getProjectionMatrix() const;
 
 	void getPickingRay(int x, int y, PxVec3& pos, PxVec3& dir) const;
+	void worldToScreen(const PxVec3& pos, int& x, int& y) const;
 };
 

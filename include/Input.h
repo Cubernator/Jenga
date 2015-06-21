@@ -55,6 +55,8 @@ public:
 	int getMouseDeltaY() const;
 
 	int getMouseWheelDelta() const;
+
+	void setMousePos(int x, int y);
 };
 
 extern Input * input;

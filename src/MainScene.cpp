@@ -4,7 +4,8 @@
 #include "utility.h"
 
 MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), 
-m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f), m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false)
+m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f),
+m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(true), m_maxSpringDist(50.0f)
 {
 	m_shader.reset(new Shader(L"Diffuse_vs.cso", L"Diffuse_ps.cso"));
 	m_debugShader.reset(new Shader(L"VertexColor_vs.cso", L"VertexColor_ps.cso"));
@@ -148,11 +149,11 @@ void MainScene::tryPickBrick()
 
 				m_pickedBrick = b;
 				m_pickedBrick->setState(PULLING);
-				m_springOrigin = hit.block.position;
+				m_planeOrigin = hit.block.position;
 				m_controlMode = false;
 
 				// set up spring joint
-				m_spring.reset(PxD6JointCreate(*physics, nullptr, PxTransform(PxIdentity), a, PxTransform(a->getGlobalPose().transformInv(m_springOrigin))));
+				m_spring.reset(PxD6JointCreate(*physics, nullptr, PxTransform(PxIdentity), a, PxTransform(a->getGlobalPose().transformInv(m_planeOrigin))));
 
 				m_spring->setMotion(PxD6Axis::eX, PxD6Motion::eFREE);
 				m_spring->setMotion(PxD6Axis::eY, PxD6Motion::eFREE);
@@ -182,7 +183,19 @@ void MainScene::updateSpringPos()
 	if (input->getMouseButtonPressed(MBUTTON2)) {
 		// switch control modes
 		m_controlMode = !m_controlMode;
-		m_springOrigin = m_springPos;
+		m_planeOrigin = m_springPos;
+
+		if (m_controlMode) {
+			float diff = m_camY + m_camDist / tanf(m_camYAngle) - m_planeOrigin.y - 15.0f;
+			if (diff < 0.0f) {
+				m_camY -= diff;
+				setCamPos();
+			}
+
+			int x, y;
+			m_camera->worldToScreen(m_springPos, x, y);
+			input->setMousePos(x, y);
+		}
 	}
 
 	// update spring joint
@@ -190,29 +203,40 @@ void MainScene::updateSpringPos()
 	m_camera->getPickingRay(input->getMouseX(), input->getMouseY(), pos, dir);
 	PxVec3 right(1, 0, 0), up(0, 1, 0), forward(0, 0, 1);
 	PxQuat camRot = m_camera->getTransform()->getRotation();
-	n = (camRot.rotate(forward));
-	n = n.cross(up).cross(up);
-	n.normalize();
 
-	float nd = n.dot(m_springOrigin - pos);
+	if (m_controlMode) {
+		n = up;
+	} else {
+		n = (camRot.rotate(forward));
+		n = n.cross(up).cross(up);
+		n.normalize();
+	}
 
-	m_springPos = pos + dir * (nd / dir.dot(n));
+	// project cursor onto plane
+	float nd = n.dot(m_planeOrigin - pos);
+	float ddn = dir.dot(n);
+	if (ddn < -0.01f) { // do this to prevent overflow and wrap-around
+		m_springPos = pos + dir * (nd / ddn);
+	}
 
 	Transform * pt = m_planeVisualizer->getTransform();
 
 	if (m_controlMode) {
-		right = camRot.rotate(right);
-		right.normalize();
-		PxQuat r90(toRadf(90.0f), right);
-		m_springPos = m_springOrigin + r90.rotate(m_springPos - m_springOrigin);
-
-		pt->setPosition(PxVec3(0, m_springOrigin.y, 0));
+		pt->setPosition(PxVec3(0, m_planeOrigin.y, 0));
 		pt->setRotation(PxQuat(PxIdentity));
 	} else {
-		PxQuat pr = fromToRotation(PxVec3(0, 0, 1), n) * PxQuat(toRadf(90.0f), right);
+		PxQuat pr = fromToRotation(forward, n) * PxQuat(toRadf(90.0f), right);
 		PxVec3 cf = camRot.rotate(forward);
 		pt->setPosition(pos + cf * (nd / cf.dot(n)));
 		pt->setRotation(pr);
+	}
+
+	// limit the horizontal distance of the spring to the tower
+	PxVec3 p = up.dot(m_springPos) * up;
+	PxVec3 ps = m_springPos - p;
+	float psm = ps.magnitude();
+	if (psm > m_maxSpringDist) {
+		m_springPos = p + (ps * (m_maxSpringDist / psm));
 	}
 
 	PxRigidDynamic * rd = (PxRigidDynamic*)m_pickedBrick->getActor();

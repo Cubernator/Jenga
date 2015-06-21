@@ -57,8 +57,6 @@ void ObjectManager::draw(float alpha)
 
 		PxMat44 vm(m_cam->getTransform()->getTransform().getInverse());
 		XMMATRIX view = XMLoadFloat4x4((XMFLOAT4X4*)&vm);
-		//XMVECTOR det = XMMatrixDeterminant(view);
-		//view = XMMatrixInverse(&det, view);
 		XMStoreFloat4x4(&m_frame.view, view);
 
 		devcon->UpdateSubresource(m_constantBuffers[CB_Application], 0, NULL, &m_app, 0, 0);

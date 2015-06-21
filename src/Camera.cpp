@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include "Engine.h"
 
-Camera::Camera() : m_transform(new DefaultTransform(this)), m_nearPlane(0.01f), m_farPlane(500.f), m_aspectRatio(1.f), m_fov(75.f)
+Camera::Camera() : m_transform(new DefaultTransform(this)), m_nearPlane(0.1f), m_farPlane(500.f), m_aspectRatio(1.f), m_fov(75.f)
 {
 	setTransform(m_transform.get());
 }
@@ -72,4 +72,15 @@ void Camera::getPickingRay(int x, int y, PxVec3& pos, PxVec3& dir) const
 
 	pos = t->getPosition();
 	dir = (end - start).getXYZ().getNormalized();
+}
+
+void Camera::worldToScreen(const PxVec3& pos, int& x, int& y) const
+{
+	PxMat44 view(getTransform()->getTransform().getInverse()), proj;
+	XMStoreFloat4x4((XMFLOAT4X4*)&proj, getProjectionMatrix());
+	PxVec4 p(view.transform(pos), 1.0f);
+	p = proj.transform(p);
+	
+	x = (int)(((p.x/p.w + 1.0f) / 2.0f) * SCREEN_WIDTH);
+	y = (int)(((1.0f - p.y/p.w) / 2.0f) * SCREEN_HEIGHT);
 }

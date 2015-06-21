@@ -21,8 +21,6 @@ private:
 
 		void setBrickAt(Brick * brick, unsigned int brickIndex);
 		void removeBrickAt(unsigned int brickIndex);
-
-		bool isValid() const;
 	};
 
 	px_ptr<PxMaterial> m_brickMat;

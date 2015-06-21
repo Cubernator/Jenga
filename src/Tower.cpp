@@ -33,12 +33,6 @@ void Tower::Row::removeBrickAt(unsigned int brickIndex)
 	bricks[brickIndex] = nullptr;
 }
 
-bool Tower::Row::isValid() const
-{
-	// TODO
-	return false;
-}
-
 Tower::Tower(Shader * s, IndexBuffer * ib, unsigned int seed) : m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
 {
 	PxVec3 brickHSize = m_brickSize / 2.0f;
@@ -122,7 +116,7 @@ bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) 
 
 bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float posTolerance, float rotTolerance) const
 {
-	PxVec3 topRowCenter, topRowDir, topRowUp;
+	PxVec3 topRowCenter(PxIdentity), topRowDir(PxIdentity), topRowUp(PxIdentity);
 	PxVec3 f(1, 0, 0), u(0, 1, 0);
 
 	if (rowBelow < 0) {
@@ -131,25 +125,46 @@ bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, 
 		topRowUp = u;
 	} else {
 		const Row& topRow = m_rows[rowBelow];
-		Transform *t0 = topRow.bricks[0]->getTransform(), *t1 = topRow.bricks[1]->getTransform(), *t2 = topRow.bricks[2]->getTransform();
-		PxQuat q0 = t0->getRotation(), q1 = t1->getRotation(), q2 = t2->getRotation();
 
-		PxVec3 d0 = q0.rotate(f), d1 = q1.rotate(f), d2 = q2.rotate(f);
-		if (d1.dot(d0) < 0.0f) d0 = -d0;
-		if (d1.dot(d2) < 0.0f) d2 = -d2;
+		std::vector<PxVec3> dirs;
 
-		topRowDir = (d0 + d1 + d2) / 3.0f;
-		topRowDir.normalize(); // average direction of top 3 bricks
+		int n = 0;
+		for (Brick* b : topRow.bricks) {
+			if (b) {
+				Transform * t = b->getTransform();
+				PxQuat q = t->getRotation();
+				PxVec3 dir = q.rotate(f);
 
-		PxVec3 u0 = q0.rotate(u), u1 = q1.rotate(u), u2 = q2.rotate(u);
-		if (u0.dot(u) < 0.0f) u0 = -u0;
-		if (u1.dot(u) < 0.0f) u1 = -u1;
-		if (u2.dot(u) < 0.0f) u2 = -u2;
+				if ((n > 0) && (dir.dot(dirs[0]) < 0.0f)) dir = -dir;
+				topRowDir += dir;
+				dirs.push_back(dir);
 
-		topRowUp = (u0 + u1 + u2) / 3.0f;
-		topRowUp.normalize(); // average up direction of top 3 bricks
+				PxVec3 updir = q.rotate(u);
 
-		topRowCenter = (t0->getPosition() + t1->getPosition() + t2->getPosition()) / 3.0f; // average position of top 3 bricks (center of row)
+				if (updir.dot(u) < 0.0f) updir = -updir;
+				topRowUp += updir;
+
+				topRowCenter += t->getPosition();
+				++n;
+			}
+		}
+
+		if (n != 0) {
+			topRowDir /= (float)n;
+			topRowDir.normalize();
+
+			topRowUp /= (float)n;
+			topRowUp.normalize();
+
+			Brick * b = topRow.bricks[1];
+			if (n < 3 && b) {
+				topRowCenter = b->getTransform()->getPosition();
+			} else {
+				topRowCenter /= (float)n;
+			}
+		} else {
+			// freak out and run around in circles
+		}
 	}
 
 	topRowCenter += m_brickSize.y * topRowUp;

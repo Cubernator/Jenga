@@ -25,7 +25,8 @@ private:
 
 	px_ptr<PxD6Joint> m_spring;
 
-	PxVec3 m_springOrigin, m_springPos;
+	PxVec3 m_planeOrigin, m_springPos;
+	float m_maxSpringDist;
 	bool m_controlMode, m_showDebug;
 
 	Brick * m_pickedBrick;
