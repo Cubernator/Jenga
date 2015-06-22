@@ -4,7 +4,7 @@
 #include "utility.h"
 
 MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), 
-m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f),
+m_camX(30), m_camY(13.5f), m_camDist(30), m_camYANormal(20.0f), m_camYASteep(40.0f), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f),
 m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(true), m_maxSpringDist(50.0f)
 {
 	m_shader.reset(new Shader(L"Diffuse_vs.cso", L"Diffuse_ps.cso"));
@@ -185,17 +185,20 @@ void MainScene::updateSpringPos()
 		m_controlMode = !m_controlMode;
 		m_planeOrigin = m_springPos;
 
+		m_camYAngle = m_controlMode ? m_camYASteep : m_camYANormal;
+
 		if (m_controlMode) {
-			float diff = m_camY + m_camDist / tanf(m_camYAngle) - m_planeOrigin.y - 15.0f;
+			float diff = m_camY + m_camDist * tanf(toRadf(m_camYAngle)) - m_planeOrigin.y - 15.0f;
 			if (diff < 0.0f) {
 				m_camY -= diff;
-				setCamPos();
 			}
-
-			int x, y;
-			m_camera->worldToScreen(m_springPos, x, y);
-			input->setMousePos(x, y);
 		}
+
+		setCamPos();
+
+		int x, y;
+		m_camera->worldToScreen(m_springPos, x, y);
+		input->setMousePos(x, y);
 	}
 
 	// update spring joint
@@ -279,6 +282,8 @@ void MainScene::releaseBrick()
 
 	m_springVisualizer->getRenderer()->setEnabled(false);
 	m_planeVisualizer->getRenderer()->setEnabled(false);
+
+	m_camYAngle = m_camYANormal;
 }
 
 void MainScene::setCamPos()
@@ -286,7 +291,7 @@ void MainScene::setCamPos()
 	PxQuat rot(toRadf(m_camX), PxVec3(0, 1, 0));
 	PxVec3 d = rot.rotate(PxVec3(0, 0, -m_camDist));
 	rot *= PxQuat(toRadf(m_camYAngle), PxVec3(1, 0, 0));
-	d.y = m_camY + m_camDist / tanf(m_camYAngle);
+	d.y = m_camY + m_camDist * tan(toRadf(m_camYAngle));
 
 	Transform * t = m_camera->getTransform();
 	t->setPosition(d);

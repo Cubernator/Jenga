@@ -32,6 +32,7 @@ private:
 	Brick * m_pickedBrick;
 
 	float m_camX, m_camY, m_camDist, m_camYAngle;
+	float m_camYANormal, m_camYASteep;
 	float m_xSens, m_ySens;
 
 	void update() final;
