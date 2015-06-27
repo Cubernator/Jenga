@@ -119,6 +119,9 @@
     <ClInclude Include="include\DebugPlane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp">
@@ -199,6 +202,9 @@
     <ClCompile Include="src\DebugPlane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shader\Diffuse_vs.hlsl">
@@ -211,6 +217,15 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="shader\Diffuse_ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\TexDiffuse_vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\TexDiffuse_ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\TexSpecular_vs.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
@@ -243,6 +258,13 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shader\common.hlsli">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="packages.config" />
+    <None Include="shader\TexDiffuse.hlsli">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shader\TexSpecular.hlsli">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

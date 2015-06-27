@@ -3,7 +3,7 @@
 #include "utility.h"
 
 
-Brick::Brick(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m) : m_rowIndex(0)
+Brick::Brick(Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m) : m_rowIndex(0)
 {
 	m_actor.reset(PxCreateDynamic(*physics, t, PxBoxGeometry(halfSize), *m, 4.8f));
 	setActor(m_actor.get());
@@ -11,9 +11,11 @@ Brick::Brick(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTrans
 	m_transform.reset(new PhysicsTransform(this));
 	setTransform(m_transform.get());
 
-	m_vbuffer.reset(createCuboidBuffer(halfSize.x, halfSize.y, halfSize.z));
+	m_vbuffer.reset(createBrickBuffer(halfSize.x, halfSize.y, halfSize.z));
 	m_renderer.reset(new MeshRenderer(this, s, m_vbuffer.get(), ib));
 	m_renderer->createConstantBuffer<XMFLOAT4>();
+	m_renderer->addTexture(tex);
+	m_renderer->addSampler(ss);
 	setRenderer(m_renderer.get());
 
 	setState(TOWER);
@@ -29,7 +31,7 @@ XMFLOAT4 Brick::getStateColor() const
 {
 	switch (m_state) {
 	case TOWER:
-		return XMFLOAT4(0.96f, 0.6f, 0.278f, 1.0f);
+		return XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	case BASE:
 		return XMFLOAT4(0.278f, 0.74f, 0.96f, 1.0f);
 	case TOP:

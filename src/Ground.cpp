@@ -14,12 +14,32 @@ Ground::Ground(Shader * s, IndexBuffer * ib)
 	m_transform.reset(new PhysicsTransform(this));
 	setTransform(m_transform.get());
 
-	m_vbuffer.reset(createCuboidBuffer(halfSize.x, halfSize.y, halfSize.z));
+	m_texture.reset(new Texture2D(L"assets\\images\\ground.jpg"));
+
+	D3D11_SAMPLER_DESC sd;
+	ZeroMemory(&sd, sizeof(D3D11_SAMPLER_DESC));
+	sd.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sd.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sd.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sd.Filter = D3D11_FILTER_ANISOTROPIC;
+	sd.MaxAnisotropy = 8;
+	sd.MinLOD = -FLT_MAX;
+	sd.MaxLOD = FLT_MAX;
+	dev->CreateSamplerState(&sd, &m_samplerState);
+
+	m_vbuffer.reset(createCuboidBuffer(halfSize.x, halfSize.y, halfSize.z, 30.0f));
 	m_renderer.reset(new MeshRenderer(this, s, m_vbuffer.get(), ib));
 	m_renderer->createConstantBuffer(XMFLOAT4(.6f, .6f, .6f, 1.f));
+	m_renderer->addTexture(m_texture.get());
+	m_renderer->addSampler(m_samplerState);
 	setRenderer(m_renderer.get());
 
 	setCollisionCallbackFlags(ENTER);
+}
+
+Ground::~Ground()
+{
+	m_samplerState->Release();
 }
 
 void Ground::onCollisionEnter(const Collision& collision)

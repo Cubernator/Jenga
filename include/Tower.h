@@ -33,7 +33,7 @@ private:
 	const PxVec3 m_brickSize;
 
 public:
-	Tower(Shader * s, IndexBuffer * ib, unsigned int seed);
+	Tower(Shader * s, IndexBuffer * ib, Texture2D * t, ID3D11SamplerState * ss, unsigned int seed);
 
 	unsigned int getHeight() const;
 	std::vector<std::unique_ptr<Brick>>& getBricks();

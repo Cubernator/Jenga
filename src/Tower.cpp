@@ -33,7 +33,8 @@ void Tower::Row::removeBrickAt(unsigned int brickIndex)
 	bricks[brickIndex] = nullptr;
 }
 
-Tower::Tower(Shader * s, IndexBuffer * ib, unsigned int seed) : m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
+Tower::Tower(Shader * s, IndexBuffer * ib, Texture2D * t, ID3D11SamplerState * ss, unsigned int seed) :
+m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
 {
 	PxVec3 brickHSize = m_brickSize / 2.0f;
 	PxQuat r90(toRadf(-90.0f), PxVec3(0, 1, 0));
@@ -85,7 +86,7 @@ Tower::Tower(Shader * s, IndexBuffer * ib, unsigned int seed) : m_positionTolera
 				PxVec3 size = brickHSize;
 				size.y = sizes[k];
 
-				Brick * b = new Brick(s, ib, size, brickTrans, m_brickMat.get());
+				Brick * b = new Brick(s, t, ss, ib, size, brickTrans, m_brickMat.get());
 
 				m_bricks.emplace_back(b);
 				row.setBrickAt(b, k);

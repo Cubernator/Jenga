@@ -83,6 +83,7 @@ void ObjectManager::draw(float alpha)
 				}
 
 				setConstantBuffers();
+				r->setStates();
 
 				r->draw();
 			}

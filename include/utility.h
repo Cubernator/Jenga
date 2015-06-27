@@ -7,7 +7,8 @@
 
 extern float PIF;
 
-VertexBuffer<VertexPosNormal> * createCuboidBuffer(float xs, float ys, float zs);
+VertexBuffer<VertexPosNormalTex> * createCuboidBuffer(float xs, float ys, float zs, float texScale = 1.0f);
+VertexBuffer<VertexPosNormalTex> * createBrickBuffer(float xs, float ys, float zs);
 
 inline float toRadf(float deg)
 {

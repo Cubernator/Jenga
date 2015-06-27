@@ -4,7 +4,7 @@
 MeshRenderer::MeshRenderer(GameObject * parent, Shader * s, VertexBufferBase * vb, IndexBuffer * ib)
 	: Renderer(parent, s), m_vertexBuffer(vb), m_indexBuffer(ib)
 {
-	ID3DBlob * vsb = m_shader->getVertexByteCode();
+	ID3DBlob * vsb = s->getVertexByteCode();
 	dev->CreateInputLayout(m_vertexBuffer->getVertexDesc(), m_vertexBuffer->getNumVertexElements(),
 		vsb->GetBufferPointer(), vsb->GetBufferSize(), &m_layout);
 }
@@ -16,9 +16,6 @@ MeshRenderer::~MeshRenderer()
 
 void MeshRenderer::draw() const
 {
-	devcon->VSSetShader(m_shader->getVertexShader(), NULL, 0);
-	devcon->PSSetShader(m_shader->getPixelShader(), NULL, 0);
-
 	ID3D11Buffer * vb = m_vertexBuffer->getBuffer();
 	const UINT stride = m_vertexBuffer->getStride(), offset = 0;
 	devcon->IASetVertexBuffers(0, 1, &vb, &stride, &offset);

@@ -4,6 +4,8 @@
 #include <dxgi.h>
 #include <DirectXMath.h>
 
+#include <memory>
+
 using namespace DirectX;
 
 extern ID3D11Device *dev;                     // the pointer to our Direct3D device interface

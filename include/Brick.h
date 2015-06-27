@@ -24,7 +24,7 @@ private:
 	px_ptr<PxRigidDynamic> m_actor;
 	std::unique_ptr<PhysicsTransform> m_transform;
 	std::unique_ptr<MeshRenderer> m_renderer;
-	std::unique_ptr<VertexBuffer<VertexPosNormal>> m_vbuffer;
+	std::unique_ptr<VertexBuffer<VertexPosNormalTex>> m_vbuffer;
 
 	XMFLOAT4 m_color;
 	BrickState m_state;
@@ -33,7 +33,7 @@ private:
 	XMFLOAT4 getStateColor() const;
 
 public:
-	Brick(Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m);
+	Brick(Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m);
 
 	void setColor(const XMFLOAT4& c);
 

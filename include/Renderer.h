@@ -1,11 +1,17 @@
 #pragma once
 #include "Component.h"
 #include "Shader.h"
+#include "Texture.h"
+
+#include <vector>
 
 class Renderer : public Component
 {
 private:
+	Shader * m_shader;
 	ID3D11Buffer *m_cbuffer;
+	std::vector<ID3D11ShaderResourceView*> m_resources;
+	std::vector<ID3D11SamplerState*> m_samplers;
 
 	virtual void draw() const = 0;
 
@@ -30,10 +36,19 @@ private:
 		dev->CreateBuffer(&cbd, srdp, &m_cbuffer);
 	}
 
-	friend class ObjectManager;
+	void setStates() const
+	{
+		devcon->VSSetShader(m_shader->getVertexShader(), NULL, 0);
+		devcon->PSSetShader(m_shader->getPixelShader(), NULL, 0);
 
-protected:
-	Shader * m_shader;
+		devcon->VSSetShaderResources(0, m_resources.size(), m_resources.data());
+		devcon->PSSetShaderResources(0, m_resources.size(), m_resources.data());
+
+		devcon->VSSetSamplers(0, m_samplers.size(), m_samplers.data());
+		devcon->PSSetSamplers(0, m_samplers.size(), m_samplers.data());
+	}
+
+	friend class ObjectManager;
 
 public:
 	Renderer(GameObject * parent, Shader * s) : Component(parent), m_cbuffer(nullptr), m_shader(s) { };
@@ -60,6 +75,26 @@ public:
 	void updateConstantBuffer(const T& content)
 	{
 		devcon->UpdateSubresource(m_cbuffer, 0, NULL, &content, 0, 0);
+	}
+
+	void addTexture(Texture2D * texture)
+	{
+		m_resources.push_back(texture->getResourceView());
+	}
+
+	void clearTextures()
+	{
+		m_resources.clear();
+	}
+
+	void addSampler(ID3D11SamplerState* sampler)
+	{
+		m_samplers.push_back(sampler);
+	}
+
+	void clearSamplers()
+	{
+		m_samplers.clear();
 	}
 };
 
