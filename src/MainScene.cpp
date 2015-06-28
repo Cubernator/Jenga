@@ -1,6 +1,6 @@
 #include "MainScene.h"
 #include "Input.h"
-#include "ObjectManager.h"
+#include "Objects.h"
 #include "utility.h"
 
 MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), 
@@ -45,7 +45,7 @@ m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(true), m_maxSpringDist
 
 	m_tower.reset(new Tower(m_brickShader.get(), m_brickIndices.get(), m_brickTex.get(), m_samplerState, seed));
 	for (std::unique_ptr<Brick>& b : m_tower->getBricks()) {
-		objects->addObject(b.get());
+		objects->add(b.get());
 		addObject(b.get());
 	}
 
@@ -67,11 +67,11 @@ m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(true), m_maxSpringDist
 
 	getPxScene()->setGravity(PxVec3(0, -9.81f, 0));
 
-	objects->setLight(l);
-	objects->setCamera(m_camera.get());
-	objects->addObject(m_ground.get());
-	objects->addObject(m_springVisualizer.get());
-	objects->addObject(m_planeVisualizer.get());
+	graphics->setLight(l);
+	graphics->setCamera(m_camera.get());
+	objects->add(m_ground.get());
+	objects->add(m_springVisualizer.get());
+	objects->add(m_planeVisualizer.get());
 
 	addObject(m_ground.get());
 }
@@ -79,14 +79,16 @@ m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(true), m_maxSpringDist
 MainScene::~MainScene()
 {
 	removeObject(m_ground.get());
-	objects->removeObject(m_ground.get());
-	objects->removeObject(m_springVisualizer.get());
-	objects->removeObject(m_planeVisualizer.get());
+	objects->remove(m_ground.get());
+	objects->remove(m_springVisualizer.get());
+	objects->remove(m_planeVisualizer.get());
 
 	for (std::unique_ptr<Brick>& b : m_tower->getBricks()) {
 		removeObject(b.get());
-		objects->removeObject(b.get());
+		objects->remove(b.get());
 	}
+
+	m_samplerState->Release();
 }
 
 void MainScene::update()

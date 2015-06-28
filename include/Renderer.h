@@ -48,7 +48,7 @@ private:
 		devcon->PSSetSamplers(0, m_samplers.size(), m_samplers.data());
 	}
 
-	friend class ObjectManager;
+	friend class GraphicsInterface;
 
 public:
 	Renderer(GameObject * parent, Shader * s) : Component(parent), m_cbuffer(nullptr), m_shader(s) { };

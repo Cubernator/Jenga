@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "Physics.h"
+#include "Graphics.h"
 
 #include "constants.h"
 
@@ -24,26 +25,13 @@ private:
 	ObjectManager * m_objectManager;
 	Input * m_input;
 	PhysicsInterface * m_physics;
+	GraphicsInterface * m_graphics;
 
 	std::unique_ptr<Scene> m_activeScene;
 
 	HWND m_hWnd;
 
-	IDXGISwapChain *m_swapchain;
-	ID3D11RenderTargetView *m_backbuffer;
-
-	ID3D11Texture2D *m_depthStencilBuffer;
-	ID3D11DepthStencilView *m_depthStencilView;
-	ID3D11DepthStencilState *m_depthStencilState;
-
-	ID3D11RasterizerState *m_rasterizerState;
-
-	D3D11_VIEWPORT m_viewport;
-
-	void initDirect3D();
-
 	void update();
-	void render(float alpha);
 
 	template<class SceneType, bool, class... Args>
 	struct enterSceneImpl
