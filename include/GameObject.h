@@ -22,6 +22,8 @@ private:
 
 	CollisionCallbackFlags m_ccFlags;
 
+	bool m_castShadow;
+
 	virtual void update() { }
 
 	virtual void onCollisionEnter(const Collision& collision) { }
@@ -51,5 +53,8 @@ public:
 
 	CollisionCallbackFlags getCollisionCallbackFlags() const;
 	void setCollisionCallbackFlags(CollisionCallbackFlags f);
+
+	bool getCastShadow() const;
+	void setCastShadow(bool v);
 };
 

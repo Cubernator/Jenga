@@ -211,6 +211,9 @@
     <ClCompile Include="src\Objects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shader\Diffuse_vs.hlsl">
@@ -232,6 +235,12 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="shader\TexSpecular_vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\ShadowPass_vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\ShadowPass_ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
@@ -271,6 +280,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shader\TexSpecular.hlsli">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shader\ShadowPass.hlsli">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shader\shadow.hlsli">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include "Engine.h"
 
-Camera::Camera() : m_transform(new DefaultTransform(this)), m_nearPlane(0.1f), m_farPlane(500.f), m_aspectRatio(1.f), m_fov(75.f)
+Camera::Camera() : m_transform(new DefaultTransform(this)), m_nearPlane(0.1f), m_farPlane(300.f), m_aspectRatio(1.f), m_fov(75.f)
 {
 	setTransform(m_transform.get());
 }

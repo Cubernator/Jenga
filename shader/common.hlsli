@@ -13,6 +13,7 @@ cbuffer PerApplication : register(b0)
 cbuffer PerFrame : register(b1)
 {
 	matrix view;
+	matrix lightVP;
 	Light light;
 }
 
@@ -20,4 +21,5 @@ cbuffer PerObject : register(b2)
 {
 	matrix world;
 	matrix mvp;
+	bool receiveShadow;
 }

@@ -22,4 +22,6 @@ DebugPlane::DebugPlane(float size, int numLines, Shader * s, const XMFLOAT4& col
 
 	m_renderer.reset(new DebugLineRenderer(this, s, m_vbuffer.get()));
 	setRenderer(m_renderer.get());
+
+	setCastShadow(false);
 }

@@ -1,6 +1,6 @@
 #include "GameObject.h"
 
-GameObject::GameObject() : m_transform(nullptr), m_renderer(nullptr), m_actor(nullptr) { }
+GameObject::GameObject() : m_transform(nullptr), m_renderer(nullptr), m_actor(nullptr), m_castShadow(true) { }
 GameObject::~GameObject() { }
 
 void GameObject::setTransform(Transform * t)
@@ -57,5 +57,15 @@ GameObject::CollisionCallbackFlags GameObject::getCollisionCallbackFlags() const
 void GameObject::setCollisionCallbackFlags(CollisionCallbackFlags f)
 {
 	m_ccFlags = f;
+}
+
+bool GameObject::getCastShadow() const
+{
+	return m_castShadow;
+}
+
+void GameObject::setCastShadow(bool v)
+{
+	m_castShadow = v;
 }
 

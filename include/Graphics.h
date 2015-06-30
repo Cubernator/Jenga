@@ -12,6 +12,7 @@ struct cbPerApplication
 struct cbPerFrame
 {
 	XMFLOAT4X4 view;
+	XMFLOAT4X4 lightVP;
 	Light light;
 };
 
@@ -19,6 +20,8 @@ struct cbPerObject
 {
 	XMFLOAT4X4 world;
 	XMFLOAT4X4 mvp;
+	bool receiveShadow;
+	XMFLOAT3 pad;
 };
 
 class GraphicsInterface
@@ -39,7 +42,15 @@ private:
 
 	D3D11_VIEWPORT m_viewport;
 
+	float m_shadowMapDimension;
 	ID3D11Texture2D *m_shadowMap;
+	ID3D11DepthStencilView *m_shadowDepthView;
+	ID3D11ShaderResourceView *m_shadowResourceView;
+	ID3D11SamplerState *m_shadowSampler;
+	ID3D11RasterizerState *m_shadowRasterizerState;
+	D3D11_VIEWPORT m_shadowViewport;
+
+	Shader * m_shadowPassShader;
 
 	Camera * m_cam;
 
@@ -47,15 +58,26 @@ private:
 	cbPerFrame m_frame;
 	cbPerObject m_object;
 
+	XMFLOAT4X4 m_shadowMVP;
+
 	ID3D11Buffer *m_constantBuffers[4];
+	ID3D11Buffer *m_shadowCB;
+
+	void createShadowResources();
 
 	void setConstantBuffers();
 
-	void drawObjects(float alpha);
+	XMMATRIX calcLightMatrix();
+
+	void drawObjects();
+	void shadowPass();
+	void mainPass();
 
 public:
 	GraphicsInterface(HWND hWnd);
 	~GraphicsInterface();
+
+	Shader * getShadowShader();
 
 	void render(float alpha);
 

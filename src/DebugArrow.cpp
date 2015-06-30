@@ -14,6 +14,8 @@ DebugArrow::DebugArrow(const PxVec3& origin, const PxVec3& dir, Shader * s, XMFL
 
 	m_renderer.reset(new DebugLineRenderer(this, s, m_vbuffer.get()));
 	setRenderer(m_renderer.get());
+
+	setCastShadow(false);
 }
 
 DebugArrow::DebugArrow(Shader * s, XMFLOAT4 color) : DebugArrow(PxVec3(0, 0, 0), PxVec3(0, 0, 1), s, color) {}
