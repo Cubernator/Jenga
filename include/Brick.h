@@ -4,6 +4,7 @@
 #include "MeshRenderer.h"
 #include "VertexBuffer.h"
 #include "PhysicsTransform.h"
+#include "utility.h"
 
 #include <memory>
 
@@ -26,11 +27,14 @@ private:
 	std::unique_ptr<MeshRenderer> m_renderer;
 	std::unique_ptr<VertexBuffer<VertexPosNormalTex>> m_vbuffer;
 
-	XMFLOAT4 m_color;
+	PxVec3 m_halfSize;
+	TexSpecular m_material;
 	BrickState m_state;
 	unsigned int m_rowIndex, m_brickIndex;
 
 	XMFLOAT4 getStateColor() const;
+
+	void getLocalAABB(XMVECTOR& min, XMVECTOR& max) const override;
 
 public:
 	Brick(Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m);

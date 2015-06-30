@@ -2,13 +2,11 @@
 #include "Brick.h"
 #include "utility.h"
 
-Ground::Ground(Shader * s, IndexBuffer * ib)
+Ground::Ground(Shader * s, IndexBuffer * ib) : m_halfSize(100.f, 1.0f, 100.f)
 {
-	PxVec3 halfSize(100.f, 1.0f, 100.f);
-
 	m_mat.reset(physics->createMaterial(0.4f, 0.8f, 0.5f));
 
-	m_actor.reset(PxCreateStatic(*physics, PxTransform(PxVec3(0, -1, 0)), PxBoxGeometry(halfSize), *m_mat.get()));
+	m_actor.reset(PxCreateStatic(*physics, PxTransform(PxVec3(0, -1, 0)), PxBoxGeometry(m_halfSize), *m_mat.get()));
 	setActor(m_actor.get());
 
 	m_transform.reset(new PhysicsTransform(this));
@@ -27,14 +25,23 @@ Ground::Ground(Shader * s, IndexBuffer * ib)
 	sd.MaxLOD = FLT_MAX;
 	dev->CreateSamplerState(&sd, &m_samplerState);
 
-	m_vbuffer.reset(createCuboidBuffer(halfSize.x, halfSize.y, halfSize.z, 30.0f));
+	m_material = {
+		{.6f, .6f, .6f, 1.0f},
+		{1.f, 1.f, 1.f, 1.0f},
+		15.0f,
+		0.4f
+	};
+
+	m_vbuffer.reset(createCuboidBuffer(m_halfSize.x, m_halfSize.y, m_halfSize.z, 30.0f));
 	m_renderer.reset(new MeshRenderer(this, s, m_vbuffer.get(), ib));
-	m_renderer->createConstantBuffer(XMFLOAT4(.6f, .6f, .6f, 1.f));
+	m_renderer->createConstantBuffer(m_material);
 	m_renderer->addTexture(m_texture.get());
 	m_renderer->addSampler(m_samplerState);
 	setRenderer(m_renderer.get());
 
 	setCollisionCallbackFlags(ENTER);
+
+	setCastShadow(false);
 }
 
 Ground::~Ground()
@@ -42,12 +49,21 @@ Ground::~Ground()
 	m_samplerState->Release();
 }
 
+void Ground::getLocalAABB(XMVECTOR& min, XMVECTOR& max) const
+{
+	XMVECTOR hs = XMLoadFloat3((XMFLOAT3*)&m_halfSize);
+	XMVectorSetW(hs, 1.0f);
+	min = -hs;
+	max = hs;
+}
+
 void Ground::onCollisionEnter(const Collision& collision)
 {
 	if (GameObject * obj = collision.getOtherObject()) {
 		if (Brick * b = dynamic_cast<Brick*>(obj)) {
 			if (!b->canTouchGround()) {
-				m_renderer->updateConstantBuffer(XMFLOAT4(1.0f, 0.3f, 0.3f, 1.0f));
+				m_material.diffuse = XMFLOAT4(1.0f, 0.3f, 0.3f, 1.0f);
+				m_renderer->updateConstantBuffer(m_material);
 				b->setState(FAULTED);
 			}
 		}

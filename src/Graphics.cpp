@@ -1,6 +1,9 @@
 #include "Graphics.h"
 #include "constants.h"
+#include "utility.h"
 #include "Objects.h"
+
+#include <limits>
 
 GraphicsInterface * graphics;
 
@@ -9,7 +12,7 @@ GraphicsInterface * graphics;
 #define CB_Object 2
 #define CB_Material 3
 
-GraphicsInterface::GraphicsInterface(HWND hWnd) : m_hWnd(hWnd), m_cam(nullptr), m_shadowMapDimension(1024)
+GraphicsInterface::GraphicsInterface(HWND hWnd) : m_hWnd(hWnd), m_cam(nullptr), m_shadowMapDimension(2048)
 {
 	graphics = this;
 
@@ -233,7 +236,7 @@ void GraphicsInterface::createShadowResources()
 	csd.MipLODBias = 0.f;
 	csd.MaxAnisotropy = 0;
 	csd.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
-	csd.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+	csd.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 
 	dev->CreateSamplerState(&csd, &m_shadowSampler);
 
@@ -242,6 +245,9 @@ void GraphicsInterface::createShadowResources()
 	srsd.CullMode = D3D11_CULL_FRONT;
 	srsd.FillMode = D3D11_FILL_SOLID;
 	srsd.DepthClipEnable = true;
+	srsd.DepthBias = 0;
+	srsd.DepthBiasClamp = 0.09f;
+	srsd.SlopeScaledDepthBias = 0.2f;
 
 	dev->CreateRasterizerState(&srsd, &m_shadowRasterizerState);
 
@@ -273,13 +279,46 @@ void GraphicsInterface::render(float alpha)
 
 XMMATRIX GraphicsInterface::calcLightMatrix()
 {
-	PxMat44 ivt(m_cam->getTransform()->getTransform());
-	XMMATRIX m = m_cam->getProjectionMatrix();
-	m = XMMatrixInverse(&XMMatrixDeterminant(m), m);
-	m = m * XMLoadFloat4x4((XMFLOAT4X4*)&ivt);
-	
 	XMMATRIX lightView = XMMatrixLookToLH(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMLoadFloat3(&m_frame.light.direction), XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-	XMMATRIX lightProj = XMMatrixOrthographicLH(30.0f, 30.0f, -30.0f, 20.0f);
+
+	XMMATRIX camProj = m_cam->getProjectionMatrix();
+	PxMat44 ivt(m_cam->getTransform()->getTransform());
+	XMMATRIX m = XMMatrixInverse(&XMMatrixDeterminant(camProj), camProj) * XMLoadFloat4x4((XMFLOAT4X4*)&ivt) * lightView;
+
+	XMVECTOR v, minv = XMVectorReplicate(FLT_MAX), maxv = XMVectorReplicate(-FLT_MAX);
+	
+	float c[] = {-1.0f, 1.0f};
+	for (float x : c) {
+		for (float y : c) {
+			for (float z : c) {
+				v = XMVector4Transform(XMVectorSet(x, y, z, 1.0f), m);
+				v = XMVectorDivide(v, XMVectorSplatW(v));
+				minv = XMVectorMin(v, minv);
+				maxv = XMVectorMax(v, maxv);
+			}
+		}
+	}
+	
+
+	XMVECTOR sceneMin, sceneMax;
+	objects->getSceneAABB(sceneMin, sceneMax);
+	transformAABB(lightView, sceneMin, sceneMax, sceneMin, sceneMax);
+	minv = XMVectorMax(minv, sceneMin);
+	maxv = XMVectorMin(maxv, sceneMax);
+
+	//minv = sceneMin;
+	//maxv = sceneMax;
+
+	// TODO: properly calculate tightly fitting near and far planes
+
+	float bound = max(XMVectorGetX(maxv) - XMVectorGetX(minv), XMVectorGetY(maxv) - XMVectorGetY(minv));
+	float up = bound / m_shadowMapDimension;
+	XMVECTOR unitsPerTexel = XMVectorSet(up, up, 1.0f, 0.0f);
+
+	minv = XMVectorFloor(minv / unitsPerTexel) * unitsPerTexel;
+	maxv = XMVectorFloor(maxv / unitsPerTexel) * unitsPerTexel;
+
+	XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(XMVectorGetX(minv), XMVectorGetX(maxv), XMVectorGetY(minv), XMVectorGetY(maxv), XMVectorGetZ(minv), XMVectorGetZ(maxv));
 
 	return lightView * lightProj;
 }
@@ -337,6 +376,7 @@ void GraphicsInterface::mainPass()
 		PxMat44 vm(m_cam->getTransform()->getTransform().getInverse());
 		XMMATRIX view = XMLoadFloat4x4((XMFLOAT4X4*)&vm);
 		XMStoreFloat4x4(&m_frame.view, view);
+		XMStoreFloat4(&m_frame.cameraPosition, XMLoadFloat3((XMFLOAT3*)&m_cam->getTransform()->getPosition()));
 
 		devcon->UpdateSubresource(m_constantBuffers[CB_Application], 0, NULL, &m_app, 0, 0);
 		devcon->UpdateSubresource(m_constantBuffers[CB_Frame], 0, NULL, &m_frame, 0, 0);

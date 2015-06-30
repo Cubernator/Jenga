@@ -19,3 +19,16 @@ inline PxQuat fromToRotation(const PxVec3& from, const PxVec3& to) // to and fro
 {
 	return PxQuat(acosf(from.dot(to)), from.cross(to).getNormalized());
 }
+
+void transformAABB(const XMMATRIX& mat, const XMVECTOR& localMin, const XMVECTOR& localMax, XMVECTOR& newMin, XMVECTOR& newMax);
+
+XMMATRIX matrixAbs(const XMMATRIX& mat);
+
+struct TexSpecular
+{
+	XMFLOAT4 diffuse;
+	XMFLOAT4 specular;
+	float specPower;
+	float specIntensity;
+	XMFLOAT2 pad;
+};

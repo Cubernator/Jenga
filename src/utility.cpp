@@ -84,3 +84,30 @@ VertexBuffer<VertexPosNormalTex> * createBrickBuffer(float xs, float ys, float z
 
 	return new VertexBuffer<VertexPosNormalTex>(vertices, 24);
 }
+
+void transformAABB(const XMMATRIX& mat, const XMVECTOR& localMin, const XMVECTOR& localMax, XMVECTOR& newMin, XMVECTOR& newMax)
+{
+	XMVECTOR center = (localMin + localMax) / 2.0f;
+	XMVECTOR extent = (localMax - localMin) / 2.0f;
+	XMVectorSetW(extent, 0.0f);
+
+	center = XMVector4Transform(center, mat);
+	extent = XMVector4Transform(extent, matrixAbs(mat));
+
+	newMin = center - extent;
+	newMax = center + extent;
+}
+
+XMMATRIX matrixAbs(const XMMATRIX& mat)
+{
+	XMFLOAT4X4 m;
+	XMStoreFloat4x4(&m, mat);
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			m(i, j) = fabsf(m(i, j));
+		}
+	}
+
+	return XMLoadFloat4x4(&m);
+}

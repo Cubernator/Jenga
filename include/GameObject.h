@@ -22,7 +22,7 @@ private:
 
 	CollisionCallbackFlags m_ccFlags;
 
-	bool m_castShadow;
+	bool m_castShadow, m_isGeometry;
 
 	virtual void update() { }
 
@@ -42,6 +42,8 @@ public:
 	GameObject();
 	virtual ~GameObject() = 0;
 
+	virtual void getLocalAABB(XMVECTOR& min, XMVECTOR& max) const;
+
 	Transform * getTransform();
 	const Transform * getTransform() const;
 
@@ -56,5 +58,8 @@ public:
 
 	bool getCastShadow() const;
 	void setCastShadow(bool v);
+
+	bool getIsGeometry() const;
+	void setIsGeometry(bool v);
 };
 

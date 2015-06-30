@@ -5,13 +5,11 @@ float4 main(VertexOut input) : SV_TARGET
 	input.normal = normalize(input.normal);
 
 	float4 color = diffuse * colorTex.Sample(samplerState, input.uv);
-	float4 finalColor = color * light.ambient;
+	float3 lighting = light.ambient.xyz;
 
 	float NdotL = dot(-light.direction, input.normal);
 
-	if (computeShadow(input.lightSpacePos, NdotL) > 0.0f) {
-		finalColor += saturate(NdotL * light.diffuse * color);
-	}
+	lighting += saturate(NdotL * light.diffuse.xyz) * computeShadow(input.lightSpacePos, NdotL);
 
-	return float4(finalColor.xyz, color.a);
+	return float4(color.xyz * lighting, color.a);
 }

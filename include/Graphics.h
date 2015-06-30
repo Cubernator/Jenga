@@ -13,6 +13,7 @@ struct cbPerFrame
 {
 	XMFLOAT4X4 view;
 	XMFLOAT4X4 lightVP;
+	XMFLOAT4 cameraPosition;
 	Light light;
 };
 

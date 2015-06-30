@@ -4,6 +4,7 @@
 #include "MeshRenderer.h"
 #include "VertexBuffer.h"
 #include "PhysicsTransform.h"
+#include "utility.h"
 
 #include <memory>
 
@@ -18,7 +19,13 @@ private:
 	std::unique_ptr<Texture2D> m_texture;
 	ID3D11SamplerState * m_samplerState;
 
+	TexSpecular m_material;
+
+	PxVec3 m_halfSize;
+
 	void onCollisionEnter(const Collision& collision) override;
+
+	void getLocalAABB(XMVECTOR& min, XMVECTOR& max) const override;
 
 public:
 	Ground(Shader * s, IndexBuffer * ib);

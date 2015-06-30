@@ -14,6 +14,7 @@ cbuffer PerFrame : register(b1)
 {
 	matrix view;
 	matrix lightVP;
+	float4 cameraPosition;
 	Light light;
 }
 

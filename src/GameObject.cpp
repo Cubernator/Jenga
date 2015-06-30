@@ -1,7 +1,13 @@
 #include "GameObject.h"
 
-GameObject::GameObject() : m_transform(nullptr), m_renderer(nullptr), m_actor(nullptr), m_castShadow(true) { }
+GameObject::GameObject() : m_transform(nullptr), m_renderer(nullptr), m_actor(nullptr), m_castShadow(true), m_isGeometry(true) { }
 GameObject::~GameObject() { }
+
+void GameObject::getLocalAABB(XMVECTOR& min, XMVECTOR& max) const
+{
+	min = XMVectorZero();
+	max = XMVectorZero();
+}
 
 void GameObject::setTransform(Transform * t)
 {
@@ -67,5 +73,15 @@ bool GameObject::getCastShadow() const
 void GameObject::setCastShadow(bool v)
 {
 	m_castShadow = v;
+}
+
+bool GameObject::getIsGeometry() const
+{
+	return m_isGeometry;
+}
+
+void GameObject::setIsGeometry(bool v)
+{
+	m_isGeometry = v;
 }
 

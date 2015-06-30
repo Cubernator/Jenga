@@ -7,9 +7,8 @@ MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc),
 m_camX(30), m_camY(13.5f), m_camDist(30), m_camYANormal(20.0f), m_camYASteep(40.0f), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f),
 m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(true), m_maxSpringDist(50.0f)
 {
-	m_groundShader.reset(new Shader(L"Diffuse_vs.cso", L"Diffuse_ps.cso"));
-	m_brickShader.reset(new Shader(L"TexDiffuse_vs.cso", L"TexDiffuse_ps.cso"));
-	m_debugShader.reset(new Shader(L"VertexColor_vs.cso", L"VertexColor_ps.cso"));
+	m_groundShader.reset(new Shader(L"TexSpecular"));
+	m_debugShader.reset(new Shader(L"VertexColor"));
 
 	UINT16 indices[] = {
 		0, 1, 2,
@@ -43,13 +42,13 @@ m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(true), m_maxSpringDist
 
 	unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
 
-	m_tower.reset(new Tower(m_brickShader.get(), m_brickIndices.get(), m_brickTex.get(), m_samplerState, seed));
+	m_tower.reset(new Tower(m_groundShader.get(), m_brickIndices.get(), m_brickTex.get(), m_samplerState, seed));
 	for (std::unique_ptr<Brick>& b : m_tower->getBricks()) {
 		objects->add(b.get());
 		addObject(b.get());
 	}
 
-	m_ground.reset(new Ground(m_brickShader.get(), m_brickIndices.get()));
+	m_ground.reset(new Ground(m_groundShader.get(), m_brickIndices.get()));
 
 	m_camera.reset(new Camera());
 	m_camera->setFOV(60.0f);
