@@ -31,7 +31,6 @@ private:
 	PxDefaultAllocator m_physicsAllocatorCallback;
 	PxDefaultCpuDispatcher *m_physicsCpuDispatcher;
 	PxCudaContextManager *m_cudaContextManager;
-
 	PxVisualDebuggerConnection * m_pvdConnection;
 
 	PhysicsScene * m_physicsScene;
