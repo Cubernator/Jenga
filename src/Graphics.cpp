@@ -32,8 +32,10 @@ GraphicsInterface::GraphicsInterface(HWND hWnd) : m_hWnd(hWnd), m_cam(nullptr), 
 		NULL,
 		&devcon);
 
+#if _DEBUG
 	// acquire debug interface
 	dev->QueryInterface(IID_PPV_ARGS(&m_debug));
+#endif
 
 	// set multisampling to 4x
 	UINT samples = 4, quality;
@@ -63,7 +65,9 @@ GraphicsInterface::GraphicsInterface(HWND hWnd) : m_hWnd(hWnd), m_cam(nullptr), 
 	pFactory->CreateSwapChain(dev, &scd, &m_swapchain);
 	pFactory->Release();
 
+#if _DEBUG
 	m_debug->SetSwapChain(m_swapchain);
+#endif
 
 	// get the address of the back buffer
 	ID3D11Texture2D *pBackBuffer;
@@ -188,8 +192,10 @@ GraphicsInterface::~GraphicsInterface()
 	dev->Release();
 	devcon->Release();
 
+#if _DEBUG
 	m_debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 	m_debug->Release();
+#endif
 }
 
 void GraphicsInterface::createShadowResources()

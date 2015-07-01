@@ -8,12 +8,14 @@ float computeShadow(float4 pos, float NdotL)
 	shadowTexCoords.y = 0.5f - (pos.y / pos.w * 0.5f);
 	float pixelDepth = pos.z / pos.w;
 
+	float f = 1.0f;
+
 	if ((saturate(shadowTexCoords.x) == shadowTexCoords.x) && (saturate(shadowTexCoords.y) == shadowTexCoords.y) && (pixelDepth > 0)) {
 		//float margin = acos(saturate(NdotL));
 		//float epsilon = clamp(0.001 / margin, 0, 0.1);
 
-		return float(shadowMap.SampleCmp(shadowSampler, shadowTexCoords, pixelDepth));
+		f = float(shadowMap.SampleCmp(shadowSampler, shadowTexCoords, pixelDepth));
 	}
 
-	return 1.0f;
+	return f;
 }

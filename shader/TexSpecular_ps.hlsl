@@ -9,7 +9,7 @@ float4 main(VertexOut input) : SV_TARGET
 	float NdotL = dot(-light.direction, input.normal);
 
 	// diffuse lighting
-	float3 lighting = saturate(NdotL * light.diffuse.xyz * color);
+	float3 lighting = saturate(NdotL * light.diffuse.xyz * color.xyz);
 
 	// specular lighting
 	float3 R = normalize(reflect(light.direction, input.normal));
