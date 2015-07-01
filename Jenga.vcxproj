@@ -108,10 +108,12 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClInclude Include="include\GameObject.h" />
     <ClInclude Include="include\Graphics.h" />
     <ClInclude Include="include\Ground.h" />
+    <ClInclude Include="include\GUI.h" />
     <ClInclude Include="include\IndexBuffer.h" />
     <ClInclude Include="include\Input.h" />
     <ClInclude Include="include\Light.h" />
     <ClInclude Include="include\DebugLineRenderer.h" />
+    <ClInclude Include="include\MainMenu.h" />
     <ClInclude Include="include\MainScene.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\MeshRenderer.h" />
