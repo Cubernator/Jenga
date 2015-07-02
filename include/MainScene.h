@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "DebugArrow.h"
 #include "DebugPlane.h"
+#include "GUIElement.h"
 
 #include <vector>
 #include <memory>
@@ -26,6 +27,9 @@ private:
 	std::unique_ptr<DebugPlane> m_planeVisualizer;
 
 	px_ptr<PxD6Joint> m_spring;
+
+	IDWriteTextFormat * m_textFormat;
+	std::unique_ptr<GUILabel> m_testLabel;
 
 	PxVec3 m_planeOrigin, m_springPos;
 	float m_maxSpringDist;

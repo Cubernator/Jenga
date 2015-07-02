@@ -78,9 +78,12 @@ public:
 	GraphicsInterface(HWND hWnd);
 	~GraphicsInterface();
 
+	IDXGISwapChain * getSwapChain();
+
 	Shader * getShadowShader();
 
 	void render(float alpha);
+	void present();
 
 	void setCamera(Camera * cam);
 	void setLight(const Light& l);

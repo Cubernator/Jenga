@@ -6,6 +6,7 @@
 
 #include "Physics.h"
 #include "Graphics.h"
+#include "GUI.h"
 
 #include "constants.h"
 
@@ -26,12 +27,14 @@ private:
 	Input * m_input;
 	PhysicsInterface * m_physics;
 	GraphicsInterface * m_graphics;
+	GUIInterface * m_gui;
 
 	std::unique_ptr<Scene> m_activeScene;
 
 	HWND m_hWnd;
 
 	void update();
+	void render(float alpha);
 
 	template<class SceneType, bool, class... Args>
 	struct enterSceneImpl

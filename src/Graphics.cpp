@@ -16,7 +16,7 @@ GraphicsInterface::GraphicsInterface(HWND hWnd) : m_hWnd(hWnd), m_cam(nullptr), 
 {
 	graphics = this;
 
-	UINT flags = 0;
+	UINT flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #if _DEBUG
 	flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
@@ -71,7 +71,7 @@ GraphicsInterface::GraphicsInterface(HWND hWnd) : m_hWnd(hWnd), m_cam(nullptr), 
 
 	// get the address of the back buffer
 	ID3D11Texture2D *pBackBuffer;
-	m_swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+	m_swapchain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
 
 	// use the back buffer address to create the render target
 	dev->CreateRenderTargetView(pBackBuffer, NULL, &m_backbuffer);
@@ -278,8 +278,10 @@ void GraphicsInterface::render(float alpha)
 {
 	shadowPass();
 	mainPass();
+}
 
-	// switch the back buffer and the front buffer
+void GraphicsInterface::present()
+{
 	m_swapchain->Present(0, 0);
 }
 
@@ -435,4 +437,9 @@ void GraphicsInterface::setLight(const Light& l)
 Shader * GraphicsInterface::getShadowShader()
 {
 	return m_shadowPassShader;
+}
+
+IDXGISwapChain * GraphicsInterface::getSwapChain()
+{
+	return m_swapchain;
 }

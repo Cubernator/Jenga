@@ -73,10 +73,18 @@ m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(true), m_maxSpringDist
 	objects->add(m_planeVisualizer.get());
 
 	addObject(m_ground.get());
+
+	gui->getDWFactory()->CreateTextFormat(L"verdana", nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+		50, L"", &m_textFormat);
+	D2D_RECT_F r = {300, 300, 100, 100};
+	m_testLabel.reset(new GUILabel(r, L"This is a test. ÄÖÜ", m_textFormat));
 }
 
 MainScene::~MainScene()
 {
+	m_textFormat->Release();
+
 	removeObject(m_ground.get());
 	objects->remove(m_ground.get());
 	objects->remove(m_springVisualizer.get());

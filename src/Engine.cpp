@@ -18,6 +18,7 @@ Engine::Engine(HWND hWnd) : m_time(0.f), m_delta(1.f / 60.f), m_running(true), m
 	engine = this; // set singleton instance
 
 	m_graphics = new GraphicsInterface(m_hWnd);
+	m_gui = new GUIInterface(m_graphics->getSwapChain());
 	m_physics = new PhysicsInterface();
 	m_input = new Input(m_hWnd);
 	m_objectManager = new ObjectManager();
@@ -29,6 +30,7 @@ Engine::~Engine()
 	delete m_objectManager;
 	delete m_input;
 	delete m_physics;
+	delete m_gui;
 	delete m_graphics;
 }
 
@@ -86,7 +88,7 @@ WPARAM Engine::run()
 		// alpha = std::chrono::operator/<fsec::rep, fsec::period, fsec::rep, fsec::period>(accumulator, m_delta);
 
 		// or just do this, because it basically does the same thing!
-		graphics->render(accumulator.count() / m_delta.count());
+		render(accumulator.count() / m_delta.count());
 	}
 
 	return msg.wParam;
@@ -102,6 +104,13 @@ void Engine::update()
 	m_objectManager->update(); // update all registered game objects
 
 	m_input->update();
+}
+
+void Engine::render(float alpha)
+{
+	graphics->render(alpha);
+	gui->render();
+	graphics->present();
 }
 
 LRESULT Engine::processMessages(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

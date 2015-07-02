@@ -131,6 +131,9 @@
     <ClInclude Include="include\GUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\GUIElement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp">
@@ -218,6 +221,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GUIElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -44,13 +44,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)include;D:\PhysXSDK\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\PhysXSDK\Lib\vc12win32;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include;F:\PhysXSDK\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>F:\PhysXSDK\Lib\vc12win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)include;D:\PhysXSDK\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\PhysXSDK\Lib\vc12win32;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include;F:\PhysXSDK\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>F:\PhysXSDK\Lib\vc12win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -109,6 +109,7 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClInclude Include="include\Graphics.h" />
     <ClInclude Include="include\Ground.h" />
     <ClInclude Include="include\GUI.h" />
+    <ClInclude Include="include\GUIElement.h" />
     <ClInclude Include="include\IndexBuffer.h" />
     <ClInclude Include="include\Input.h" />
     <ClInclude Include="include\Light.h" />
@@ -145,6 +146,8 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClCompile Include="src\GameObject.cpp" />
     <ClCompile Include="src\Graphics.cpp" />
     <ClCompile Include="src\Ground.cpp" />
+    <ClCompile Include="src\GUI.cpp" />
+    <ClCompile Include="src\GUIElement.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\Jenga.cpp" />
