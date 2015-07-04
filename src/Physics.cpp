@@ -3,6 +3,23 @@
 #include "GameObject.h"
 #include "constants.h"
 
+#if _DEBUG
+#pragma comment(lib,"PhysX3DEBUG_x86.lib")
+#pragma comment(lib,"PhysX3CommonDEBUG_x86.lib")
+#pragma comment(lib,"PhysX3ExtensionsDEBUG.lib")
+#pragma comment(lib,"PhysX3GpuDEBUG_x86.lib")
+#pragma comment(lib,"PxTaskDEBUG.lib")
+#pragma comment(lib,"PhysXVisualDebuggerSDKDEBUG.lib")
+#else
+#pragma comment(lib,"PhysX3_x86.lib")
+#pragma comment(lib,"PhysX3Common_x86.lib")
+#pragma comment(lib,"PhysX3Extensions.lib")
+#pragma comment(lib,"PhysX3Gpu_x86.lib")
+#pragma comment(lib,"PxTask.lib")
+#pragma comment(lib,"PhysXVisualDebuggerSDK.lib")
+#endif
+
+
 PxFoundation *physicsFoundation;
 PxPhysics *physics;
 

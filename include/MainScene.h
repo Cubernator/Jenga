@@ -28,9 +28,6 @@ private:
 
 	px_ptr<PxD6Joint> m_spring;
 
-	IDWriteTextFormat * m_textFormat;
-	std::unique_ptr<GUILabel> m_testLabel;
-
 	PxVec3 m_planeOrigin, m_springPos;
 	float m_maxSpringDist;
 	bool m_controlMode, m_showDebug;

@@ -5,6 +5,9 @@
 
 #include <limits>
 
+#pragma comment(lib,"d3d11.lib")
+#pragma comment(lib,"dxgi.lib")
+
 GraphicsInterface * graphics;
 
 #define CB_Application 0
@@ -12,7 +15,7 @@ GraphicsInterface * graphics;
 #define CB_Object 2
 #define CB_Material 3
 
-GraphicsInterface::GraphicsInterface(HWND hWnd) : m_hWnd(hWnd), m_cam(nullptr), m_shadowMapDimension(2048)
+GraphicsInterface::GraphicsInterface(HWND hWnd) : m_hWnd(hWnd), m_cam(nullptr), m_shadowMapDimension(2048), m_vSync(true)
 {
 	graphics = this;
 
@@ -282,7 +285,7 @@ void GraphicsInterface::render(float alpha)
 
 void GraphicsInterface::present()
 {
-	m_swapchain->Present(0, 0);
+	m_swapchain->Present(m_vSync ? 1 : 0, 0);
 }
 
 XMMATRIX GraphicsInterface::calcLightMatrix()
@@ -333,13 +336,13 @@ XMMATRIX GraphicsInterface::calcLightMatrix()
 
 void GraphicsInterface::shadowPass()
 {
-	devcon->OMSetRenderTargets(0, nullptr, m_shadowDepthView);
-	devcon->ClearDepthStencilView(m_shadowDepthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	if (m_cam && objects->m_objects.size() > 0) {
+		devcon->OMSetRenderTargets(0, nullptr, m_shadowDepthView);
+		devcon->ClearDepthStencilView(m_shadowDepthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	devcon->RSSetState(m_shadowRasterizerState);
-	devcon->RSSetViewports(1, &m_shadowViewport);
+		devcon->RSSetState(m_shadowRasterizerState);
+		devcon->RSSetViewports(1, &m_shadowViewport);
 
-	if (m_cam) {
 		XMMATRIX vp = calcLightMatrix();
 		XMStoreFloat4x4(&m_frame.lightVP, vp);
 		PxMat44 wm;
@@ -366,17 +369,18 @@ void GraphicsInterface::shadowPass()
 
 void GraphicsInterface::mainPass()
 {
-	XMFLOAT4 clearColor(0.f, 0.2f, 0.4f, 1.f);
+	XMFLOAT4 clearColor = m_cam ? m_cam->getBackColor() : XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+
 	devcon->ClearRenderTargetView(m_backbuffer, (float*)&clearColor);
 	devcon->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	devcon->RSSetState(m_rasterizerState);
-	devcon->RSSetViewports(1, &m_viewport);
+	if (m_cam && objects->m_objects.size() > 0) {
+		devcon->RSSetState(m_rasterizerState);
+		devcon->RSSetViewports(1, &m_viewport);
 
-	devcon->OMSetRenderTargets(1, &m_backbuffer, m_depthStencilView);
-	devcon->OMSetDepthStencilState(m_depthStencilState, 1);
+		devcon->OMSetRenderTargets(1, &m_backbuffer, m_depthStencilView);
+		devcon->OMSetDepthStencilState(m_depthStencilState, 1);
 
-	if (m_cam) {
 		m_cam->setAspectRatio(16.f / 9.f);
 		XMMATRIX proj = m_cam->getProjectionMatrix();
 		XMStoreFloat4x4(&m_app.projection, proj);

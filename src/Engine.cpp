@@ -103,6 +103,8 @@ void Engine::update()
 	if (m_activeScene) m_activeScene->update(); // update active scene object
 	m_objectManager->update(); // update all registered game objects
 
+	m_gui->update();
+
 	m_input->update();
 }
 

@@ -61,6 +61,8 @@ private:
 
 	XMFLOAT4X4 m_shadowMVP;
 
+	bool m_vSync;
+
 	ID3D11Buffer *m_constantBuffers[4];
 	ID3D11Buffer *m_shadowCB;
 
