@@ -1,8 +1,9 @@
 #include "Ground.h"
+#include "MainScene.h"
 #include "Brick.h"
 #include "utility.h"
 
-Ground::Ground(Shader * s, IndexBuffer * ib) : m_halfSize(100.f, 1.0f, 100.f)
+Ground::Ground(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene), m_halfSize(100.f, 1.0f, 100.f)
 {
 	m_mat.reset(physics->createMaterial(0.4f, 0.8f, 0.5f));
 
@@ -62,9 +63,9 @@ void Ground::onCollisionEnter(const Collision& collision)
 	if (GameObject * obj = collision.getOtherObject()) {
 		if (Brick * b = dynamic_cast<Brick*>(obj)) {
 			if (!b->canTouchGround()) {
-				m_material.diffuse = XMFLOAT4(1.0f, 0.3f, 0.3f, 1.0f);
-				m_renderer->updateConstantBuffer(m_material);
 				b->setState(FAULTED);
+
+				m_scene->brickFaulted();
 			}
 		}
 	}

@@ -46,21 +46,21 @@ XMFLOAT4 Brick::getStateColor() const
 {
 	switch (m_state) {
 	case TOWER:
-		return XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+		return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	case BASE:
-		return XMFLOAT4(0.278f, 0.74f, 0.96f, 1.0f);
+		return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	case TOP:
-		return XMFLOAT4(0.96f, 0.278f, 0.278f, 1.0f);
+		return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	case PULLING:
-		return XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
+		return XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
 	case SELECTED:
-		return XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+		return XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f);
 	case ALIGNED:
-		return XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+		return XMFLOAT4(0.5f, 1.0f, 0.5f, 1.0f);
 	case FAULTED:
-		return XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+		return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	default:
-		return XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
+		return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
 

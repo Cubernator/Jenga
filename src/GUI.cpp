@@ -32,7 +32,7 @@ GUIInterface::GUIInterface(IDXGISwapChain * swapChain)
 	hr = m_d2dFactory->CreateDxgiSurfaceRenderTarget(surface, rtp, m_renderTarget.GetAddressOf());
 	surface->Release();
 
-	CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (LPVOID*)m_wicFactory.GetAddressOf());
+	CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, &m_wicFactory);
 
 	DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), (IUnknown**)m_dwFactory.GetAddressOf());
 
@@ -44,15 +44,19 @@ GUIInterface::GUIInterface(IDXGISwapChain * swapChain)
 		delete[] buf;
 	}
 
-	m_defaultFormat = createFormat(L"verdana", 18);
+	createFormat(L"verdana", 18, &m_defaultFormat);
+
+	m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &m_textBrush);
 }
 
-IDWriteTextFormat * GUIInterface::createFormat(const std::wstring& family, float size,
-	DWRITE_FONT_WEIGHT weight, DWRITE_FONT_STYLE style, DWRITE_FONT_STRETCH stretch)
+HRESULT GUIInterface::createFormat(const std::wstring& family, float size, DWRITE_FONT_WEIGHT weight, DWRITE_FONT_STYLE style, DWRITE_FONT_STRETCH stretch, IDWriteTextFormat **format)
 {
-	IDWriteTextFormat * newFormat = nullptr;
-	m_dwFactory->CreateTextFormat(family.c_str(), nullptr, weight, style, stretch, size, m_localeName.c_str(), &newFormat);
-	return newFormat;
+	return m_dwFactory->CreateTextFormat(family.c_str(), nullptr, weight, style, stretch, size, m_localeName.c_str(), format);
+}
+
+HRESULT GUIInterface::createFormat(const std::wstring& family, float size, IDWriteTextFormat **format)
+{
+	return createFormat(family, size, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, format);
 }
 
 ID2D1Bitmap * GUIInterface::createSharedBitmap(Texture2D * texture)
@@ -103,11 +107,6 @@ void GUIInterface::remove(GUIElement * e)
 	m_elements.erase(std::remove(m_elements.begin(), m_elements.end(), e), m_elements.end());
 }
 
-ID2D1RenderTarget * GUIInterface::getD2DRenderTarget()
-{
-	return m_renderTarget.Get();
-}
-
 IDWriteTextFormat * GUIInterface::getDefaultFormat()
 {
 	return m_defaultFormat.Get();
@@ -122,6 +121,41 @@ void GUIInterface::render()
 	}
 
 	m_renderTarget->EndDraw();
+}
+
+void GUIInterface::drawRectangle(const D2D_RECT_F& rect, const D2D_COLOR_F& color)
+{
+	m_textBrush->SetColor(color);
+	m_renderTarget->FillRectangle(rect, m_textBrush.Get());
+}
+
+void GUIInterface::drawText(const D2D_RECT_F& rect, const std::wstring& text, IDWriteTextFormat * format, const D2D_COLOR_F& color)
+{
+	m_textBrush->SetColor(color);
+	m_renderTarget->DrawTextW(text.c_str(), text.size(), format, rect, m_textBrush.Get());
+}
+
+void GUIInterface::drawImage(const D2D_RECT_F& rect, ID2D1Bitmap * image)
+{
+	m_renderTarget->DrawBitmap(image, rect);
+}
+
+void GUIInterface::drawControlImage(const D2D_RECT_F& rect, ID2D1Bitmap * image)
+{
+	D2D_SIZE_U s = image->GetPixelSize();
+	float w = (float)s.width, h = (float)s.height;
+	float hw = w / 2.0f, hh = h / 2.0f;
+
+	// stretch the button image out
+	m_renderTarget->DrawBitmap(image, { rect.left, rect.top, rect.left + hw, rect.top + hh }, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, { 0, 0, hw, hh }); // upper left
+	m_renderTarget->DrawBitmap(image, { rect.left + hw, rect.top, rect.right - hw, rect.top + hh }, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, { hw, 0, hw + 1, hh }); // upper center
+	m_renderTarget->DrawBitmap(image, { rect.right - hw, rect.top, rect.right, rect.top + hh }, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, { hw, 0, w, hh }); // upper right
+	m_renderTarget->DrawBitmap(image, { rect.left, rect.top + hh, rect.left + hw, rect.bottom - hh }, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, { 0, hh, hw, hh + 1 }); // middle left
+	m_renderTarget->DrawBitmap(image, { rect.left + hw, rect.top + hh, rect.right - hw, rect.bottom - hh }, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, { hw, hh, hw + 1, hh + 1 }); // middle center
+	m_renderTarget->DrawBitmap(image, { rect.right - hw, rect.top + hh, rect.right, rect.bottom - hh }, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, { hw, hh, w, hh + 1 }); // middle right
+	m_renderTarget->DrawBitmap(image, { rect.left, rect.bottom - hh, rect.left + hw, rect.bottom }, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, { 0, hh, hw, h }); // bottom left
+	m_renderTarget->DrawBitmap(image, { rect.left + hw, rect.bottom - hh, rect.right - hw, rect.bottom }, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, { hw, hh, hw + 1, h }); // bottom center
+	m_renderTarget->DrawBitmap(image, { rect.right - hw, rect.bottom - hh, rect.right, rect.bottom }, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, { hw, hh, w, h }); // bottom right
 }
 
 void GUIInterface::update()

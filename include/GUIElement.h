@@ -4,6 +4,17 @@
 
 #include <functional>
 
+struct GUIStyleState
+{
+	D2D_COLOR_F textColor;
+	ID2D1Bitmap * controlImage;
+
+	GUIStyleState();
+	GUIStyleState(const D2D_COLOR_F& textColor);
+	GUIStyleState(ID2D1Bitmap * controlImage);
+	GUIStyleState(const D2D_COLOR_F& textColor, ID2D1Bitmap * controlImage);
+};
+
 class GUIElement
 {
 private:
@@ -28,12 +39,24 @@ public:
 	void setRect(const D2D_RECT_F& r);
 };
 
+class GUIRectangle : public GUIElement
+{
+private:
+	D2D_COLOR_F m_color;
+
+protected:
+	void draw() const override;
+
+public:
+	GUIRectangle(const D2D_RECT_F& rect, const D2D_COLOR_F& color);
+};
+
 class GUILabel : public GUIElement
 {
 private:
 	std::wstring m_text;
+	D2D_COLOR_F m_textColor;
 	IDWriteTextFormat * m_format;
-	ComPtr<ID2D1SolidColorBrush> m_textBrush;
 
 protected:
 	void draw() const override;
@@ -43,6 +66,8 @@ public:
 	GUILabel(const D2D_RECT_F& rect, const std::wstring& text, IDWriteTextFormat * format);
 	GUILabel(const D2D_RECT_F& rect, const std::wstring& text, const D2D_COLOR_F& textColor);
 	GUILabel(const D2D_RECT_F& rect, const std::wstring& text);
+
+	void setPadding(const D2D_RECT_F& p);
 };
 
 class GUIImage : public GUIElement
@@ -50,28 +75,45 @@ class GUIImage : public GUIElement
 private:
 	ID2D1Bitmap * m_image;
 
+protected:
 	void draw() const override;
 	
 public:
 	GUIImage(const D2D_RECT_F& rect, ID2D1Bitmap * image);
 };
 
-class GUIButton : public GUILabel
+struct GUIButtonStyle
+{
+	GUIStyleState normal, hover, active, disabled;
+};
+
+class GUIButton : public GUIElement
 {
 private:
-	ComPtr<ID2D1Bitmap> m_imageNormal, m_imageHover, m_imageActive;
+	ID2D1Bitmap * m_icon;
+	std::wstring m_text;
+
+	D2D_RECT_F m_padding;
+
+	IDWriteTextFormat * m_textFormat;
+	GUIButtonStyle m_style;
 
 	std::function<void()> m_callback;
 	bool m_hover, m_down;
 
+protected:
 	void draw() const override;
 	void update() override;
 
 public:
-	GUIButton(const D2D_RECT_F& rect, const std::wstring& text, IDWriteTextFormat * format, const D2D_COLOR_F& textColor);
+	GUIButton(const D2D_RECT_F& rect, const std::wstring& text, IDWriteTextFormat * format, const GUIButtonStyle& style);
 	GUIButton(const D2D_RECT_F& rect, const std::wstring& text, IDWriteTextFormat * format);
-	GUIButton(const D2D_RECT_F& rect, const std::wstring& text, const D2D_COLOR_F& textColor);
+	GUIButton(const D2D_RECT_F& rect, const std::wstring& text, const GUIButtonStyle& style);
 	GUIButton(const D2D_RECT_F& rect, const std::wstring& text);
+	GUIButton(const D2D_RECT_F& rect, ID2D1Bitmap * icon, const GUIButtonStyle& style);
+	GUIButton(const D2D_RECT_F& rect, ID2D1Bitmap * icon);
 
 	void setCallback(std::function<void()> callback);
+	void setText(const std::wstring& text);
+	void setStyle(const GUIButtonStyle& style);
 };

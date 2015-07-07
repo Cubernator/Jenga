@@ -56,9 +56,10 @@ public:
 		desc.filterShader = contactReportFilterShader;
 		desc.simulationEventCallback = this;
 		SceneType * newScene = new SceneType(desc, std::forward<Args>(args)...);
-		m_physicsScene = newScene;
 		return newScene;
 	}
+
+	void setScene(PhysicsScene * scene);
 
 	void simulate(float step);
 };

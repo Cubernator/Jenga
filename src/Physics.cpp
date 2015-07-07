@@ -59,9 +59,14 @@ PhysicsInterface::~PhysicsInterface()
 	physicsFoundation->release();
 }
 
+void PhysicsInterface::setScene(PhysicsScene * scene)
+{
+	m_physicsScene = scene;
+}
+
 void PhysicsInterface::simulate(float step)
 {
-	if (m_physicsScene) {
+	if (m_physicsScene && step > 0.0f) {
 		PxScene * pxs = m_physicsScene->getPxScene();
 		pxs->simulate(step);
 		pxs->fetchResults(true);

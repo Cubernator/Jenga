@@ -49,6 +49,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	ShowWindow(hWnd, nCmdShow);
 
+	CoInitializeEx(0, COINIT_MULTITHREADED);
+
 	WPARAM result = -1;
 
 	try {
@@ -60,6 +62,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	catch (std::exception&) {
 
 	}
+
+	CoUninitialize();
 
 	return result;
 }

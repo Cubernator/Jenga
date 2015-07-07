@@ -20,7 +20,7 @@ Shader::Shader(const std::wstring& vShaderPath, const std::wstring& pShaderPath)
 	dev->CreatePixelShader(m_pByteCode->GetBufferPointer(), m_pByteCode->GetBufferSize(), NULL, &m_pixelShader);
 }
 
-Shader::Shader(const std::wstring& shaderName) : Shader(shaderName + L"_vs.cso", shaderName + L"_ps.cso") { }
+Shader::Shader(const std::wstring& shaderName) : Shader(L"assets\\shader\\" + shaderName + L"_vs.cso", L"assets\\shader\\" + shaderName + L"_ps.cso") {}
 
 Shader::~Shader()
 {

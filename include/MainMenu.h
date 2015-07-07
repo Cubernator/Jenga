@@ -6,13 +6,10 @@
 class MainMenu : public Scene
 {
 private:
+	ComPtr<IDWriteTextFormat> m_titleFormat, m_buttonFormat;
+
 	std::unique_ptr<GUILabel> m_titleLabel;
-	IDWriteTextFormat * m_titleFormat;
-
-	ID2D1Bitmap * m_testBitmap;
-	std::unique_ptr<GUIImage> m_testImage;
-
-	std::unique_ptr<GUIButton> m_button;
+	std::unique_ptr<GUIButton> m_classicButton, m_specialButton, m_scoreButton, m_quitButton;
 
 	bool m_exit;
 

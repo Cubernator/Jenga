@@ -19,7 +19,10 @@ class Scene;
 class Engine
 {
 private:
-	fsec m_time, m_delta;
+	const fsec m_realDelta;
+	fsec m_realTime, m_time, m_delta;
+
+	float m_timeScale;
 
 	bool m_running;
 
@@ -41,6 +44,7 @@ private:
 	{
 		static SceneType * construct(Engine * e, Args&&... args)
 		{
+			e->m_physics->setScene(nullptr);
 			return new SceneType(std::forward<Args>(args)...);
 		}
 	};
@@ -50,7 +54,9 @@ private:
 	{
 		static SceneType * construct(Engine * e, Args&&... args)
 		{
-			return e->m_physics->constructScene<SceneType>(std::forward<Args>(args)...);
+			SceneType * newScene = e->m_physics->constructScene<SceneType>(std::forward<Args>(args)...);
+			e->m_physics->setScene(newScene);
+			return newScene;
 		}
 	};
 
@@ -64,6 +70,11 @@ public:
 
 	float getTime() const;
 	float getDelta() const;
+
+	float getRealTime() const;
+	float getRealDelta() const;
+
+	void setTimeScale(float scale);
 
 	void stop();
 

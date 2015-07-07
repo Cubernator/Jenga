@@ -1,11 +1,13 @@
 #include "MainScene.h"
+#include "MainMenu.h"
 #include "Input.h"
 #include "Objects.h"
 #include "utility.h"
 
 MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), 
 m_camX(30), m_camY(13.5f), m_camDist(30), m_camYANormal(20.0f), m_camYASteep(40.0f), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f),
-m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false), m_maxSpringDist(50.0f)
+m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false), m_maxSpringDist(50.0f),
+m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false)
 {
 	m_groundShader.reset(new Shader(L"TexSpecular"));
 	m_debugShader.reset(new Shader(L"VertexColor"));
@@ -48,7 +50,7 @@ m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false), m_maxSpringDis
 		addObject(b.get());
 	}
 
-	m_ground.reset(new Ground(m_groundShader.get(), m_brickIndices.get()));
+	m_ground.reset(new Ground(this, m_groundShader.get(), m_brickIndices.get()));
 
 	m_camera.reset(new Camera());
 	m_camera->setFOV(60.0f);
@@ -74,10 +76,20 @@ m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false), m_maxSpringDis
 	objects->add(m_planeVisualizer.get());
 
 	addObject(m_ground.get());
+
+	gui->loadBitmap(L"assets\\images\\pause_white.png", &m_pauseSymbol);
+	gui->loadBitmap(L"assets\\images\\play_white.png", &m_playSymbol);
+
+	GUIButtonStyle pbs = { GUIStyleState(m_pauseSymbol.Get()) };
+	m_pauseButton.reset(new GUIButton({ 10, 10, 42, 42 }, L"", pbs));
+	m_pauseButton->setCallback([this] { togglePause(); });
+	gui->add(m_pauseButton.get());
 }
 
 MainScene::~MainScene()
 {
+	gui->remove(m_pauseButton.get());
+
 	removeObject(m_ground.get());
 	objects->remove(m_ground.get());
 	objects->remove(m_springVisualizer.get());
@@ -91,10 +103,53 @@ MainScene::~MainScene()
 	m_samplerState->Release();
 }
 
+void MainScene::brickFaulted()
+{
+	if (!m_roundOver) {
+		m_roundOver = true;
+		m_resultsMenu.reset(new ResultsMenu(this));
+		gui->remove(m_pauseButton.get());
+		m_pauseButton.reset();
+	}
+}
+
+void MainScene::togglePause()
+{
+	m_togglePause = true;
+}
+
+void MainScene::restart()
+{
+	m_restart = true;
+}
+
+void MainScene::backToMainMenu()
+{
+	m_backToMain = true;
+}
+
 void MainScene::update()
 {
-	if (input->getKeyPressed('R')) {
+	if (m_togglePause) {
+		m_togglePause = false;
+
+		m_paused = !m_paused;
+
+		m_pauseButton->setStyle({ GUIStyleState(m_paused ? m_playSymbol.Get() : m_pauseSymbol.Get()) });
+		m_pauseMenu.reset(m_paused ? new PauseMenu(this) : nullptr);
+
+		// FIXME: this is just a quick hack to get the pause button on top
+		gui->remove(m_pauseButton.get());
+		gui->add(m_pauseButton.get());
+	}
+
+	if (m_restart || input->getKeyPressed('R')) {
 		engine->enterScene<MainScene>(); // restart
+		return;
+	}
+
+	if (m_backToMain || input->getKeyPressed('M')) {
+		engine->enterScene<MainMenu>();
 		return;
 	}
 
@@ -109,26 +164,27 @@ void MainScene::update()
 		}
 	}
 
-	if (input->getMouseButtonPressed(MBUTTON1)) {
-		tryPickBrick();
-	}
-
-	if (input->getMouseButtonDown(MBUTTON1) && m_spring) {
-		updateSpringPos();
-
-	} else {
-		updateCamPos();
-
-		/* NOTE: this is a cheat! remove in release version! */
-		if (m_pickedBrick && input->getKeyPressed('B')) {
-			BrickState s = (m_pickedBrick->getRowIndex() == 0) ? BASE : TOWER;
-			m_pickedBrick->setState(s);
-			m_pickedBrick = nullptr;
+	if (!(m_paused || m_roundOver)) {
+		if (input->getMouseButtonPressed(MBUTTON1)) {
+			tryPickBrick();
 		}
-	}
 
-	if (input->getMouseButtonReleased(MBUTTON1)) {
-		releaseBrick();
+		if (input->getMouseButtonDown(MBUTTON1) && m_spring) {
+			updateSpringPos();
+		} else {
+			updateCamPos();
+
+			/* NOTE: this is a cheat! remove in release version! */
+			if (m_pickedBrick && input->getKeyPressed('B')) {
+				BrickState s = (m_pickedBrick->getRowIndex() == 0) ? BASE : TOWER;
+				m_pickedBrick->setState(s);
+				m_pickedBrick = nullptr;
+			}
+		}
+
+		if (input->getMouseButtonReleased(MBUTTON1)) {
+			releaseBrick();
+		}
 	}
 
 	setCamPos();
@@ -267,8 +323,8 @@ void MainScene::updateCamPos()
 {
 	if (input->getMouseButtonDown(MBUTTON2)) {
 		// control camera
-		m_camX += input->getMouseDeltaX() * engine->getDelta() * m_xSens;
-		m_camY += input->getMouseDeltaY() * engine->getDelta() * m_ySens;
+		m_camX += input->getMouseDeltaX() * engine->getRealDelta() * m_xSens;
+		m_camY += input->getMouseDeltaY() * engine->getRealDelta() * m_ySens;
 
 		if (m_camX < 0.0f) m_camX += 360.0f;
 		else if (m_camX >= 360.0f) m_camX -= 360.0f;

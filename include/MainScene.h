@@ -7,6 +7,8 @@
 #include "DebugArrow.h"
 #include "DebugPlane.h"
 #include "GUIElement.h"
+#include "ResultsMenu.h"
+#include "PauseMenu.h"
 
 #include <vector>
 #include <memory>
@@ -38,6 +40,16 @@ private:
 	float m_camYANormal, m_camYASteep;
 	float m_xSens, m_ySens;
 
+	bool m_togglePause, m_restart, m_backToMain;
+
+	bool m_paused, m_roundOver;
+
+	ComPtr<ID2D1Bitmap> m_pauseSymbol, m_playSymbol;
+	std::unique_ptr<GUIButton> m_pauseButton;
+	std::unique_ptr<PauseMenu> m_pauseMenu;
+
+	std::unique_ptr<ResultsMenu> m_resultsMenu;
+
 	void update() final;
 
 	void tryPickBrick();
@@ -49,5 +61,11 @@ private:
 public:
 	MainScene(PxSceneDesc desc);
 	~MainScene();
+
+	void brickFaulted();
+
+	void togglePause();
+	void restart();
+	void backToMainMenu();
 };
 

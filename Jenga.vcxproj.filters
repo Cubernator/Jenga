@@ -134,6 +134,12 @@
     <ClInclude Include="include\GUIElement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\PauseMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ResultsMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp">
@@ -232,6 +238,12 @@
     <ClCompile Include="src\MainMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\PauseMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ResultsMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shader\Diffuse_vs.hlsl">
@@ -309,5 +321,31 @@
     <None Include="shader\shadow.hlsli">
       <Filter>Shader Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\images\brick.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\ground.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\pause_white.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\play_white.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\button_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\button_hover.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\button_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\images\UV.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

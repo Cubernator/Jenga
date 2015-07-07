@@ -22,6 +22,7 @@ private:
 	ComPtr<IWICImagingFactory> m_wicFactory;
 	ComPtr<IDWriteFactory> m_dwFactory;
 	ComPtr<IDWriteTextFormat> m_defaultFormat;
+	ComPtr<ID2D1SolidColorBrush> m_textBrush;
 
 	std::wstring m_localeName;
 	std::vector<GUIElement*> m_elements;
@@ -29,21 +30,24 @@ private:
 public:
 	GUIInterface(IDXGISwapChain * swapChain);
 
-	ID2D1RenderTarget * getD2DRenderTarget();
-
 	ID2D1Bitmap * createSharedBitmap(Texture2D * texture);
 	HRESULT loadBitmap(const std::wstring& fileName, ID2D1Bitmap **bitmap);
 	ID2D1Bitmap * loadBitmap(const std::wstring& fileName);
 
 	IDWriteTextFormat * getDefaultFormat();
-	IDWriteTextFormat * createFormat(const std::wstring& family, float size, DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL,
-		DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL);
+	HRESULT createFormat(const std::wstring& family, float size, DWRITE_FONT_WEIGHT weight, DWRITE_FONT_STYLE style, DWRITE_FONT_STRETCH stretch, IDWriteTextFormat **format);
+	HRESULT createFormat(const std::wstring& family, float size, IDWriteTextFormat **format);
 
 	void add(GUIElement * e);
 	void remove(GUIElement * e);
 
 	void render();
 	void update();
+
+	void drawRectangle(const D2D_RECT_F& rect, const D2D_COLOR_F& color);
+	void drawText(const D2D_RECT_F& rect, const std::wstring& text, IDWriteTextFormat * format, const D2D_COLOR_F& color);
+	void drawImage(const D2D_RECT_F& rect, ID2D1Bitmap * image);
+	void drawControlImage(const D2D_RECT_F& rect, ID2D1Bitmap * image);
 };
 
 extern GUIInterface * gui;
