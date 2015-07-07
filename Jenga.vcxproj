@@ -46,11 +46,13 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)include;D:\PhysXSDK\Include;$(IncludePath)</IncludePath>
     <LibraryPath>D:\PhysXSDK\Lib\vc12win32;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)include;D:\PhysXSDK\Include;$(IncludePath)</IncludePath>
     <LibraryPath>D:\PhysXSDK\Lib\vc12win32;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -71,6 +73,9 @@
       <Command>xcopy /y /d $(ProjectDir)dll\*.dll $(OutDir)
 xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     </PostBuildEvent>
+    <FxCompile>
+      <ObjectFileOutput>$(OutDir)assets\shader\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -95,6 +100,9 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
       <Command>xcopy /y /d $(ProjectDir)dll\*.dll $(OutDir)
 xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     </PostBuildEvent>
+    <FxCompile>
+      <ObjectFileOutput>$(OutDir)assets\shader\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Camera.h" />
@@ -104,18 +112,23 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClInclude Include="include\DebugPlane.h" />
     <ClInclude Include="include\DefaultTransform.h" />
     <ClInclude Include="include\DirectX.h" />
+    <ClInclude Include="include\ResultsMenu.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\GameObject.h" />
     <ClInclude Include="include\Graphics.h" />
     <ClInclude Include="include\Ground.h" />
+    <ClInclude Include="include\GUI.h" />
+    <ClInclude Include="include\GUIElement.h" />
     <ClInclude Include="include\IndexBuffer.h" />
     <ClInclude Include="include\Input.h" />
     <ClInclude Include="include\Light.h" />
     <ClInclude Include="include\DebugLineRenderer.h" />
+    <ClInclude Include="include\MainMenu.h" />
     <ClInclude Include="include\MainScene.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\MeshRenderer.h" />
     <ClInclude Include="include\Objects.h" />
+    <ClInclude Include="include\PauseMenu.h" />
     <ClInclude Include="include\Physics.h" />
     <ClInclude Include="include\PhysicsScene.h" />
     <ClInclude Include="include\PhysicsTransform.h" />
@@ -139,17 +152,22 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClCompile Include="src\DebugLineRenderer.cpp" />
     <ClCompile Include="src\DebugPlane.cpp" />
     <ClCompile Include="src\DefaultTransform.cpp" />
+    <ClCompile Include="src\ResultsMenu.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
     <ClCompile Include="src\Graphics.cpp" />
     <ClCompile Include="src\Ground.cpp" />
+    <ClCompile Include="src\GUI.cpp" />
+    <ClCompile Include="src\GUIElement.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\Jenga.cpp" />
+    <ClCompile Include="src\MainMenu.cpp" />
     <ClCompile Include="src\MainScene.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\MeshRenderer.cpp" />
     <ClCompile Include="src\Objects.cpp" />
+    <ClCompile Include="src\PauseMenu.cpp" />
     <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\PhysicsScene.cpp" />
     <ClCompile Include="src\PhysicsTransform.cpp" />
@@ -264,6 +282,16 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <None Include="shader\VertexColor.hlsli">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\images\brick.jpg" />
+    <Image Include="assets\images\button_active.png" />
+    <Image Include="assets\images\button_hover.png" />
+    <Image Include="assets\images\button_normal.png" />
+    <Image Include="assets\images\ground.jpg" />
+    <Image Include="assets\images\pause_white.png" />
+    <Image Include="assets\images\play_white.png" />
+    <Image Include="assets\images\UV.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

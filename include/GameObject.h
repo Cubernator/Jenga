@@ -42,6 +42,12 @@ public:
 	GameObject();
 	virtual ~GameObject() = 0;
 
+	GameObject(const GameObject& other) = delete;
+	GameObject& operator=(const GameObject& other) = delete;
+
+	GameObject(GameObject&& other) = delete;
+	GameObject& operator=(GameObject&& other) = delete;
+
 	virtual void getLocalAABB(XMVECTOR& min, XMVECTOR& max) const;
 
 	Transform * getTransform();

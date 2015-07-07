@@ -8,9 +8,13 @@
 
 #include <memory>
 
+class MainScene;
+
 class Ground : public GameObject
 {
 private:
+	MainScene * m_scene;
+
 	px_ptr<PxMaterial> m_mat;
 	px_ptr<PxRigidStatic> m_actor;
 	std::unique_ptr<PhysicsTransform> m_transform;
@@ -28,6 +32,6 @@ private:
 	void getLocalAABB(XMVECTOR& min, XMVECTOR& max) const override;
 
 public:
-	Ground(Shader * s, IndexBuffer * ib);
+	Ground(MainScene * scene, Shader * s, IndexBuffer * ib);
 	~Ground();
 };

@@ -2,29 +2,9 @@
 #include <windows.h>
 #include <windowsx.h>
 #include "Engine.h"
-#include "MainScene.h"
+#include "MainMenu.h"
 
 #include "constants.h"
-
-// include the Direct3D Library file
-#pragma comment(lib,"d3d11.lib")
-#pragma comment(lib,"dxgi.lib")
-
-#if _DEBUG
-#pragma comment(lib,"PhysX3DEBUG_x86.lib")
-#pragma comment(lib,"PhysX3CommonDEBUG_x86.lib")
-#pragma comment(lib,"PhysX3ExtensionsDEBUG.lib")
-#pragma comment(lib,"PhysX3GpuDEBUG_x86.lib")
-#pragma comment(lib,"PxTaskDEBUG.lib")
-#pragma comment(lib,"PhysXVisualDebuggerSDKDEBUG.lib")
-#else
-#pragma comment(lib,"PhysX3_x86.lib")
-#pragma comment(lib,"PhysX3Common_x86.lib")
-#pragma comment(lib,"PhysX3Extensions.lib")
-#pragma comment(lib,"PhysX3Gpu_x86.lib")
-#pragma comment(lib,"PxTask.lib")
-#pragma comment(lib,"PhysXVisualDebuggerSDK.lib")
-#endif
 
 // this is the main message handler for the program
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -69,17 +49,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	ShowWindow(hWnd, nCmdShow);
 
+	CoInitializeEx(0, COINIT_MULTITHREADED);
+
 	WPARAM result = -1;
 
 	try {
 		Engine e(hWnd);
 
-		e.enterScene<MainScene>();
+		e.enterScene<MainMenu>();
 		result = e.run();
 	}
 	catch (std::exception&) {
 
 	}
+
+	CoUninitialize();
 
 	return result;
 }

@@ -13,11 +13,12 @@ ID3D11DeviceContext *devcon;           // the pointer to our Direct3D device con
 
 Engine * engine;
 
-Engine::Engine(HWND hWnd) : m_time(0.f), m_delta(1.f / 60.f), m_running(true), m_hWnd(hWnd)
+Engine::Engine(HWND hWnd) : m_realDelta(1.f / 60.f), m_realTime(0.f), m_time(0.f), m_timeScale(1.0f), m_running(true), m_hWnd(hWnd)
 {
 	engine = this; // set singleton instance
 
 	m_graphics = new GraphicsInterface(m_hWnd);
+	m_gui = new GUIInterface(m_graphics->getSwapChain());
 	m_physics = new PhysicsInterface();
 	m_input = new Input(m_hWnd);
 	m_objectManager = new ObjectManager();
@@ -29,6 +30,7 @@ Engine::~Engine()
 	delete m_objectManager;
 	delete m_input;
 	delete m_physics;
+	delete m_gui;
 	delete m_graphics;
 }
 
@@ -40,6 +42,21 @@ float Engine::getTime() const
 float Engine::getDelta() const
 {
 	return m_delta.count();
+}
+
+float Engine::getRealTime() const
+{
+	return m_realTime.count();
+}
+
+float Engine::getRealDelta() const
+{
+	return m_realDelta.count();
+}
+
+void Engine::setTimeScale(float scale)
+{
+	m_timeScale = max(min(scale, 5.0f), 0.0f);
 }
 
 void Engine::stop()
@@ -66,7 +83,7 @@ WPARAM Engine::run()
 
 		accumulator += frameTime;
 
-		while (accumulator >= m_delta) {
+		while (accumulator >= m_realDelta) {
 			while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
@@ -76,17 +93,21 @@ WPARAM Engine::run()
 			if (msg.message == WM_QUIT)
 				m_running = false;
 
+			m_realTime += m_realDelta;
+
+			m_delta = m_realDelta * m_timeScale;
+			m_time += m_delta;
+
 			update();
 
-			m_time += m_delta;
-			accumulator -= m_delta;
+			accumulator -= m_realDelta;
 		}
 
 		// we have to explicitly call the appropriate division operator due to a bug in Microsoft's implementation of the C++ standard...
 		// alpha = std::chrono::operator/<fsec::rep, fsec::period, fsec::rep, fsec::period>(accumulator, m_delta);
 
 		// or just do this, because it basically does the same thing!
-		graphics->render(accumulator.count() / m_delta.count());
+		render(accumulator.count() / m_realDelta.count());
 	}
 
 	return msg.wParam;
@@ -101,7 +122,16 @@ void Engine::update()
 	if (m_activeScene) m_activeScene->update(); // update active scene object
 	m_objectManager->update(); // update all registered game objects
 
+	m_gui->update();
+
 	m_input->update();
+}
+
+void Engine::render(float alpha)
+{
+	graphics->render(alpha);
+	gui->render();
+	graphics->present();
 }
 
 LRESULT Engine::processMessages(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

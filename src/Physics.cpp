@@ -3,6 +3,23 @@
 #include "GameObject.h"
 #include "constants.h"
 
+#if _DEBUG
+#pragma comment(lib,"PhysX3DEBUG_x86.lib")
+#pragma comment(lib,"PhysX3CommonDEBUG_x86.lib")
+#pragma comment(lib,"PhysX3ExtensionsDEBUG.lib")
+#pragma comment(lib,"PhysX3GpuDEBUG_x86.lib")
+#pragma comment(lib,"PxTaskDEBUG.lib")
+#pragma comment(lib,"PhysXVisualDebuggerSDKDEBUG.lib")
+#else
+#pragma comment(lib,"PhysX3_x86.lib")
+#pragma comment(lib,"PhysX3Common_x86.lib")
+#pragma comment(lib,"PhysX3Extensions.lib")
+#pragma comment(lib,"PhysX3Gpu_x86.lib")
+#pragma comment(lib,"PxTask.lib")
+#pragma comment(lib,"PhysXVisualDebuggerSDK.lib")
+#endif
+
+
 PxFoundation *physicsFoundation;
 PxPhysics *physics;
 
@@ -42,9 +59,14 @@ PhysicsInterface::~PhysicsInterface()
 	physicsFoundation->release();
 }
 
+void PhysicsInterface::setScene(PhysicsScene * scene)
+{
+	m_physicsScene = scene;
+}
+
 void PhysicsInterface::simulate(float step)
 {
-	if (m_physicsScene) {
+	if (m_physicsScene && step > 0.0f) {
 		PxScene * pxs = m_physicsScene->getPxScene();
 		pxs->simulate(step);
 		pxs->fetchResults(true);

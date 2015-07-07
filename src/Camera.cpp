@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include "Engine.h"
 
-Camera::Camera() : m_transform(new DefaultTransform(this)), m_nearPlane(0.1f), m_farPlane(300.f), m_aspectRatio(1.f), m_fov(75.f)
+Camera::Camera() : m_transform(new DefaultTransform(this)), m_nearPlane(0.1f), m_farPlane(300.f), m_aspectRatio(1.f), m_fov(75.f), m_backColor(0,0,0,0)
 {
 	setTransform(m_transform.get());
 }
@@ -44,6 +44,16 @@ void Camera::setAspectRatio(float v)
 void Camera::setFOV(float v)
 {
 	m_fov = v;
+}
+
+const XMFLOAT4& Camera::getBackColor() const
+{
+	return m_backColor;
+}
+
+void Camera::setBackColor(const XMFLOAT4& c)
+{
+	m_backColor = c;
 }
 
 XMMATRIX Camera::getProjectionMatrix() const

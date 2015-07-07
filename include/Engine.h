@@ -6,6 +6,7 @@
 
 #include "Physics.h"
 #include "Graphics.h"
+#include "GUI.h"
 
 #include "constants.h"
 
@@ -18,7 +19,10 @@ class Scene;
 class Engine
 {
 private:
-	fsec m_time, m_delta;
+	const fsec m_realDelta;
+	fsec m_realTime, m_time, m_delta;
+
+	float m_timeScale;
 
 	bool m_running;
 
@@ -26,18 +30,21 @@ private:
 	Input * m_input;
 	PhysicsInterface * m_physics;
 	GraphicsInterface * m_graphics;
+	GUIInterface * m_gui;
 
 	std::unique_ptr<Scene> m_activeScene;
 
 	HWND m_hWnd;
 
 	void update();
+	void render(float alpha);
 
 	template<class SceneType, bool, class... Args>
 	struct enterSceneImpl
 	{
 		static SceneType * construct(Engine * e, Args&&... args)
 		{
+			e->m_physics->setScene(nullptr);
 			return new SceneType(std::forward<Args>(args)...);
 		}
 	};
@@ -47,7 +54,9 @@ private:
 	{
 		static SceneType * construct(Engine * e, Args&&... args)
 		{
-			return e->m_physics->constructScene<SceneType>(std::forward<Args>(args)...);
+			SceneType * newScene = e->m_physics->constructScene<SceneType>(std::forward<Args>(args)...);
+			e->m_physics->setScene(newScene);
+			return newScene;
 		}
 	};
 
@@ -61,6 +70,11 @@ public:
 
 	float getTime() const;
 	float getDelta() const;
+
+	float getRealTime() const;
+	float getRealDelta() const;
+
+	void setTimeScale(float scale);
 
 	void stop();
 

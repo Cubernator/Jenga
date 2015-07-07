@@ -61,6 +61,8 @@ private:
 
 	XMFLOAT4X4 m_shadowMVP;
 
+	bool m_vSync;
+
 	ID3D11Buffer *m_constantBuffers[4];
 	ID3D11Buffer *m_shadowCB;
 
@@ -78,9 +80,12 @@ public:
 	GraphicsInterface(HWND hWnd);
 	~GraphicsInterface();
 
+	IDXGISwapChain * getSwapChain();
+
 	Shader * getShadowShader();
 
 	void render(float alpha);
+	void present();
 
 	void setCamera(Camera * cam);
 	void setLight(const Light& l);
