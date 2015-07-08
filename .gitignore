@@ -11,3 +11,4 @@
 *.psess
 *.vsp
 /packages/directxtk_desktop_2013.2015.3.27.2
+*.ipch

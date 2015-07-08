@@ -20,8 +20,6 @@ private:
 	std::unique_ptr<Camera> m_camera;
 	std::unique_ptr<Shader> m_brickShader, m_groundShader, m_debugShader;
 	std::unique_ptr<IndexBuffer> m_brickIndices;
-	std::unique_ptr<Texture2D> m_brickTex;
-	ID3D11SamplerState * m_samplerState;
 
 	std::unique_ptr<Tower> m_tower;
 

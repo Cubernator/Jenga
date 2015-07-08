@@ -140,7 +140,13 @@
     <ClInclude Include="include\ResultsMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Audio_.h">
+    <ClInclude Include="include\AudioSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Collision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AudioInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -247,7 +253,10 @@
     <ClCompile Include="src\ResultsMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Audio.cpp">
+    <ClCompile Include="src\AudioSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AudioInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

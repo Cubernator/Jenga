@@ -1,6 +1,7 @@
 #include "MainScene.h"
 #include "MainMenu.h"
 #include "Input.h"
+#include "Graphics.h"
 #include "Objects.h"
 #include "utility.h"
 
@@ -29,26 +30,9 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 
 	m_brickIndices.reset(new IndexBuffer(indices, 36));
 
-	m_brickTex.reset(new Texture2D(L"assets\\images\\brick.jpg"));
-
-	D3D11_SAMPLER_DESC sd;
-	ZeroMemory(&sd, sizeof(D3D11_SAMPLER_DESC));
-	sd.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sd.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sd.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sd.Filter = D3D11_FILTER_ANISOTROPIC;
-	sd.MaxAnisotropy = 8;
-	sd.MinLOD = -FLT_MAX;
-	sd.MaxLOD = FLT_MAX;
-	dev->CreateSamplerState(&sd, &m_samplerState);
-
 	unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
 
-	m_tower.reset(new Tower(m_groundShader.get(), m_brickIndices.get(), m_brickTex.get(), m_samplerState, seed));
-	for (std::unique_ptr<Brick>& b : m_tower->getBricks()) {
-		objects->add(b.get());
-		addObject(b.get());
-	}
+	m_tower.reset(new Tower(this, m_groundShader.get(), m_brickIndices.get(), seed));
 
 	m_ground.reset(new Ground(this, m_groundShader.get(), m_brickIndices.get()));
 
@@ -88,19 +72,14 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 
 MainScene::~MainScene()
 {
+	graphics->setCamera(nullptr);
+
 	gui->remove(m_pauseButton.get());
 
 	removeObject(m_ground.get());
 	objects->remove(m_ground.get());
 	objects->remove(m_springVisualizer.get());
 	objects->remove(m_planeVisualizer.get());
-
-	for (std::unique_ptr<Brick>& b : m_tower->getBricks()) {
-		removeObject(b.get());
-		objects->remove(b.get());
-	}
-
-	m_samplerState->Release();
 }
 
 void MainScene::brickFaulted()

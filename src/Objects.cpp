@@ -1,5 +1,6 @@
 #include "Objects.h"
 #include "utility.h"
+#include "Transform.h"
 #include <algorithm>
 
 ObjectManager * objects;

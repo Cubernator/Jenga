@@ -58,7 +58,7 @@ HRESULT GUIInterface::createFormat(const std::wstring& family, float size, IDWri
 {
 	return createFormat(family, size, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, format);
 }
-
+/*
 ID2D1Bitmap * GUIInterface::createSharedBitmap(Texture2D * texture)
 {
 	// NOTE: this doesn't work.
@@ -69,7 +69,7 @@ ID2D1Bitmap * GUIInterface::createSharedBitmap(Texture2D * texture)
 	surface->Release();
 	return newBitmap;
 }
-
+*/
 HRESULT GUIInterface::loadBitmap(const std::wstring& fileName, ID2D1Bitmap **bitmap)
 {
 	ComPtr<IWICBitmapDecoder> decoder;

@@ -1,9 +1,12 @@
 #include "Brick.h"
 #include "Engine.h"
 #include "utility.h"
+#include "Tower.h"
 
+#define COLLISION_SOUND_THRESHOLD 10.0f
 
-Brick::Brick(Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m) : m_halfSize(halfSize), m_rowIndex(0)
+Brick::Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m)
+	: m_tower(tower), m_halfSize(halfSize), m_rowIndex(0)
 {
 	m_actor.reset(PxCreateDynamic(*physics, t, PxBoxGeometry(halfSize), *m, 4.8f));
 	setActor(m_actor.get());
@@ -25,6 +28,11 @@ Brick::Brick(Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer *
 	m_renderer->addSampler(ss);
 	setRenderer(m_renderer.get());
 
+	m_audioSource.reset(new AudioSource(this));
+	setAudioSource(m_audioSource.get());
+
+	setCollisionCallbackFlags(ENTER);
+
 	setState(TOWER);
 }
 
@@ -34,6 +42,22 @@ void Brick::getLocalAABB(XMVECTOR& min, XMVECTOR& max) const
 	XMVectorSetW(hs, 1.0f);
 	min = -hs;
 	max = hs;
+}
+
+void Brick::onCollisionEnter(const Collision& collision)
+{
+	float strength = 0.0f;
+
+	for (const PxContactPairPoint& p : collision.contacts) {
+		strength += p.impulse.magnitude();
+	}
+
+	strength /= collision.contacts.size();
+
+	if (strength >= COLLISION_SOUND_THRESHOLD) {
+		m_audioSource->setClip(m_tower->getRandomBrickSound(strength));
+		m_audioSource->play();
+	}
 }
 
 void Brick::setColor(const XMFLOAT4& c)

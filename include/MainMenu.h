@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include "GUIElement.h"
+#include "AudioInterface.h"
 
 class MainMenu : public Scene
 {

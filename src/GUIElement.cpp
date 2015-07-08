@@ -1,4 +1,5 @@
 #include "GUIElement.h"
+#include "GUI.h"
 
 #include "Input.h"
 

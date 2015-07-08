@@ -2,6 +2,8 @@
 
 #include "Objects.h"
 #include "utility.h"
+#include "MainScene.h"
+#include "AudioInterface.h"
 
 #include <random>
 #include <algorithm>
@@ -33,9 +35,21 @@ void Tower::Row::removeBrickAt(unsigned int brickIndex)
 	bricks[brickIndex] = nullptr;
 }
 
-Tower::Tower(Shader * s, IndexBuffer * ib, Texture2D * t, ID3D11SamplerState * ss, unsigned int seed) :
-m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
+Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib, unsigned int seed) : m_scene(scene), m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
 {
+	m_brickTex.reset(new Texture2D(L"assets\\images\\brick.jpg"));
+
+	D3D11_SAMPLER_DESC sd;
+	ZeroMemory(&sd, sizeof(D3D11_SAMPLER_DESC));
+	sd.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sd.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sd.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sd.Filter = D3D11_FILTER_ANISOTROPIC;
+	sd.MaxAnisotropy = 8;
+	sd.MinLOD = -FLT_MAX;
+	sd.MaxLOD = FLT_MAX;
+	dev->CreateSamplerState(&sd, &m_sampler);
+
 	PxVec3 brickHSize = m_brickSize / 2.0f;
 	PxQuat r90(toRadf(-90.0f), PxVec3(0, 1, 0));
 	float hgap = 0.01f, vgap = 0.001f, maxVariance = 0.025f;
@@ -86,7 +100,7 @@ m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(
 				PxVec3 size = brickHSize;
 				size.y = sizes[k];
 
-				Brick * b = new Brick(s, t, ss, ib, size, brickTrans, m_brickMat.get());
+				Brick * b = new Brick(this, s, m_brickTex.get(), m_sampler.Get(), ib, size, brickTrans, m_brickMat.get());
 
 				m_bricks.emplace_back(b);
 				row.setBrickAt(b, k);
@@ -98,16 +112,31 @@ m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(
 
 	m_rows.front().setState(BASE);
 	m_rows.back().setState(TOP);
+
+	for (auto& b : m_bricks) {
+		objects->add(b.get());
+		m_scene->addObject(b.get());
+	}
+
+	m_brickSound.reset(audio->loadSoundEffect(L"assets\\audio\\wood_sharp08.wav"));
+}
+
+Tower::~Tower()
+{
+	for (auto& b : m_bricks) {
+		m_scene->removeObject(b.get());
+		objects->remove(b.get());
+	}
+}
+
+SoundEffect * Tower::getRandomBrickSound(float impactStrength)
+{
+	return m_brickSound.get();
 }
 
 unsigned int Tower::getHeight() const
 {
 	return m_bricks.size();
-}
-
-std::vector<std::unique_ptr<Brick>>& Tower::getBricks()
-{
-	return m_bricks;
 }
 
 bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) const

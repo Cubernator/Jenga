@@ -4,6 +4,8 @@
 
 #include <array>
 
+class MainScene;
+
 class Tower
 {
 private:
@@ -23,7 +25,14 @@ private:
 		void removeBrickAt(unsigned int brickIndex);
 	};
 
+	MainScene * m_scene;
+
+	std::unique_ptr<Texture2D> m_brickTex;
+	ComPtr<ID3D11SamplerState> m_sampler;
+
 	px_ptr<PxMaterial> m_brickMat;
+
+	std::unique_ptr<SoundEffect> m_brickSound;
 
 	std::vector<std::unique_ptr<Brick>> m_bricks;
 	std::vector<Row> m_rows;
@@ -33,10 +42,12 @@ private:
 	const PxVec3 m_brickSize;
 
 public:
-	Tower(Shader * s, IndexBuffer * ib, Texture2D * t, ID3D11SamplerState * ss, unsigned int seed);
+	Tower(MainScene * scene, Shader * s, IndexBuffer * ib, unsigned int seed);
+	~Tower();
 
 	unsigned int getHeight() const;
-	std::vector<std::unique_ptr<Brick>>& getBricks();
+
+	SoundEffect * getRandomBrickSound(float impactStrength);
 
 	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float posTolerance, float rotTolerance) const;
 	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) const;

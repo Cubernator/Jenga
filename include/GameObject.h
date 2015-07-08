@@ -1,8 +1,10 @@
 #pragma once
+#include "DirectX.h"
+#include "Collision.h"
 
-#include "Transform.h"
-#include "Renderer.h"
-#include "Physics.h"
+class Transform;
+class Renderer;
+class AudioSource;
 
 class GameObject
 {
@@ -18,7 +20,9 @@ public:
 private:
 	Transform * m_transform;
 	Renderer * m_renderer;
+	AudioSource * m_audioSource;
 	PxRigidActor * m_actor;
+
 
 	CollisionCallbackFlags m_ccFlags;
 
@@ -36,6 +40,7 @@ private:
 protected:
 	void setTransform(Transform * t);
 	void setRenderer(Renderer * r);
+	void setAudioSource(AudioSource * s);
 	void setActor(PxRigidActor * a);
 
 public:
@@ -55,6 +60,9 @@ public:
 
 	Renderer * getRenderer();
 	const Renderer * getRenderer() const;
+
+	AudioSource * getAudioSource();
+	const AudioSource * getAudioSource() const;
 
 	PxRigidActor * getActor();
 	const PxRigidActor * getActor() const;

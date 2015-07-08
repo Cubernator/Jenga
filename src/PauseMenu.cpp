@@ -2,6 +2,7 @@
 #include "MainScene.h"
 #include "constants.h"
 #include "Engine.h"
+#include "AudioInterface.h"
 
 PauseMenu::PauseMenu(MainScene * scene) : m_scene(scene)
 {

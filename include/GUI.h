@@ -1,18 +1,9 @@
 #pragma once
 
-#include "Graphics.h"
-
-#include <d2d1_1.h>
-#include <dwrite_2.h>
-#include <wincodec.h>
-
-#include <wrl.h>
-
 #include <vector>
 
-using namespace Microsoft::WRL;
-
-class GUIElement;
+#include "DirectX.h"
+#include "GUIElement.h"
 
 class GUIInterface
 {
@@ -30,7 +21,6 @@ private:
 public:
 	GUIInterface(IDXGISwapChain * swapChain);
 
-	ID2D1Bitmap * createSharedBitmap(Texture2D * texture);
 	HRESULT loadBitmap(const std::wstring& fileName, ID2D1Bitmap **bitmap);
 	ID2D1Bitmap * loadBitmap(const std::wstring& fileName);
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "DirectX.h"
-#include "Camera.h"
 #include "Light.h"
 
 struct cbPerApplication
@@ -24,6 +23,9 @@ struct cbPerObject
 	bool receiveShadow;
 	XMFLOAT3 pad;
 };
+
+class Camera;
+class Shader;
 
 class GraphicsInterface
 {
@@ -89,6 +91,8 @@ public:
 
 	void setCamera(Camera * cam);
 	void setLight(const Light& l);
+
+	Camera * getCamera();
 };
 
 extern GraphicsInterface * graphics;

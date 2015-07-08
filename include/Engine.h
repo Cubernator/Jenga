@@ -5,16 +5,17 @@
 #include <memory>
 
 #include "constants.h"
+#include "Physics.h"
 
 typedef std::chrono::duration<float> fsec;
 
 class Input;
 class ObjectManager;
-class PhysicsInterface;
 class GraphicsInterface;
 class GUIInterface;
 class AudioInterface;
 class Scene;
+class PhysicsScene;
 
 class Engine
 {

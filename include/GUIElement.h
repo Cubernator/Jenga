@@ -1,7 +1,6 @@
 #pragma once
 
-#include "GUI.h"
-
+#include "DirectX.h"
 #include <functional>
 
 struct GUIStyleState

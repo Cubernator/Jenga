@@ -12,6 +12,7 @@ private:
 	void computeAABB();
 
 	friend class GraphicsInterface;
+	friend class AudioInterface;
 
 public:
 	ObjectManager();

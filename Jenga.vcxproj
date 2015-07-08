@@ -106,8 +106,10 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\Audio_.h" />
+    <ClInclude Include="include\AudioSource.h" />
+    <ClInclude Include="include\AudioInterface.h" />
     <ClInclude Include="include\Camera.h" />
+    <ClInclude Include="include\Collision.h" />
     <ClInclude Include="include\Component.h" />
     <ClInclude Include="include\constants.h" />
     <ClInclude Include="include\DebugArrow.h" />
@@ -148,7 +150,8 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClInclude Include="include\VertexBufferBase.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Audio.cpp" />
+    <ClCompile Include="src\AudioInterface.cpp" />
+    <ClCompile Include="src\AudioSource.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Component.cpp" />
     <ClCompile Include="src\DebugArrow.cpp" />

@@ -1,6 +1,9 @@
 #include "GameObject.h"
+#include "Transform.h"
+#include "Renderer.h"
+#include "AudioSource.h"
 
-GameObject::GameObject() : m_transform(nullptr), m_renderer(nullptr), m_actor(nullptr), m_castShadow(true), m_isGeometry(true) { }
+GameObject::GameObject() : m_transform(nullptr), m_renderer(nullptr), m_audioSource(nullptr), m_actor(nullptr), m_castShadow(true), m_isGeometry(true) { }
 GameObject::~GameObject() { }
 
 void GameObject::getLocalAABB(XMVECTOR& min, XMVECTOR& max) const
@@ -17,6 +20,11 @@ void GameObject::setTransform(Transform * t)
 void GameObject::setRenderer(Renderer * r)
 {
 	m_renderer = r;
+}
+
+void GameObject::setAudioSource(AudioSource * s)
+{
+	m_audioSource = s;
 }
 
 void GameObject::setActor(PxRigidActor * a)
@@ -43,6 +51,16 @@ Renderer * GameObject::getRenderer()
 const Renderer * GameObject::getRenderer() const
 {
 	return m_renderer;
+}
+
+AudioSource * GameObject::getAudioSource()
+{
+	return m_audioSource;
+}
+
+const AudioSource * GameObject::getAudioSource() const
+{
+	return m_audioSource;
 }
 
 PxRigidActor * GameObject::getActor()

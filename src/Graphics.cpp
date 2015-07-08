@@ -2,6 +2,9 @@
 #include "constants.h"
 #include "utility.h"
 #include "Objects.h"
+#include "Shader.h"
+#include "Camera.h"
+#include "Renderer.h"
 
 #include <limits>
 
@@ -449,4 +452,9 @@ Shader * GraphicsInterface::getShadowShader()
 IDXGISwapChain * GraphicsInterface::getSwapChain()
 {
 	return m_swapchain;
+}
+
+Camera * GraphicsInterface::getCamera()
+{
+	return m_cam;
 }
