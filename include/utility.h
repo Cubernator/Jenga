@@ -1,6 +1,7 @@
 #pragma once
 
 #include "VertexBuffer.h"
+#include "PhysX.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>

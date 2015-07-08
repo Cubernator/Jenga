@@ -4,16 +4,16 @@
 #include <chrono>
 #include <memory>
 
-#include "Physics.h"
-#include "Graphics.h"
-#include "GUI.h"
-
 #include "constants.h"
 
 typedef std::chrono::duration<float> fsec;
 
 class Input;
 class ObjectManager;
+class PhysicsInterface;
+class GraphicsInterface;
+class GUIInterface;
+class AudioInterface;
 class Scene;
 
 class Engine
@@ -31,6 +31,7 @@ private:
 	PhysicsInterface * m_physics;
 	GraphicsInterface * m_graphics;
 	GUIInterface * m_gui;
+	AudioInterface * m_audio;
 
 	std::unique_ptr<Scene> m_activeScene;
 

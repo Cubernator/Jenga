@@ -5,11 +5,10 @@
 #include "Objects.h"
 #include "Scene.h"
 #include "Physics.h"
+#include "Graphics.h"
+#include "GUI.h"
 #include "Input.h"
-
-// global declarations
-ID3D11Device *dev;                     // the pointer to our Direct3D device interface
-ID3D11DeviceContext *devcon;           // the pointer to our Direct3D device context
+#include "Audio_.h"
 
 Engine * engine;
 
@@ -19,6 +18,7 @@ Engine::Engine(HWND hWnd) : m_realDelta(1.f / 60.f), m_realTime(0.f), m_time(0.f
 
 	m_graphics = new GraphicsInterface(m_hWnd);
 	m_gui = new GUIInterface(m_graphics->getSwapChain());
+	m_audio = new AudioInterface();
 	m_physics = new PhysicsInterface();
 	m_input = new Input(m_hWnd);
 	m_objectManager = new ObjectManager();
@@ -27,9 +27,11 @@ Engine::Engine(HWND hWnd) : m_realDelta(1.f / 60.f), m_realTime(0.f), m_time(0.f
 Engine::~Engine()
 {
 	m_activeScene.reset();
+
 	delete m_objectManager;
 	delete m_input;
 	delete m_physics;
+	delete m_audio;
 	delete m_gui;
 	delete m_graphics;
 }
@@ -125,6 +127,8 @@ void Engine::update()
 	m_gui->update();
 
 	m_input->update();
+
+	m_audio->update();
 }
 
 void Engine::render(float alpha)

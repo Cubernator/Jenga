@@ -1,4 +1,4 @@
-#include <WICTextureLoader.h>
+#include "WICTextureLoader.h"
 #include "Texture.h"
 
 #pragma comment(lib,"DirectXTK.lib")

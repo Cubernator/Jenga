@@ -140,6 +140,9 @@
     <ClInclude Include="include\ResultsMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Audio_.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp">
@@ -244,6 +247,9 @@
     <ClCompile Include="src\ResultsMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Audio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shader\Diffuse_vs.hlsl">
@@ -308,7 +314,6 @@
     <None Include="shader\common.hlsli">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="packages.config" />
     <None Include="shader\TexDiffuse.hlsli">
       <Filter>Shader Files</Filter>
     </None>
