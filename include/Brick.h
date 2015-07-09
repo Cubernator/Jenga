@@ -53,6 +53,8 @@ public:
 
 	void setState(BrickState state);
 
+	void allocateSoundInstance(SoundEffect * effect);
+
 	unsigned int getRowIndex() const;
 	void setRowIndex(unsigned int i);
 

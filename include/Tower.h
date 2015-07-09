@@ -32,7 +32,7 @@ private:
 
 	px_ptr<PxMaterial> m_brickMat;
 
-	std::unique_ptr<SoundEffect> m_brickSound;
+	std::vector<std::unique_ptr<SoundEffect>> m_brickSounds1, m_brickSounds2;
 
 	std::vector<std::unique_ptr<Brick>> m_bricks;
 	std::vector<Row> m_rows;
@@ -47,7 +47,7 @@ public:
 
 	unsigned int getHeight() const;
 
-	SoundEffect * getRandomBrickSound(float impactStrength);
+	SoundEffect * getRandomBrickSound(float force);
 
 	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float posTolerance, float rotTolerance) const;
 	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) const;

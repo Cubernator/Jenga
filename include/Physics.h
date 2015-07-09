@@ -46,4 +46,6 @@ public:
 	void setScene(PhysicsScene * scene);
 
 	void simulate(float step);
+
+	float getLastStepInterval() const;
 };

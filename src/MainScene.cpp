@@ -88,7 +88,6 @@ void MainScene::brickFaulted()
 		m_roundOver = true;
 		m_resultsMenu.reset(new ResultsMenu(this));
 		gui->remove(m_pauseButton.get());
-		m_pauseButton.reset();
 	}
 }
 
@@ -160,10 +159,10 @@ void MainScene::update()
 				m_pickedBrick = nullptr;
 			}
 		}
+	}
 
-		if (input->getMouseButtonReleased(MBUTTON1)) {
-			releaseBrick();
-		}
+	if (input->getMouseButtonReleased(MBUTTON1)) {
+		releaseBrick();
 	}
 
 	setCamPos();

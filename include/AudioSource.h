@@ -3,6 +3,8 @@
 #include <Audio.h>
 #include "Component.h"
 
+#include <unordered_map>
+
 using namespace DirectX;
 
 class Transform;
@@ -10,11 +12,13 @@ class Transform;
 class AudioSource : public Component
 {
 private:
-	std::unique_ptr<SoundEffectInstance> m_instance;
 	AudioEmitter m_emitter;
 	bool m_is3D;
 
 	SoundEffect * m_clip;
+	SoundEffectInstance * m_instance;
+
+	std::unordered_map<SoundEffect*, std::unique_ptr<SoundEffectInstance>> m_cache;
 
 	Transform * m_transform;
 

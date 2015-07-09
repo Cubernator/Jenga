@@ -118,7 +118,21 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib, unsigned int seed)
 		m_scene->addObject(b.get());
 	}
 
-	m_brickSound.reset(audio->loadSoundEffect(L"assets\\audio\\wood_sharp08.wav"));
+	m_brickSounds1.resize(10);
+	m_brickSounds2.resize(10);
+
+	for (std::size_t i = 0; i < 10; ++i) {
+		std::wstring n = std::to_wstring(i + 1);
+		if (i < 9) n = L"0" + n;
+
+		m_brickSounds1[i].reset(audio->loadSoundEffect(L"assets\\audio\\wood_00_" + n + L".wav"));
+		m_brickSounds2[i].reset(audio->loadSoundEffect(L"assets\\audio\\wood_01_" + n + L".wav"));
+
+		for (auto& b : m_bricks) {
+			b->allocateSoundInstance(m_brickSounds1[i].get());
+			b->allocateSoundInstance(m_brickSounds2[i].get());
+		}
+	}
 }
 
 Tower::~Tower()
@@ -129,9 +143,27 @@ Tower::~Tower()
 	}
 }
 
-SoundEffect * Tower::getRandomBrickSound(float impactStrength)
+SoundEffect * Tower::getRandomBrickSound(float force)
 {
-	return m_brickSound.get();
+	std::default_random_engine gen((unsigned int)std::chrono::system_clock::now().time_since_epoch().count());
+	std::discrete_distribution<int> dist{1, 10, 1};
+	std::bernoulli_distribution dist2;
+
+	std::vector<std::unique_ptr<SoundEffect>>& sv = dist2(gen) ? m_brickSounds1 : m_brickSounds2;
+
+	float minForce = 1000.0f, maxForce = 50000.0f;
+	int i = (int)floorf((force - minForce) / (maxForce - minForce) * 10.0f);
+
+	if (i >= 0) {
+		//OutputDebugString((std::to_wstring(i) + L"\n").c_str());
+
+		i += dist(gen) - 1;
+		i = max(min(i, 9), 0);
+
+		return sv[i].get();
+	}
+
+	return nullptr;
 }
 
 unsigned int Tower::getHeight() const

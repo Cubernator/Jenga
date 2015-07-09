@@ -3,7 +3,7 @@
 #include "Transform.h"
 #include "AudioInterface.h"
 
-AudioSource::AudioSource(GameObject * parent, SoundEffect * clip, bool is3D) : Component(parent), m_clip(nullptr)
+AudioSource::AudioSource(GameObject * parent, SoundEffect * clip, bool is3D) : Component(parent), m_clip(nullptr), m_instance(nullptr)
 {
 	m_transform = getParent()->getTransform();
 	m_is3D = is3D && m_transform; // if no transform is available, simply default to non-3D sound
@@ -29,21 +29,29 @@ void AudioSource::syncPos()
 void AudioSource::setClip(SoundEffect * clip)
 {
 	if (clip != m_clip) {
+		stop();
+
 		m_clip = clip;
 
 		if (m_clip) {
-			SOUND_EFFECT_INSTANCE_FLAGS f = m_is3D ? SoundEffectInstance_Use3D : SoundEffectInstance_Default;
-			m_instance = m_clip->CreateInstance(f);
+			std::unique_ptr<SoundEffectInstance>& inst = m_cache[m_clip];
+			if (!inst) {
+				SOUND_EFFECT_INSTANCE_FLAGS f = m_is3D ? SoundEffectInstance_Use3D : SoundEffectInstance_Default;
+				inst = m_clip->CreateInstance(f);
+			}
+			m_instance = inst.get();
 			syncPos();
 		} else {
-			m_instance.reset();
+			m_instance = nullptr;
 		}
 	}
 }
 
 void AudioSource::play(bool loop)
 {
-	if (m_instance) m_instance->Play(loop);
+	try {
+		if (m_instance) m_instance->Play(loop);
+	} catch (std::exception&) { }
 }
 
 void AudioSource::stop(bool immediate)

@@ -3,8 +3,6 @@
 #include "utility.h"
 #include "Tower.h"
 
-#define COLLISION_SOUND_THRESHOLD 10.0f
-
 Brick::Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m)
 	: m_tower(tower), m_halfSize(halfSize), m_rowIndex(0)
 {
@@ -36,6 +34,11 @@ Brick::Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss
 	setState(TOWER);
 }
 
+void Brick::allocateSoundInstance(SoundEffect * effect)
+{
+	m_audioSource->setClip(effect);
+}
+
 void Brick::getLocalAABB(XMVECTOR& min, XMVECTOR& max) const
 {
 	XMVECTOR hs = XMLoadFloat3((XMFLOAT3*)&m_halfSize);
@@ -46,17 +49,20 @@ void Brick::getLocalAABB(XMVECTOR& min, XMVECTOR& max) const
 
 void Brick::onCollisionEnter(const Collision& collision)
 {
-	float strength = 0.0f;
+	float force = 0.0f;
+	float d = engine->getDelta();
+	if (d > 0.0f) {
+		float f = 1.0f / d;
+		for (const PxContactPairPoint& p : collision.contacts) {
+			force += p.impulse.magnitude() * f;
+		}
 
-	for (const PxContactPairPoint& p : collision.contacts) {
-		strength += p.impulse.magnitude();
-	}
+		force /= collision.contacts.size();
 
-	strength /= collision.contacts.size();
-
-	if (strength >= COLLISION_SOUND_THRESHOLD) {
-		m_audioSource->setClip(m_tower->getRandomBrickSound(strength));
-		m_audioSource->play();
+		if (SoundEffect * eff = m_tower->getRandomBrickSound(force)) {
+			m_audioSource->setClip(eff);
+			m_audioSource->play();
+		}
 	}
 }
 
