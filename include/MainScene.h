@@ -16,6 +16,10 @@
 class MainScene : public PhysicsScene
 {
 private:
+	bool m_specialMode;
+
+	unsigned int m_seed;
+
 	std::unique_ptr<Ground> m_ground;
 	std::unique_ptr<Camera> m_camera;
 	std::unique_ptr<Shader> m_brickShader, m_groundShader, m_debugShader;
@@ -42,6 +46,11 @@ private:
 
 	bool m_paused, m_roundOver;
 
+	std::vector<unsigned int> m_collectedPowerups;
+	std::vector<std::unique_ptr<GUIButton>> m_powerupButtons;
+	unsigned int m_usedPowerup;
+	std::unique_ptr<PowerupManager> m_powerupManager;
+
 	ComPtr<ID2D1Bitmap> m_pauseSymbol, m_playSymbol;
 	std::unique_ptr<GUIButton> m_pauseButton;
 	std::unique_ptr<PauseMenu> m_pauseMenu;
@@ -56,8 +65,11 @@ private:
 	void releaseBrick();
 	void setCamPos();
 
+	void makePowerupButtons();
+	void usePowerup(unsigned int index);
+
 public:
-	MainScene(PxSceneDesc desc);
+	MainScene(PxSceneDesc desc, bool specialMode, unsigned int seed);
 	~MainScene();
 
 	void brickFaulted();

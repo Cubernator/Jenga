@@ -5,6 +5,7 @@
 #include "VertexBuffer.h"
 #include "PhysicsTransform.h"
 #include "utility.h"
+#include "Powerup.h"
 
 #include "AudioSource.h"
 
@@ -40,6 +41,9 @@ private:
 	BrickState m_state;
 	unsigned int m_rowIndex, m_brickIndex;
 
+	bool m_hasPowerup;
+	unsigned int m_powerupId;
+
 	void onCollisionEnter(const Collision& collision) override;
 
 	XMFLOAT4 getStateColor() const;
@@ -64,5 +68,10 @@ public:
 	bool canTouchGround() const;
 	bool canPickUp() const;
 	bool isAligned() const;
+
+	void setPowerup(bool hasPowerup, unsigned int powerupId);
+
+	bool hasPowerup() const;
+	unsigned int getPowerupId() const;
 };
 

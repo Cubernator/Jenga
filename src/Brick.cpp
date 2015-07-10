@@ -6,7 +6,7 @@
 #define MAX_NUMBER_SOUNDS 20
 
 Brick::Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m)
-	: m_tower(tower), m_halfSize(halfSize), m_rowIndex(0)
+	: m_tower(tower), m_halfSize(halfSize), m_rowIndex(0), m_hasPowerup(false), m_powerupId(-1)
 {
 	m_actor.reset(PxCreateDynamic(*physics, t, PxBoxGeometry(halfSize), *m, 4.8f));
 	setActor(m_actor.get());
@@ -79,13 +79,15 @@ void Brick::setColor(const XMFLOAT4& c)
 
 XMFLOAT4 Brick::getStateColor() const
 {
+	XMFLOAT4 defCol = m_hasPowerup ? XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) : XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
 	switch (m_state) {
 	case TOWER:
-		return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		return defCol;
 	case BASE:
-		return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		return defCol;
 	case TOP:
-		return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		return defCol;
 	case PULLING:
 		return XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
 	case SELECTED:
@@ -93,9 +95,9 @@ XMFLOAT4 Brick::getStateColor() const
 	case ALIGNED:
 		return XMFLOAT4(0.5f, 1.0f, 0.5f, 1.0f);
 	case FAULTED:
-		return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		return defCol;
 	default:
-		return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		return defCol;
 	}
 }
 
@@ -138,4 +140,22 @@ bool Brick::canPickUp() const
 bool Brick::isAligned() const
 {
 	return m_state == ALIGNED;
+}
+
+bool Brick::hasPowerup() const
+{
+	return m_hasPowerup;
+}
+
+unsigned int Brick::getPowerupId() const
+{
+	return m_powerupId;
+}
+
+void Brick::setPowerup(bool hasPowerup, unsigned int powerupId)
+{
+	m_hasPowerup = hasPowerup;
+	m_powerupId = powerupId;
+
+	setColor(getStateColor());
 }

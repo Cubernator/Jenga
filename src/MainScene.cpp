@@ -5,10 +5,11 @@
 #include "Objects.h"
 #include "utility.h"
 
-MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc), 
+MainScene::MainScene(PxSceneDesc desc, bool specialMode, unsigned int seed) : PhysicsScene(desc), m_specialMode(specialMode), m_seed(seed),
 m_camX(30), m_camY(13.5f), m_camDist(30), m_camYANormal(20.0f), m_camYASteep(40.0f), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f),
 m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false), m_maxSpringDist(50.0f),
-m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false)
+m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false),
+m_usedPowerup(-1)
 {
 	m_groundShader.reset(new Shader(L"TexSpecular"));
 	m_debugShader.reset(new Shader(L"VertexColor"));
@@ -30,9 +31,7 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 
 	m_brickIndices.reset(new IndexBuffer(indices, 36));
 
-	unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
-
-	m_tower.reset(new Tower(this, m_groundShader.get(), m_brickIndices.get(), seed));
+	m_tower.reset(new Tower(this, m_groundShader.get(), m_brickIndices.get(), m_specialMode, m_seed));
 
 	m_ground.reset(new Ground(this, m_groundShader.get(), m_brickIndices.get()));
 
@@ -68,6 +67,8 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 	m_pauseButton.reset(new GUIButton({ 10, 10, 42, 42 }, L"", pbs));
 	m_pauseButton->setCallback([this] { togglePause(); });
 	gui->add(m_pauseButton.get());
+
+	m_powerupManager.reset(new PowerupManager());
 }
 
 MainScene::~MainScene()
@@ -122,7 +123,7 @@ void MainScene::update()
 	}
 
 	if (m_restart || input->getKeyPressed('R')) {
-		engine->enterScene<MainScene>(); // restart
+		engine->enterScene<MainScene>(m_specialMode, m_seed); // restart
 		return;
 	}
 
@@ -174,6 +175,45 @@ void MainScene::update()
 	}
 
 	m_tower->update();
+
+	if (m_usedPowerup < m_collectedPowerups.size()) {
+		Powerup * pwp = m_powerupManager->getPowerup(m_collectedPowerups[m_usedPowerup]);
+
+		if (pwp->isApplicable()) {
+			pwp->apply();
+			m_collectedPowerups.erase(m_collectedPowerups.begin() + m_usedPowerup);
+
+			makePowerupButtons();
+		}
+
+		m_usedPowerup = -1;
+	}
+}
+
+void MainScene::usePowerup(unsigned int index)
+{
+	m_usedPowerup = index;
+}
+
+void MainScene::makePowerupButtons()
+{
+	for (auto& b : m_powerupButtons) gui->remove(b.get());
+	m_powerupButtons.resize(m_collectedPowerups.size());
+
+	float bw = 64, bh = 64, o = 20, g = 10;
+
+	D2D_RECT_F r{o, SCREEN_HEIGHT - o - bh, o + bw, SCREEN_HEIGHT - o};
+
+	for (std::size_t i = 0; i < m_collectedPowerups.size(); ++i) {
+		unsigned int pwpId = m_collectedPowerups[i];
+		GUIButton * b = new GUIButton(r, std::to_wstring(pwpId));
+		b->setCallback([this, i] { usePowerup(i); });
+		m_powerupButtons[i].reset(b);
+		gui->add(b);
+
+		r.left += bw + g;
+		r.right += bw + g;
+	}
 }
 
 void MainScene::tryPickBrick()
@@ -322,6 +362,11 @@ void MainScene::releaseBrick()
 	if (m_pickedBrick) {
 		if (m_tower->attemptPutBrickOnTop(m_pickedBrick, true)) {
 			m_pickedBrick->setState(ALIGNED);
+			if (m_pickedBrick->hasPowerup()) {
+				m_collectedPowerups.push_back(m_pickedBrick->getPowerupId());
+				m_pickedBrick->setPowerup(false, -1);
+				makePowerupButtons();
+			}
 		} else if (m_tower->attemptPutBrickBack(m_pickedBrick)) {
 			BrickState s = (m_pickedBrick->getRowIndex() == 0) ? BASE : TOWER;
 			m_pickedBrick->setState(s);

@@ -7,6 +7,9 @@
 
 #include <random>
 #include <algorithm>
+#include <numeric>
+
+#define NUM_SPECIAL_BRICKS 10
 
 void Tower::Row::setState(BrickState state)
 {
@@ -35,7 +38,7 @@ void Tower::Row::removeBrickAt(unsigned int brickIndex)
 	bricks[brickIndex] = nullptr;
 }
 
-Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib, unsigned int seed) : m_scene(scene), m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
+Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib, bool specialMode, unsigned int seed) : m_scene(scene), m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
 {
 	m_brickTex.reset(new Texture2D(L"assets\\images\\brick.jpg"));
 
@@ -59,7 +62,8 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib, unsigned int seed)
 	std::default_random_engine gen(seed);
 	std::uniform_real_distribution<float> dist1(-1.0f, 0.0f);
 	std::uniform_int_distribution<int> dist2(0, 2);
-	std::bernoulli_distribution dist3(0.2f);
+	std::bernoulli_distribution dist3(0.3f);
+	std::uniform_int_distribution<int> powerupDist(0, NUM_POWERUPS - 1);
 
 	m_rows.resize(18);
 
@@ -108,6 +112,14 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib, unsigned int seed)
 
 			y += rowSize * 2.0f + vgap;
 		}
+	}
+
+	std::vector<std::size_t> v(m_bricks.size());
+	std::iota(v.begin(), v.end(), 0);
+	std::shuffle(v.begin(), v.end(), gen);
+
+	for (int i = 0; i < NUM_SPECIAL_BRICKS; ++i) {
+		m_bricks[v[i]]->setPowerup(true, powerupDist(gen));
 	}
 
 	m_rows.front().setState(BASE);

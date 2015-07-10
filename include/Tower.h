@@ -43,7 +43,7 @@ private:
 	const PxVec3 m_brickSize;
 
 public:
-	Tower(MainScene * scene, Shader * s, IndexBuffer * ib, unsigned int seed);
+	Tower(MainScene * scene, Shader * s, IndexBuffer * ib, bool specialMode, unsigned int seed);
 	~Tower();
 
 	void update();

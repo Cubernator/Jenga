@@ -12,7 +12,7 @@ private:
 	std::unique_ptr<GUILabel> m_titleLabel;
 	std::unique_ptr<GUIButton> m_classicButton, m_specialButton, m_scoreButton, m_quitButton;
 
-	bool m_exit;
+	bool m_startClassic, m_startSpecial, m_viewScoreboard;
 
 	void update() final;
 
