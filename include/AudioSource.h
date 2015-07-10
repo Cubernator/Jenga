@@ -32,6 +32,8 @@ public:
 
 	void setClip(SoundEffect * clip);
 
+	SoundState getSoundState() const;
+
 	void play(bool loop = false);
 	void stop(bool immediate = true);
 	void pause();

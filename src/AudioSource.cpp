@@ -16,6 +16,15 @@ AudioSource::~AudioSource()
 	stop();
 }
 
+SoundState AudioSource::getSoundState() const
+{
+	if (m_instance) {
+		return m_instance->GetState();
+	}
+
+	return STOPPED;
+}
+
 void AudioSource::syncPos()
 {
 	if (m_is3D) {

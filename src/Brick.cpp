@@ -3,6 +3,8 @@
 #include "utility.h"
 #include "Tower.h"
 
+#define MAX_NUMBER_SOUNDS 20
+
 Brick::Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m)
 	: m_tower(tower), m_halfSize(halfSize), m_rowIndex(0)
 {
@@ -59,9 +61,12 @@ void Brick::onCollisionEnter(const Collision& collision)
 
 		force /= collision.contacts.size();
 
-		if (SoundEffect * eff = m_tower->getRandomBrickSound(force)) {
-			m_audioSource->setClip(eff);
-			m_audioSource->play();
+		if (m_tower->getActiveSounds() < MAX_NUMBER_SOUNDS && !m_audioSource->getSoundState()) {
+			if (SoundEffect * eff = m_tower->getRandomBrickSound(force)) {
+				m_audioSource->setClip(eff);
+				m_audioSource->play();
+				m_tower->soundPlayed();
+			}
 		}
 	}
 }

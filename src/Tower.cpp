@@ -143,6 +143,27 @@ Tower::~Tower()
 	}
 }
 
+void Tower::update()
+{
+	m_activeSounds = 0;
+	
+	for (auto& b : m_bricks) {
+		AudioSource * s = b->getAudioSource();
+		if (s && s->getSoundState()) ++m_activeSounds;
+	}
+	
+}
+
+int Tower::getActiveSounds() const
+{
+	return m_activeSounds;
+}
+
+void Tower::soundPlayed()
+{
+	++m_activeSounds;
+}
+
 SoundEffect * Tower::getRandomBrickSound(float force)
 {
 	std::default_random_engine gen((unsigned int)std::chrono::system_clock::now().time_since_epoch().count());

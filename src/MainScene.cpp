@@ -172,6 +172,8 @@ void MainScene::update()
 		lp = m_pickedBrick->getTransform()->getTransform().transform(lp);
 		m_springVisualizer->setProps(lp, m_springPos);
 	}
+
+	m_tower->update();
 }
 
 void MainScene::tryPickBrick()

@@ -33,6 +33,7 @@ private:
 	px_ptr<PxMaterial> m_brickMat;
 
 	std::vector<std::unique_ptr<SoundEffect>> m_brickSounds1, m_brickSounds2;
+	int m_activeSounds;
 
 	std::vector<std::unique_ptr<Brick>> m_bricks;
 	std::vector<Row> m_rows;
@@ -45,7 +46,12 @@ public:
 	Tower(MainScene * scene, Shader * s, IndexBuffer * ib, unsigned int seed);
 	~Tower();
 
+	void update();
+
 	unsigned int getHeight() const;
+
+	int getActiveSounds() const;
+	void soundPlayed();
 
 	SoundEffect * getRandomBrickSound(float force);
 
