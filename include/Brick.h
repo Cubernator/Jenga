@@ -44,6 +44,8 @@ private:
 	bool m_hasPowerup;
 	unsigned int m_powerupId;
 
+	float m_difficulty;
+
 	void onCollisionEnter(const Collision& collision) override;
 
 	XMFLOAT4 getStateColor() const;
@@ -51,7 +53,7 @@ private:
 	void getLocalAABB(XMVECTOR& min, XMVECTOR& max) const override;
 
 public:
-	Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m);
+	Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m, float difficulty);
 
 	void setColor(const XMFLOAT4& c);
 
@@ -73,5 +75,7 @@ public:
 
 	bool hasPowerup() const;
 	unsigned int getPowerupId() const;
+
+	float getDifficulty() const;
 };
 

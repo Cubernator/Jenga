@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DirectX.h"
+#include "Input.h"
 #include <functional>
 
 struct GUIStyleState
@@ -19,6 +20,8 @@ class GUIElement
 private:
 	D2D_RECT_F m_rect;
 
+	int m_depth;
+
 	virtual void draw() const = 0;
 	virtual void update() { }
 
@@ -36,6 +39,9 @@ public:
 
 	const D2D_RECT_F& getRect() const;
 	void setRect(const D2D_RECT_F& r);
+
+	int getDepth() const;
+	void setDepth(int d);
 };
 
 class GUIRectangle : public GUIElement
@@ -66,7 +72,7 @@ public:
 	GUILabel(const D2D_RECT_F& rect, const std::wstring& text, const D2D_COLOR_F& textColor);
 	GUILabel(const D2D_RECT_F& rect, const std::wstring& text);
 
-	void setPadding(const D2D_RECT_F& p);
+	void setText(const std::wstring& text);
 };
 
 class GUIImage : public GUIElement
@@ -111,6 +117,43 @@ public:
 	GUIButton(const D2D_RECT_F& rect, const std::wstring& text);
 	GUIButton(const D2D_RECT_F& rect, ID2D1Bitmap * icon, const GUIButtonStyle& style);
 	GUIButton(const D2D_RECT_F& rect, ID2D1Bitmap * icon);
+
+	void setCallback(std::function<void()> callback);
+	void setText(const std::wstring& text);
+	void setStyle(const GUIButtonStyle& style);
+};
+
+struct GUITextFieldStyle
+{
+	GUIStyleState normal, hover, focused, disabled;
+};
+
+class GUITextField : public GUIElement
+{
+private:
+	TextEditor m_textEditor;
+
+	D2D_RECT_F m_padding;
+
+	IDWriteTextFormat * m_textFormat;
+	GUITextFieldStyle m_style;
+
+	std::function<void()> m_callback;
+	bool m_hover, m_focused;
+
+protected:
+	void draw() const override;
+	void update() override;
+
+public:
+	GUITextField(const D2D_RECT_F& rect, IDWriteTextFormat * format, const GUITextFieldStyle& style);
+	GUITextField(const D2D_RECT_F& rect, IDWriteTextFormat * format);
+	GUITextField(const D2D_RECT_F& rect, const GUITextFieldStyle& style);
+	GUITextField(const D2D_RECT_F& rect);
+
+	~GUITextField();
+
+	const std::wstring& getText() const;
 
 	void setCallback(std::function<void()> callback);
 	void setText(const std::wstring& text);

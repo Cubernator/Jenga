@@ -18,6 +18,8 @@ private:
 	std::wstring m_localeName;
 	std::vector<GUIElement*> m_elements;
 
+	bool m_elementsNotSorted;
+
 public:
 	GUIInterface(IDXGISwapChain * swapChain);
 
@@ -35,9 +37,11 @@ public:
 	void update();
 
 	void drawRectangle(const D2D_RECT_F& rect, const D2D_COLOR_F& color);
-	void drawText(const D2D_RECT_F& rect, const std::wstring& text, IDWriteTextFormat * format, const D2D_COLOR_F& color);
+	void drawText(const D2D_RECT_F& rect, const std::wstring& text, IDWriteTextFormat * format, const D2D_COLOR_F& color, D2D1_DRAW_TEXT_OPTIONS options = D2D1_DRAW_TEXT_OPTIONS_NONE);
 	void drawImage(const D2D_RECT_F& rect, ID2D1Bitmap * image);
 	void drawControlImage(const D2D_RECT_F& rect, ID2D1Bitmap * image);
+
+	void sortElements();
 };
 
 extern GUIInterface * gui;

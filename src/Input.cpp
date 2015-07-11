@@ -1,7 +1,54 @@
 #include "Input.h"
 #include "constants.h"
 
+#include <algorithm>
+
 Input * input;
+
+TextEditor::TextEditor() { }
+TextEditor::TextEditor(const std::wstring& text) : m_text(text) {}
+TextEditor::TextEditor(std::wstring&& text) : m_text(std::move(text)) {}
+
+std::wstring& TextEditor::getText()
+{
+	return m_text;
+}
+
+const std::wstring& TextEditor::getText() const
+{
+	return m_text;
+}
+
+void TextEditor::setText(const std::wstring& text)
+{
+	m_text = text;
+}
+
+void TextEditor::setText(std::wstring&& text)
+{
+	m_text = std::move(text);
+}
+
+bool TextEditor::isActive() const
+{
+	return m_active;
+}
+
+void TextEditor::setActive(bool a)
+{
+	m_active = a;
+}
+
+void TextEditor::deleteChar()
+{
+	if (m_text.size() > 0) m_text.pop_back();
+}
+
+void TextEditor::insertChar(wchar_t c)
+{
+	m_text.push_back(c);
+}
+
 
 Input::Input(HWND hWnd) : m_mx(0), m_my(0), m_mxDelta(0), m_myDelta(0), m_wheelDelta(0), m_hWnd(hWnd)
 {
@@ -114,6 +161,29 @@ void Input::handle(RAWINPUT * raw)
 	}
 }
 
+void Input::characterInput(TCHAR character)
+{
+	switch (character) {
+	case 0x0A: // linefeed
+	case 0x1B: // escape
+	case 0x09: // tab
+	case 0x0D: // carriage return
+		break;
+
+	case 0x08: // backspace
+		for (auto e : m_textEditors) {
+			if (e->isActive()) e->deleteChar();
+		}
+		break;
+
+	default: // displayable character
+		for (auto e : m_textEditors) {
+			if (e->isActive()) e->insertChar(character); 
+		}
+		break;
+	}
+}
+
 bool Input::getKeyDown(USHORT key)
 {
 	return m_keyboardState[key].down;
@@ -183,3 +253,14 @@ void Input::setMousePos(int x, int y)
 	m_mx = x;
 	m_my = y;
 }
+
+void Input::registerTextEditor(TextEditor * editor)
+{
+	m_textEditors.push_back(editor);
+}
+
+void Input::unregisterTextEditor(TextEditor * editor)
+{
+	m_textEditors.erase(std::remove(m_textEditors.begin(), m_textEditors.end(), editor), m_textEditors.end());
+}
+

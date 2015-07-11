@@ -11,7 +11,7 @@
 
 GUIInterface * gui;
 
-GUIInterface::GUIInterface(IDXGISwapChain * swapChain)
+GUIInterface::GUIInterface(IDXGISwapChain * swapChain) : m_elementsNotSorted(false)
 {
 	gui = this;
 
@@ -58,18 +58,7 @@ HRESULT GUIInterface::createFormat(const std::wstring& family, float size, IDWri
 {
 	return createFormat(family, size, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, format);
 }
-/*
-ID2D1Bitmap * GUIInterface::createSharedBitmap(Texture2D * texture)
-{
-	// NOTE: this doesn't work.
-	ID2D1Bitmap * newBitmap;
-	IDXGISurface * surface;
-	HRESULT hr = texture->getTexture()->QueryInterface(IID_PPV_ARGS(&surface));
-	m_renderTarget->CreateSharedBitmap(__uuidof(*surface), surface, NULL, &newBitmap);
-	surface->Release();
-	return newBitmap;
-}
-*/
+
 HRESULT GUIInterface::loadBitmap(const std::wstring& fileName, ID2D1Bitmap **bitmap)
 {
 	ComPtr<IWICBitmapDecoder> decoder;
@@ -100,16 +89,23 @@ ID2D1Bitmap * GUIInterface::loadBitmap(const std::wstring& fileName)
 void GUIInterface::add(GUIElement * e)
 {
 	m_elements.push_back(e);
+	sortElements();
 }
 
 void GUIInterface::remove(GUIElement * e)
 {
 	m_elements.erase(std::remove(m_elements.begin(), m_elements.end(), e), m_elements.end());
+	sortElements();
 }
 
 IDWriteTextFormat * GUIInterface::getDefaultFormat()
 {
 	return m_defaultFormat.Get();
+}
+
+void GUIInterface::sortElements()
+{
+	m_elementsNotSorted = true;
 }
 
 void GUIInterface::render()
@@ -129,10 +125,10 @@ void GUIInterface::drawRectangle(const D2D_RECT_F& rect, const D2D_COLOR_F& colo
 	m_renderTarget->FillRectangle(rect, m_textBrush.Get());
 }
 
-void GUIInterface::drawText(const D2D_RECT_F& rect, const std::wstring& text, IDWriteTextFormat * format, const D2D_COLOR_F& color)
+void GUIInterface::drawText(const D2D_RECT_F& rect, const std::wstring& text, IDWriteTextFormat * format, const D2D_COLOR_F& color, D2D1_DRAW_TEXT_OPTIONS options)
 {
 	m_textBrush->SetColor(color);
-	m_renderTarget->DrawTextW(text.c_str(), text.size(), format, rect, m_textBrush.Get());
+	m_renderTarget->DrawTextW(text.c_str(), text.size(), format, rect, m_textBrush.Get(), options);
 }
 
 void GUIInterface::drawImage(const D2D_RECT_F& rect, ID2D1Bitmap * image)
@@ -162,5 +158,14 @@ void GUIInterface::update()
 {
 	for (GUIElement * e : m_elements) {
 		e->update();
+	}
+
+	// at the end of each update cycle, sort elements by depth if any changes were registered
+	if (m_elementsNotSorted) {
+		std::stable_sort(m_elements.begin(), m_elements.end(), [](GUIElement * lhs, GUIElement * rhs) {
+			return lhs->getDepth() > rhs->getDepth();
+		});
+
+		m_elementsNotSorted = false;
 	}
 }

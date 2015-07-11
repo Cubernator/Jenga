@@ -38,7 +38,7 @@ void Tower::Row::removeBrickAt(unsigned int brickIndex)
 	bricks[brickIndex] = nullptr;
 }
 
-Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib, bool specialMode, unsigned int seed) : m_scene(scene), m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(1.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
+Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene), m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(10.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
 {
 	m_brickTex.reset(new Texture2D(L"assets\\images\\brick.jpg"));
 
@@ -59,13 +59,15 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib, bool specialMode, 
 
 	m_brickMat.reset(physics->createMaterial(0.7f, 0.4f, 0.1f));
 
-	std::default_random_engine gen(seed);
+	std::default_random_engine gen(m_scene->getSeed());
 	std::uniform_real_distribution<float> dist1(-1.0f, 0.0f);
 	std::uniform_int_distribution<int> dist2(0, 2);
 	std::bernoulli_distribution dist3(0.3f);
 	std::uniform_int_distribution<int> powerupDist(0, NUM_POWERUPS - 1);
 
 	m_rows.resize(18);
+
+	float minBrickSize = brickHSize.y - maxVariance;
 
 	std::array<float, 3> sizes;
 	float y = 0.0f;
@@ -104,7 +106,10 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib, bool specialMode, 
 				PxVec3 size = brickHSize;
 				size.y = sizes[k];
 
-				Brick * b = new Brick(this, s, m_brickTex.get(), m_sampler.Get(), ib, size, brickTrans, m_brickMat.get());
+				float difficulty = (size.y - minBrickSize) / (rowSize - minBrickSize);
+				difficulty = min(max(difficulty, 0.0f), 1.0f);
+
+				Brick * b = new Brick(this, s, m_brickTex.get(), m_sampler.Get(), ib, size, brickTrans, m_brickMat.get(), difficulty);
 
 				m_bricks.emplace_back(b);
 				row.setBrickAt(b, k);
@@ -114,12 +119,14 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib, bool specialMode, 
 		}
 	}
 
-	std::vector<std::size_t> v(m_bricks.size());
-	std::iota(v.begin(), v.end(), 0);
-	std::shuffle(v.begin(), v.end(), gen);
+	if (m_scene->getSpecialMode()) {
+		std::vector<std::size_t> v(m_bricks.size());
+		std::iota(v.begin(), v.end(), 0);
+		std::shuffle(v.begin(), v.end(), gen);
 
-	for (int i = 0; i < NUM_SPECIAL_BRICKS; ++i) {
-		m_bricks[v[i]]->setPowerup(true, powerupDist(gen));
+		for (int i = 0; i < NUM_SPECIAL_BRICKS; ++i) {
+			m_bricks[v[i]]->setPowerup(true, powerupDist(gen));
+		}
 	}
 
 	m_rows.front().setState(BASE);
@@ -204,12 +211,12 @@ unsigned int Tower::getHeight() const
 	return m_bricks.size();
 }
 
-bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) const
+bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float& accuracy) const
 {
-	return testBrickValidSpot(brick, rowBelow, newBrickIndex, m_positionTolerance, m_rotationTolerance);
+	return testBrickValidSpot(brick, rowBelow, newBrickIndex, accuracy, m_positionTolerance, m_rotationTolerance);
 }
 
-bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float posTolerance, float rotTolerance) const
+bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float& accuracy, float posTolerance, float rotTolerance) const
 {
 	PxVec3 topRowCenter(PxIdentity), topRowDir(PxIdentity), topRowUp(PxIdentity);
 	PxVec3 f(1, 0, 0), u(0, 1, 0);
@@ -267,11 +274,17 @@ bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, 
 	Transform * bt = brick->getTransform();
 	PxVec3 bdir = bt->getRotation().rotate(f);
 
-	if ((bdir.dot(topRowDir) <= rotTolerance) && (bdir.dot(topRowUp) <= rotTolerance)) {
+	float bdd = fabsf(bdir.dot(topRowDir)), bdu = fabsf(bdir.dot(topRowUp));
+	if ((bdd <= rotTolerance) && (bdu <= rotTolerance)) {
+		float rotAcc = 1.0f - (bdd / rotTolerance);
+
 		for (int i = -1; i < 2; ++i) {
 			PxVec3 bc = bt->getPosition();
 			PxVec3 diff = (topRowCenter + ((float)i * topRowDir * m_brickSize.z)) - bc;
-			if (diff.magnitude() <= posTolerance) {
+			float dm = diff.magnitude();
+			if (dm <= posTolerance) {
+				float posAcc = 1.0f - (dm / posTolerance);
+				accuracy = (rotAcc + posAcc) * 0.5f;
 				newBrickIndex = i + 1;
 				return true;
 			}
@@ -284,17 +297,18 @@ bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, 
 bool Tower::attemptPutBrickBack(Brick * brick)
 {
 	int bi, ri = brick->getRowIndex();
-	bool a = testBrickValidSpot(brick, ri-1, bi, 1.0f, sinf(toRadf(10.0f)));
+	float acc;
+	bool a = testBrickValidSpot(brick, ri-1, bi, acc, 1.0f, sinf(toRadf(10.0f)));
 	return a && (bi == brick->getBrickIndex());
 }
 
-bool Tower::attemptPutBrickOnTop(Brick * brick, bool dryRun)
+bool Tower::attemptPutBrickOnTop(Brick * brick, float& accuracy, bool dryRun)
 {
 	Row& topRow = m_rows.back();
 	bool topFull = topRow.getBrickCount() == 3;
 	int ri = topRow.index - ((topFull) ? 0 : 1);
 	int bi;
-	if (testBrickValidSpot(brick, ri, bi)) {
+	if (testBrickValidSpot(brick, ri, bi, accuracy)) {
 		if (!dryRun) {
 			if (topFull) {
 				m_rows.emplace_back(m_rows.size());

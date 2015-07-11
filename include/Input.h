@@ -20,6 +20,30 @@ struct Button
 	Button() : down(false), pressed(false), released(false) { }
 };
 
+class TextEditor
+{
+private:
+	std::wstring m_text;
+	bool m_active;
+
+public:
+	TextEditor();
+	explicit TextEditor(const std::wstring& text);
+	explicit TextEditor(std::wstring&& text);
+
+	std::wstring& getText();
+	const std::wstring& getText() const;
+
+	void setText(const std::wstring& text);
+	void setText(std::wstring&& text);
+
+	bool isActive() const;
+	void setActive(bool a);
+
+	void deleteChar();
+	void insertChar(wchar_t c);
+};
+
 class Input
 {
 private:
@@ -27,9 +51,12 @@ private:
 	std::unordered_map<MouseButton, Button> m_mouseButtons;
 	int m_mx, m_my, m_mxDelta, m_myDelta, m_wheelDelta;
 
+	std::vector<TextEditor*> m_textEditors;
+
 	HWND m_hWnd;
 
 	void handle(RAWINPUT * raw);
+	void characterInput(TCHAR character);
 	void preUpdate();
 	void update();
 
@@ -57,6 +84,9 @@ public:
 	int getMouseWheelDelta() const;
 
 	void setMousePos(int x, int y);
+
+	void registerTextEditor(TextEditor * editor);
+	void unregisterTextEditor(TextEditor * editor);
 };
 
 extern Input * input;

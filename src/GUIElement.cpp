@@ -8,7 +8,7 @@ GUIStyleState::GUIStyleState(const D2D_COLOR_F& textColor) : GUIStyleState(textC
 GUIStyleState::GUIStyleState(ID2D1Bitmap * controlImage) : GUIStyleState(D2D1::ColorF(D2D1::ColorF::White), controlImage) {}
 GUIStyleState::GUIStyleState() : GUIStyleState(nullptr) {}
 
-GUIElement::GUIElement(const D2D_RECT_F& rect) : m_rect(rect) { }
+GUIElement::GUIElement(const D2D_RECT_F& rect) : m_rect(rect), m_depth(0) { }
 GUIElement::~GUIElement() { }
 
 const D2D_RECT_F& GUIElement::getRect() const
@@ -19,6 +19,19 @@ const D2D_RECT_F& GUIElement::getRect() const
 void GUIElement::setRect(const D2D_RECT_F& r)
 {
 	m_rect = r;
+}
+
+int GUIElement::getDepth() const
+{
+	return m_depth;
+}
+
+void GUIElement::setDepth(int d)
+{
+	if (d != m_depth) {
+		m_depth = d;
+		gui->sortElements();
+	}
 }
 
 GUIRectangle::GUIRectangle(const D2D_RECT_F& rect, const D2D_COLOR_F& color) : GUIElement(rect), m_color(color) { }
@@ -39,6 +52,11 @@ GUILabel::GUILabel(const D2D_RECT_F& rect, const std::wstring& text, const D2D_C
 
 GUILabel::GUILabel(const D2D_RECT_F& rect, const std::wstring& text)
 	: GUILabel(rect, text, gui->getDefaultFormat()) { }
+
+void GUILabel::setText(const std::wstring& text)
+{
+	m_text = text;
+}
 
 void GUILabel::draw() const
 {
@@ -118,4 +136,63 @@ void GUIButton::setStyle(const GUIButtonStyle& style)
 	m_style = style;
 }
 
+GUITextField::GUITextField(const D2D_RECT_F& rect, IDWriteTextFormat * format, const GUITextFieldStyle& style)
+	: GUIElement(rect), m_textFormat(format), m_style(style), m_padding({ 6, 3, 6, 3 }), m_hover(false), m_focused(false)
+{
+	m_textEditor.setActive(false);
+	input->registerTextEditor(&m_textEditor);
+}
 
+GUITextField::~GUITextField()
+{
+	input->unregisterTextEditor(&m_textEditor);
+}
+
+GUITextField::GUITextField(const D2D_RECT_F& rect, IDWriteTextFormat * format)
+	: GUITextField(rect, format, GUITextFieldStyle()) {}
+GUITextField::GUITextField(const D2D_RECT_F& rect, const GUITextFieldStyle& style)
+	: GUITextField(rect, gui->getDefaultFormat(), style) {}
+GUITextField::GUITextField(const D2D_RECT_F& rect)
+	: GUITextField(rect, GUITextFieldStyle()) {}
+
+const std::wstring& GUITextField::getText() const
+{
+	return m_textEditor.getText();
+}
+
+void GUITextField::setCallback(std::function<void()> callback)
+{
+	m_callback = callback;
+}
+
+void GUITextField::draw() const
+{
+	const GUIStyleState& state = m_focused ? m_style.focused : (m_hover ? m_style.hover : m_style.normal);
+	ID2D1Bitmap * image = state.controlImage;
+	if (!image) image = m_style.normal.controlImage;
+	if (image) gui->drawControlImage(getRect(), image);
+
+	D2D_RECT_F r = getRect();
+	r.left += m_padding.left;
+	r.top += m_padding.top;
+	r.right -= m_padding.right;
+	r.bottom -= m_padding.bottom;
+
+	gui->drawText(r, m_textEditor.getText(), m_textFormat, state.textColor, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+}
+
+void GUITextField::update()
+{
+	float mx = (float)input->getMouseX(), my = (float)input->getMouseY();
+	D2D_RECT_F r = getRect();
+	m_hover = mx >= r.left && mx <= r.right && my >= r.top && my <= r.bottom;
+
+	if (input->getMouseButtonPressed(MBUTTONLEFT))
+		m_focused = m_hover;
+
+	m_textEditor.setActive(m_focused);
+
+	if (m_focused && input->getKeyPressed(VK_RETURN)) {
+		if (m_callback) m_callback();
+	}
+}

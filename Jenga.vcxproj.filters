@@ -152,6 +152,12 @@
     <ClInclude Include="include\Powerup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\ScoreCounter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ScoreFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp">
@@ -263,6 +269,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Powerup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ScoreCounter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -140,6 +140,8 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClInclude Include="include\PhysX.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Scene.h" />
+    <ClInclude Include="include\ScoreCounter.h" />
+    <ClInclude Include="include\ScoreFile.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\Brick.h" />
     <ClInclude Include="include\Texture.h" />
@@ -181,6 +183,7 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClCompile Include="src\PhysicsTransform.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\ScoreCounter.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Brick.cpp" />
     <ClCompile Include="src\Texture.cpp" />

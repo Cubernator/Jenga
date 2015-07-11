@@ -43,7 +43,7 @@ private:
 	const PxVec3 m_brickSize;
 
 public:
-	Tower(MainScene * scene, Shader * s, IndexBuffer * ib, bool specialMode, unsigned int seed);
+	Tower(MainScene * scene, Shader * s, IndexBuffer * ib);
 	~Tower();
 
 	void update();
@@ -55,9 +55,9 @@ public:
 
 	SoundEffect * getRandomBrickSound(float force);
 
-	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float posTolerance, float rotTolerance) const;
-	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex) const;
+	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float& accuracy, float posTolerance, float rotTolerance) const;
+	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float& accuracy) const;
 
 	bool attemptPutBrickBack(Brick * brick);
-	bool attemptPutBrickOnTop(Brick * brick, bool dryRun = false);
+	bool attemptPutBrickOnTop(Brick * brick, float& accuracy, bool dryRun = false);
 };

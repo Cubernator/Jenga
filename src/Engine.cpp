@@ -145,8 +145,8 @@ LRESULT Engine::processMessages(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	case WM_DESTROY:
 	{
 		stop();
-		return 0;
 	} break;
+
 	case WM_INPUT:
 	{
 		UINT dwSize;
@@ -166,9 +166,18 @@ LRESULT Engine::processMessages(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 		// free buffer
 		delete[] lpb;
-		return 0;
 	} break;
+
+	case WM_CHAR:
+	{
+		input->characterInput((TCHAR)wParam);
+	} break;
+
+	default:
+	{
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
 	}
 
-	return DefWindowProc(hWnd, message, wParam, lParam);
+	return 0;
 }

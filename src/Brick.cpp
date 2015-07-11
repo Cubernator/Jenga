@@ -5,8 +5,8 @@
 
 #define MAX_NUMBER_SOUNDS 20
 
-Brick::Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m)
-	: m_tower(tower), m_halfSize(halfSize), m_rowIndex(0), m_hasPowerup(false), m_powerupId(-1)
+Brick::Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m, float difficulty)
+	: m_tower(tower), m_halfSize(halfSize), m_rowIndex(0), m_hasPowerup(false), m_powerupId(-1), m_difficulty(difficulty)
 {
 	m_actor.reset(PxCreateDynamic(*physics, t, PxBoxGeometry(halfSize), *m, 4.8f));
 	setActor(m_actor.get());
@@ -158,4 +158,9 @@ void Brick::setPowerup(bool hasPowerup, unsigned int powerupId)
 	m_powerupId = powerupId;
 
 	setColor(getStateColor());
+}
+
+float Brick::getDifficulty() const
+{
+	return m_difficulty;
 }

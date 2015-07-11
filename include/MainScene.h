@@ -9,6 +9,7 @@
 #include "GUIElement.h"
 #include "ResultsMenu.h"
 #include "PauseMenu.h"
+#include "ScoreCounter.h"
 
 #include <vector>
 #include <memory>
@@ -46,10 +47,8 @@ private:
 
 	bool m_paused, m_roundOver;
 
-	std::vector<unsigned int> m_collectedPowerups;
-	std::vector<std::unique_ptr<GUIButton>> m_powerupButtons;
-	unsigned int m_usedPowerup;
 	std::unique_ptr<PowerupManager> m_powerupManager;
+	std::unique_ptr<ScoreCounter> m_scoreCounter;
 
 	ComPtr<ID2D1Bitmap> m_pauseSymbol, m_playSymbol;
 	std::unique_ptr<GUIButton> m_pauseButton;
@@ -65,12 +64,15 @@ private:
 	void releaseBrick();
 	void setCamPos();
 
-	void makePowerupButtons();
-	void usePowerup(unsigned int index);
-
 public:
 	MainScene(PxSceneDesc desc, bool specialMode, unsigned int seed);
 	~MainScene();
+
+	PowerupManager * getPowerupManager();
+	ScoreCounter * getScoreCounter();
+
+	unsigned int getSeed() const;
+	bool getSpecialMode() const;
 
 	void brickFaulted();
 
