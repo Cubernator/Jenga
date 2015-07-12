@@ -8,6 +8,8 @@
 
 extern float PIF;
 
+std::wstring formatScore(unsigned int score);
+
 VertexBuffer<VertexPosNormalTex> * createCuboidBuffer(float xs, float ys, float zs, float texScale = 1.0f);
 VertexBuffer<VertexPosNormalTex> * createBrickBuffer(float xs, float ys, float zs);
 

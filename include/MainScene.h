@@ -56,6 +56,8 @@ private:
 
 	std::unique_ptr<ResultsMenu> m_resultsMenu;
 
+	std::unique_ptr<SeedPrompt> m_seedPrompt;
+
 	void update() final;
 
 	void tryPickBrick();

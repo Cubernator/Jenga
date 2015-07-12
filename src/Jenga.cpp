@@ -5,6 +5,8 @@
 #include "MainMenu.h"
 
 #include "constants.h"
+#include "GUI.h"
+#include "Content.h"
 
 // this is the main message handler for the program
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -12,6 +14,62 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	return engine->processMessages(hWnd, message, wParam, lParam);
 }
 
+struct Resources
+{
+	ComPtr<IDWriteTextFormat> menuTitleFormat, menuButtonFormat, menuTextFieldFormat;
+	ComPtr<ID2D1Bitmap> buttonNormal, buttonHover, buttonActive, textfieldNormal, textfieldHover, textfieldFocus;
+
+	Resources()
+	{
+		std::wstring fontFamily = L"verdana";
+
+		gui->createFormat(fontFamily, 50, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, &menuTitleFormat);
+		menuTitleFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+		menuTitleFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+		gui->createFormat(fontFamily, 28, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, &menuButtonFormat);
+		menuButtonFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+		menuButtonFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+		gui->createFormat(L"verdana", 20, &menuTextFieldFormat);
+		menuTextFieldFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+		content->put(L"menuTitleFormat", menuTitleFormat.Get());
+		content->put(L"menuButtonFormat", menuButtonFormat.Get());
+		content->put(L"menuTextFieldFormat", menuTextFieldFormat.Get());
+
+		//gui->loadBitmap(L"assets\\images\\button_normal.png", &buttonNormal);
+		gui->loadBitmap(L"assets\\images\\button_hover.png", &buttonHover);
+		gui->loadBitmap(L"assets\\images\\button_active.png", &buttonActive);
+
+		gui->loadBitmap(L"assets\\images\\textfield_normal.png", &textfieldNormal);
+		gui->loadBitmap(L"assets\\images\\textfield_hover.png", &textfieldHover);
+		gui->loadBitmap(L"assets\\images\\textfield_focus.png", &textfieldFocus);
+
+		content->put(L"buttonNormal", buttonNormal.Get());
+		content->put(L"buttonHover", buttonHover.Get());
+		content->put(L"buttonActive", buttonActive.Get());
+
+		content->put(L"textfieldNormal", textfieldNormal.Get());
+		content->put(L"textfieldHover", textfieldHover.Get());
+		content->put(L"textfieldFocus", textfieldFocus.Get());
+
+		GUIButtonStyle menuButtonStyle{
+			GUIStyleState(buttonNormal.Get()),
+			GUIStyleState(D2D1::ColorF(1.0f, 0.3f, 0.0f), buttonHover.Get()),
+			GUIStyleState(D2D1::ColorF(1.0f, 0.6f, 0.6f), buttonActive.Get())
+		};
+
+		GUITextFieldStyle menuTextFieldStyle{
+			GUIStyleState(textfieldNormal.Get()),
+			GUIStyleState(textfieldHover.Get()),
+			GUIStyleState(textfieldFocus.Get())
+		};
+
+		content->put(L"menuButtonStyle", menuButtonStyle);
+		content->put(L"menuTextFieldStyle", menuTextFieldStyle);
+	}
+};
 
 // the entry point for any Windows program
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -56,7 +114,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	try {
 		Engine e(hWnd);
 
+		Resources r;
+
 		e.enterScene<MainMenu>();
+
 		result = e.run();
 	}
 	catch (std::exception&) {

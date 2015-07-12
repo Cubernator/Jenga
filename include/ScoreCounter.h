@@ -8,8 +8,9 @@ class ScoreCounter
 private:
 	unsigned int m_points, m_displayedPoints;
 
-	ComPtr<IDWriteTextFormat> m_displayFormat;
-	std::unique_ptr<GUILabel> m_display;
+	std::unique_ptr<GUILabel> m_display, m_label;
+
+	ComPtr<IDWriteTextFormat> m_displayFormat, m_labelFormat;
 
 	void updateDisplay();
 
@@ -22,6 +23,7 @@ public:
 	GUILabel * getDisplay();
 
 	void hideDisplay();
+	void hideLabel();
 
 	bool finishedCounting() const;
 

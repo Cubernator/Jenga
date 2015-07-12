@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GUI.h"
+#include "SeedPrompt.h"
 
 #include <memory>
 
@@ -18,8 +19,7 @@ private:
 
 	std::unique_ptr<GUITextField> m_nameField;
 
-	ComPtr<ID2D1Bitmap> m_tfNormal, m_tfHover, m_tfFocus;
-	ComPtr<IDWriteTextFormat> m_buttonFormat, m_fieldFormat, m_titleFormat;
+	IDWriteTextFormat *m_labelFormat;
 
 	bool m_finishedCounting, m_scoreSaved;
 
@@ -30,6 +30,8 @@ private:
 public:
 	ResultsMenu(MainScene * scene);
 	~ResultsMenu();
+
+	void hideMenu();
 
 	void update();
 };

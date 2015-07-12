@@ -63,7 +63,7 @@
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ObjectFileName>$(IntDir).obj\</ObjectFileName>
-      <AdditionalIncludeDirectories>$(SolutionDir)DirectXTK\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Development\Coding\C++\Libraries\boost_1_58_0;$(SolutionDir)DirectXTK\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,7 +89,7 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ObjectFileName>$(IntDir).obj\</ObjectFileName>
-      <AdditionalIncludeDirectories>$(SolutionDir)DirectXTK\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Development\Coding\C++\Libraries\boost_1_58_0;$(SolutionDir)DirectXTK\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -112,6 +112,7 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClInclude Include="include\Collision.h" />
     <ClInclude Include="include\Component.h" />
     <ClInclude Include="include\constants.h" />
+    <ClInclude Include="include\Content.h" />
     <ClInclude Include="include\DebugArrow.h" />
     <ClInclude Include="include\DebugPlane.h" />
     <ClInclude Include="include\DefaultTransform.h" />
@@ -140,8 +141,10 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClInclude Include="include\PhysX.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Scene.h" />
+    <ClInclude Include="include\Scoreboard.h" />
     <ClInclude Include="include\ScoreCounter.h" />
     <ClInclude Include="include\ScoreFile.h" />
+    <ClInclude Include="include\SeedPrompt.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\Brick.h" />
     <ClInclude Include="include\Texture.h" />
@@ -157,6 +160,7 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClCompile Include="src\AudioSource.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Component.cpp" />
+    <ClCompile Include="src\Content.cpp" />
     <ClCompile Include="src\DebugArrow.cpp" />
     <ClCompile Include="src\DebugLineRenderer.cpp" />
     <ClCompile Include="src\DebugPlane.cpp" />
@@ -183,7 +187,9 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClCompile Include="src\PhysicsTransform.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\Scoreboard.cpp" />
     <ClCompile Include="src\ScoreCounter.cpp" />
+    <ClCompile Include="src\SeedPrompt.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Brick.cpp" />
     <ClCompile Include="src\Texture.cpp" />

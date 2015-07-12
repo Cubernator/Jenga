@@ -58,6 +58,11 @@ void GUILabel::setText(const std::wstring& text)
 	m_text = text;
 }
 
+void GUILabel::setFormat(IDWriteTextFormat * format)
+{
+	m_format = format;
+}
+
 void GUILabel::draw() const
 {
 	gui->drawText(getRect(), m_text, m_format, m_textColor);
@@ -108,7 +113,7 @@ void GUIButton::update()
 {
 	float mx = (float)input->getMouseX(), my = (float)input->getMouseY();
 	D2D_RECT_F r = getRect();
-	m_hover = mx >= r.left && mx <= r.right && my >= r.top && my <= r.bottom;
+	m_hover = mx >= r.left && mx < r.right && my >= r.top && my < r.bottom;
 	if (m_hover) {
 		if (input->getMouseButtonPressed(MBUTTONLEFT)) m_down = true;
 	} else {
@@ -185,7 +190,7 @@ void GUITextField::update()
 {
 	float mx = (float)input->getMouseX(), my = (float)input->getMouseY();
 	D2D_RECT_F r = getRect();
-	m_hover = mx >= r.left && mx <= r.right && my >= r.top && my <= r.bottom;
+	m_hover = mx >= r.left && mx < r.right && my >= r.top && my < r.bottom;
 
 	if (input->getMouseButtonPressed(MBUTTONLEFT))
 		m_focused = m_hover;

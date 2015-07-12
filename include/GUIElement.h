@@ -73,6 +73,7 @@ public:
 	GUILabel(const D2D_RECT_F& rect, const std::wstring& text);
 
 	void setText(const std::wstring& text);
+	void setFormat(IDWriteTextFormat * format);
 };
 
 class GUIImage : public GUIElement

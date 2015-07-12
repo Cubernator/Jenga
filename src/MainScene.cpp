@@ -72,6 +72,8 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 	m_powerupManager.reset(new PowerupManager(this));
 
 	m_scoreCounter.reset(new ScoreCounter());
+
+	setCamPos();
 }
 
 MainScene::~MainScene()
@@ -142,10 +144,23 @@ void MainScene::update()
 	}
 
 	if (m_restart) {
-		bool sm = m_specialMode;
-		unsigned int seed = m_seed;
-		engine->enterScene<MainScene>(sm, seed); // restart
-		return;
+		m_restart = false;
+		m_seedPrompt.reset(new SeedPrompt(m_seed));
+
+		if (m_resultsMenu) m_resultsMenu->hideMenu();
+		if (m_pauseMenu) m_pauseMenu->hideMenu();
+		gui->remove(m_pauseButton.get());
+	}
+
+	if (m_seedPrompt) {
+		m_seedPrompt->update();
+
+		if (m_seedPrompt->isDone()) {
+			bool sm = m_specialMode;
+			unsigned int seed = m_seedPrompt->getSeed();
+			engine->enterScene<MainScene>(sm, seed); // restart
+			return;
+		}
 	}
 
 	if (m_backToMain) {

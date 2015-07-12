@@ -1,19 +1,31 @@
 #include "ScoreCounter.h"
 
+#include <sstream>
+#include <iomanip>
+
 ScoreCounter::ScoreCounter() : m_points(0), m_displayedPoints(0)
 {
-	gui->createFormat(L"verdana", 30, &m_displayFormat);
-	m_displayFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	gui->createFormat(L"verdana", 40, &m_displayFormat);
+	m_displayFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	m_displayFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	m_display.reset(new GUILabel({0, 0, SCREEN_WIDTH, 100}, L"", m_displayFormat.Get()));
-	updateDisplay();
 
+	gui->createFormat(L"verdana", 20, &m_labelFormat);
+	m_labelFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
+	m_labelFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	m_label.reset(new GUILabel({ SCREEN_WIDTH - 300, 20, SCREEN_WIDTH - 40, 40 }, L"SCORE:", m_labelFormat.Get()));
+	gui->add(m_label.get());
+
+	m_display.reset(new GUILabel({ SCREEN_WIDTH - 300, 50, SCREEN_WIDTH - 30, 100 }, L"", m_displayFormat.Get()));
 	gui->add(m_display.get());
+
+	updateDisplay();
 }
 
 ScoreCounter::~ScoreCounter()
 {
 	gui->remove(m_display.get());
+	gui->remove(m_label.get());
 }
 
 unsigned int ScoreCounter::getPoints() const
@@ -31,6 +43,11 @@ void ScoreCounter::hideDisplay()
 	gui->remove(m_display.get());
 }
 
+void ScoreCounter::hideLabel()
+{
+	gui->remove(m_label.get());
+}
+
 bool ScoreCounter::finishedCounting() const
 {
 	return m_displayedPoints == m_points;
@@ -38,7 +55,7 @@ bool ScoreCounter::finishedCounting() const
 
 void ScoreCounter::updateDisplay()
 {
-	m_display->setText(std::to_wstring(m_displayedPoints));
+	m_display->setText(formatScore(m_displayedPoints));
 }
 
 void ScoreCounter::update()
@@ -65,7 +82,7 @@ void ScoreCounter::brickPlaced(Brick * brick, float accuracy)
 
 void ScoreCounter::addPowerupScore(unsigned int count)
 {
-	unsigned int basePoints = 10000;
+	unsigned int basePoints = 5000;
 	
 	m_points += basePoints * count;
 }

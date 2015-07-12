@@ -16,6 +16,7 @@ class GUIInterface;
 class AudioInterface;
 class Scene;
 class PhysicsScene;
+class Content;
 
 class Engine
 {
@@ -33,6 +34,7 @@ private:
 	GraphicsInterface * m_graphics;
 	GUIInterface * m_gui;
 	AudioInterface * m_audio;
+	Content * m_content;
 
 	std::unique_ptr<Scene> m_activeScene;
 

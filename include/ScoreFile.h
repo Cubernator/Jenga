@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 #include <fstream>
 
 struct ScoreEntry
@@ -10,14 +11,29 @@ struct ScoreEntry
 	std::wstring name;
 };
 
+inline bool operator<(const ScoreEntry& lhs, const ScoreEntry& rhs)
+{
+	return lhs.points < rhs.points;
+}
+
+inline bool operator>(const ScoreEntry& lhs, const ScoreEntry& rhs)
+{
+	return lhs.points > rhs.points;
+}
+
 inline std::wostream& operator<<(std::wostream& ostr, const ScoreEntry& e)
 {
-	return ostr << e.points << L" " << e.seed << L" " << e.name;
+	return ostr << e.points << L"," << e.seed << L"," << e.name;
 }
 
 inline std::wistream& operator>>(std::wistream& istr, ScoreEntry& e)
 {
-	return istr >> e.points >> e.seed >> e.name;
+	istr >> e.points;
+	istr.ignore(1, L',');
+	istr >> e.seed;
+	istr.ignore(1, L',');
+	std::getline(istr, e.name);
+	return istr;
 }
 
 class ScoreFile
@@ -40,17 +56,15 @@ public:
 	template<typename OutIter>
 	void readEntries(OutIter outputIter)
 	{
-		static_assert(std::is_same<std::iterator_traits<OutIter>::value_type, ScoreEntry>::value, "wrong value type, must be 'ScoreEntry'");
-
 		std::wifstream file(m_fileName);
+		ScoreEntry e;
 
 		if (file) {
 			std::wstring line;
-			std::wstringstream wss;
 			while (std::getline(file, line)) {
-				wss = line;
-				wss >> *outputIter;
-				++outputIter;
+				std::wstringstream wss(line);
+				wss >> e;
+				*outputIter = e;
 			}
 		}
 	}

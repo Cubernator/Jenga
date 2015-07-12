@@ -1,6 +1,16 @@
 #include "utility.h"
 
+#include <sstream>
+#include <iomanip>
+
 float PIF = (float)M_PI;
+
+std::wstring formatScore(unsigned int score)
+{
+	std::wstringstream wss;
+	wss << std::setw(7) << std::setfill(L'0') << score;
+	return wss.str();
+}
 
 VertexBuffer<VertexPosNormalTex> * createCuboidBuffer(float xs, float ys, float zs, float texScale)
 {
