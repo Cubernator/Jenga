@@ -55,6 +55,13 @@ public:
 
 	SoundEffect * getRandomBrickSound(float force);
 
+	void getRowProperties(int row, PxVec3& center, PxVec3& dir, PxVec3& up) const;
+
+	PxTransform getFreeSpot() const;
+
+	void setDamping(bool d);
+	void setHighlight(bool h);
+
 	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float& accuracy, float posTolerance, float rotTolerance) const;
 	bool testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float& accuracy) const;
 

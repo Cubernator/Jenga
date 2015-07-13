@@ -1,16 +1,17 @@
 #include "Powerup.h"
 #include "utility.h"
+#include "Content.h"
+#include "MainScene.h"
 
 #include <string>
 
-void TestPowerup::apply()
-{
-	OutputDebugString(L"BOOM!\n");
-}
-
 PowerupManager::PowerupManager(MainScene * scene) : m_scene(scene), m_usedPowerup(-1)
 {
-	m_powerups[0].reset(new TestPowerup());
+	content->get(L"menuButtonStyle", m_buttonStyle);
+
+	m_powerups[0].reset(new QuickPlacePowerup(m_scene));
+	m_powerups[1].reset(new StabilizePowerup(m_scene));
+	m_powerups[2].reset(new HighlightPowerup(m_scene));
 }
 
 PowerupManager::~PowerupManager()
@@ -31,6 +32,16 @@ void PowerupManager::update()
 		}
 
 		m_usedPowerup = -1;
+	}
+
+	for (auto& p : m_powerups) p->update();
+
+	// NOTE: THIS IS A CHEAT!
+	char c = '1';
+	for (int i = 0; i < NUM_POWERUPS; ++i, ++c) {
+		if (input->getKeyPressed(c)) {
+			collectPowerup(i);
+		}
 	}
 }
 
@@ -65,7 +76,7 @@ void PowerupManager::makePowerupButtons()
 
 	for (std::size_t i = 0; i < m_collectedPowerups.size(); ++i) {
 		unsigned int pwpId = m_collectedPowerups[i];
-		GUIButton * b = new GUIButton(r, std::to_wstring(pwpId));
+		GUIButton * b = new GUIButton(r, std::to_wstring(pwpId), m_buttonStyle);
 		b->setCallback([this, i] { usePowerup(i); });
 		m_powerupButtons[i].reset(b);
 		gui->add(b);
@@ -87,4 +98,41 @@ void PowerupManager::clearCollectedPowerups()
 
 	m_powerupButtons.clear();
 	m_collectedPowerups.clear();
+}
+
+QuickPlacePowerup::QuickPlacePowerup(MainScene * scene) : m_scene(scene) { }
+
+bool QuickPlacePowerup::isApplicable() const
+{
+	return m_scene->getSelectedBrick() != nullptr;
+}
+
+void QuickPlacePowerup::apply()
+{
+	m_scene->quickPlace();
+}
+
+StabilizePowerup::StabilizePowerup(MainScene * scene) : m_tower(scene->getTower()), m_timer(0.0f) {}
+
+void StabilizePowerup::apply()
+{
+	m_tower->setDamping(true);
+	m_timer = 5.0f;
+}
+
+void StabilizePowerup::update()
+{
+	if (m_timer > 0.0f) {
+		m_timer -= engine->getRealDelta();
+		if (m_timer <= 0.0f) {
+			m_tower->setDamping(false);
+		}
+	}
+}
+
+HighlightPowerup::HighlightPowerup(MainScene * scene) : m_scene(scene) {}
+
+void HighlightPowerup::apply()
+{
+	m_scene->activateHighlight();
 }

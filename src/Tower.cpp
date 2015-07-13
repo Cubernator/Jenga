@@ -62,7 +62,7 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene), 
 	std::default_random_engine gen(m_scene->getSeed());
 	std::uniform_real_distribution<float> dist1(-1.0f, 0.0f);
 	std::uniform_int_distribution<int> dist2(0, 2);
-	std::bernoulli_distribution dist3(0.3f);
+	std::bernoulli_distribution dist3(0.5f);
 	std::uniform_int_distribution<int> powerupDist(0, NUM_POWERUPS - 1);
 
 	m_rows.resize(18);
@@ -195,8 +195,6 @@ SoundEffect * Tower::getRandomBrickSound(float force)
 	int i = (int)floorf((force - minForce) / (maxForce - minForce) * 10.0f);
 
 	if (i >= 0) {
-		//OutputDebugString((std::to_wstring(i) + L"\n").c_str());
-
 		i += dist(gen) - 1;
 		i = max(min(i, 9), 0);
 
@@ -211,22 +209,16 @@ unsigned int Tower::getHeight() const
 	return m_bricks.size();
 }
 
-bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float& accuracy) const
+void Tower::getRowProperties(int row, PxVec3& center, PxVec3& dir, PxVec3& up) const
 {
-	return testBrickValidSpot(brick, rowBelow, newBrickIndex, accuracy, m_positionTolerance, m_rotationTolerance);
-}
-
-bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float& accuracy, float posTolerance, float rotTolerance) const
-{
-	PxVec3 topRowCenter(PxIdentity), topRowDir(PxIdentity), topRowUp(PxIdentity);
 	PxVec3 f(1, 0, 0), u(0, 1, 0);
 
-	if (rowBelow < 0) {
-		topRowCenter = PxVec3(0, -m_brickSize.y / 2.0f, 0);
-		topRowDir = PxVec3(0, 0, 1);
-		topRowUp = u;
+	if (row < 0) {
+		center = PxVec3(0, -m_brickSize.y / 2.0f, 0);
+		dir = PxVec3(0, 0, 1);
+		up = u;
 	} else {
-		const Row& topRow = m_rows[rowBelow];
+		const Row& topRow = m_rows[row];
 
 		std::vector<PxVec3> dirs;
 
@@ -235,39 +227,52 @@ bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, 
 			if (b) {
 				Transform * t = b->getTransform();
 				PxQuat q = t->getRotation();
-				PxVec3 dir = q.rotate(f);
+				PxVec3 dir2 = q.rotate(f);
 
-				if ((n > 0) && (dir.dot(dirs[0]) < 0.0f)) dir = -dir;
-				topRowDir += dir;
-				dirs.push_back(dir);
+				if ((n > 0) && (dir2.dot(dirs[0]) < 0.0f)) dir2 = -dir2;
+				dir += dir2;
+				dirs.push_back(dir2);
 
 				PxVec3 updir = q.rotate(u);
 
 				if (updir.dot(u) < 0.0f) updir = -updir;
-				topRowUp += updir;
+				up += updir;
 
-				topRowCenter += t->getPosition();
+				center += t->getPosition();
 				++n;
 			}
 		}
 
 		if (n != 0) {
-			topRowDir /= (float)n;
-			topRowDir.normalize();
+			dir /= (float)n;
+			dir.normalize();
 
-			topRowUp /= (float)n;
-			topRowUp.normalize();
+			up /= (float)n;
+			up.normalize();
 
 			Brick * b = topRow.bricks[1];
 			if (n < 3 && b) {
-				topRowCenter = b->getTransform()->getPosition();
+				center = b->getTransform()->getPosition();
 			} else {
-				topRowCenter /= (float)n;
+				center /= (float)n;
 			}
 		} else {
 			// freak out and run around in circles
 		}
 	}
+}
+
+bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float& accuracy) const
+{
+	return testBrickValidSpot(brick, rowBelow, newBrickIndex, accuracy, m_positionTolerance, m_rotationTolerance);
+}
+
+bool Tower::testBrickValidSpot(Brick * brick, int rowBelow, int& newBrickIndex, float& accuracy, float posTolerance, float rotTolerance) const
+{
+	PxVec3 f(1, 0, 0), u(0, 1, 0);
+	PxVec3 topRowCenter(PxIdentity), topRowDir(PxIdentity), topRowUp(PxIdentity);
+
+	getRowProperties(rowBelow, topRowCenter, topRowDir, topRowUp);
 
 	topRowCenter += m_brickSize.y * topRowUp;
 
@@ -327,4 +332,47 @@ bool Tower::attemptPutBrickOnTop(Brick * brick, float& accuracy, bool dryRun)
 	}
 
 	return false;
+}
+
+PxTransform Tower::getFreeSpot() const
+{
+	PxVec3 f(1, 0, 0), u(0, 1, 0);
+	PxVec3 topRowCenter(PxIdentity), topRowDir(PxIdentity), topRowUp(PxIdentity);
+
+	const Row& topRow = m_rows.back();
+	bool topFull = topRow.getBrickCount() == 3;
+	int ri = topRow.index - ((topFull) ? 0 : 1);
+
+	getRowProperties(ri, topRowCenter, topRowDir, topRowUp);
+
+	topRowCenter += (m_brickSize.y + 0.01f) * topRowUp;
+
+	if (!topFull) {
+		for (int i = 0; i < 3; ++i) {
+			if (!topRow.bricks[i]) {
+				topRowCenter += ((float)(i - 1) * topRowDir * m_brickSize.z);
+				break;
+			}
+		}
+	}
+
+	PxQuat r = fromToRotation(f, topRowDir);
+	r *= PxQuat(toRadf(90), topRowUp);
+
+	return PxTransform(topRowCenter, r);
+}
+
+void Tower::setDamping(bool d)
+{
+	float damping = d ? 5.0f : 0.0f;
+
+	for (auto& b : m_bricks) {
+		PxRigidDynamic * a = (PxRigidDynamic*)b->getActor();
+		a->setLinearDamping(damping);
+	}
+}
+
+void Tower::setHighlight(bool h)
+{
+	for (auto& b : m_bricks) b->setHighlight(h);
 }

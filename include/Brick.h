@@ -41,7 +41,7 @@ private:
 	BrickState m_state;
 	unsigned int m_rowIndex, m_brickIndex;
 
-	bool m_hasPowerup;
+	bool m_hasPowerup, m_highlight;
 	unsigned int m_powerupId;
 
 	float m_difficulty;
@@ -77,5 +77,7 @@ public:
 	unsigned int getPowerupId() const;
 
 	float getDifficulty() const;
+
+	void setHighlight(bool h);
 };
 

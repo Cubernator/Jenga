@@ -9,7 +9,7 @@
 MainScene::MainScene(PxSceneDesc desc, bool specialMode, unsigned int seed) : PhysicsScene(desc), m_specialMode(specialMode), m_seed(seed),
 m_camX(30), m_camY(13.5f), m_camDist(30), m_camYANormal(20.0f), m_camYASteep(40.0f), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f),
 m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false), m_maxSpringDist(50.0f),
-m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false)
+m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false), m_highlight(false)
 {
 	m_groundShader.reset(new Shader(L"TexSpecular"));
 	m_debugShader.reset(new Shader(L"VertexColor"));
@@ -243,6 +243,11 @@ void MainScene::tryPickBrick()
 								}
 
 								m_scoreCounter->brickPlaced(m_pickedBrick, accuracy);
+
+								if (m_highlight) {
+									m_highlight = false;
+									m_tower->setHighlight(false);
+								}
 							}
 						} else {
 							return;
@@ -400,4 +405,26 @@ void MainScene::setCamPos()
 	Transform * t = m_camera->getTransform();
 	t->setPosition(d);
 	t->setRotation(rot);
+}
+
+Tower * MainScene::getTower()
+{
+	return m_tower.get();
+}
+
+Brick * MainScene::getSelectedBrick()
+{
+	return m_pickedBrick;
+}
+
+void MainScene::quickPlace()
+{
+	m_pickedBrick->getActor()->setGlobalPose(m_tower->getFreeSpot());
+	releaseBrick();
+}
+
+void MainScene::activateHighlight()
+{
+	m_highlight = true;
+	m_tower->setHighlight(true);
 }

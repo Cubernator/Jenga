@@ -6,7 +6,7 @@
 #define MAX_NUMBER_SOUNDS 20
 
 Brick::Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m, float difficulty)
-	: m_tower(tower), m_halfSize(halfSize), m_rowIndex(0), m_hasPowerup(false), m_powerupId(-1), m_difficulty(difficulty)
+	: m_tower(tower), m_halfSize(halfSize), m_rowIndex(0), m_hasPowerup(false), m_powerupId(-1), m_difficulty(difficulty), m_highlight(false)
 {
 	m_actor.reset(PxCreateDynamic(*physics, t, PxBoxGeometry(halfSize), *m, 4.8f));
 	setActor(m_actor.get());
@@ -71,6 +71,12 @@ void Brick::onCollisionEnter(const Collision& collision)
 	}
 }
 
+void Brick::setHighlight(bool h)
+{
+	m_highlight = h;
+	setColor(getStateColor());
+}
+
 void Brick::setColor(const XMFLOAT4& c)
 {
 	m_material.diffuse = c;
@@ -79,7 +85,12 @@ void Brick::setColor(const XMFLOAT4& c)
 
 XMFLOAT4 Brick::getStateColor() const
 {
-	XMFLOAT4 defCol = m_hasPowerup ? XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) : XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4 defCol(1.0f, 1.0f, 1.0f, 1.0f);
+	if (m_highlight) {
+		XMStoreFloat4(&defCol, XMVectorLerp(XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f), XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f), m_difficulty));
+	} else if (m_hasPowerup) {
+		defCol = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	}
 
 	switch (m_state) {
 	case TOWER:

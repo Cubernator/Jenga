@@ -37,7 +37,9 @@ private:
 	float m_maxSpringDist;
 	bool m_controlMode, m_showDebug;
 
-	Brick * m_pickedBrick;
+	Brick *m_pickedBrick;
+
+	bool m_highlight;
 
 	float m_camX, m_camY, m_camDist, m_camYAngle;
 	float m_camYANormal, m_camYASteep;
@@ -72,6 +74,13 @@ public:
 
 	PowerupManager * getPowerupManager();
 	ScoreCounter * getScoreCounter();
+
+	Tower * getTower();
+
+	Brick * getSelectedBrick();
+	void quickPlace();
+
+	void activateHighlight();
 
 	unsigned int getSeed() const;
 	bool getSpecialMode() const;

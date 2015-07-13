@@ -10,18 +10,53 @@ class Powerup
 public:
 	virtual ~Powerup() { }
 
-	virtual bool isApplicable() const = 0;
+	virtual bool isApplicable() const { return true; };
+
 	virtual void apply() = 0;
+
+	virtual void update() { }
 };
 
-class TestPowerup : public Powerup
+class MainScene;
+class Tower;
+
+class QuickPlacePowerup : public Powerup
 {
+private:
+	MainScene * m_scene;
+
 public:
-	bool isApplicable() const final { return true; }
+	QuickPlacePowerup(MainScene * scene);
+
+	bool isApplicable() const final;
 	void apply() final;
 };
 
-#define NUM_POWERUPS 1
+class StabilizePowerup : public Powerup
+{
+private:
+	Tower * m_tower;
+	float m_timer;
+
+public:
+	StabilizePowerup(MainScene * scene);
+
+	void apply() final;
+	void update() final;
+};
+
+class HighlightPowerup : public Powerup
+{
+private:
+	MainScene * m_scene;
+
+public:
+	HighlightPowerup(MainScene * scene);
+
+	void apply() final;
+};
+
+#define NUM_POWERUPS 3
 
 class MainScene;
 
@@ -35,6 +70,8 @@ private:
 	std::vector<unsigned int> m_collectedPowerups;
 	std::vector<std::unique_ptr<GUIButton>> m_powerupButtons;
 	unsigned int m_usedPowerup;
+
+	GUIButtonStyle m_buttonStyle;
 
 	void makePowerupButtons();
 
