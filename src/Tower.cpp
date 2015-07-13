@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <numeric>
 
-#define NUM_SPECIAL_BRICKS 10
+#define NUM_SPECIAL_BRICKS 20
 
 void Tower::Row::setState(BrickState state)
 {
@@ -59,10 +59,10 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene), 
 
 	m_brickMat.reset(physics->createMaterial(0.7f, 0.4f, 0.1f));
 
-	std::default_random_engine gen(m_scene->getSeed());
-	std::uniform_real_distribution<float> dist1(-1.0f, 0.0f);
-	std::uniform_int_distribution<int> dist2(0, 2);
-	std::bernoulli_distribution dist3(0.5f);
+	std::default_random_engine gen(m_scene->getSeed()); // initialize RNG with seed
+
+	std::uniform_real_distribution<float> heightDist(-1.0f, 0.0f); // height variance distribution
+	std::bernoulli_distribution rowTypeDist(0.5f); // row type distribution
 	std::uniform_int_distribution<int> powerupDist(0, NUM_POWERUPS - 1);
 
 	m_rows.resize(18);
@@ -79,15 +79,16 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene), 
 			Row& row = m_rows[rowIndex];
 			row.index = rowIndex;
 
-			int d = dist2(gen);
+			for (int k = 0; k < 3; k++) sizes[k] = brickHSize.y;
 
-			for (int k = 0; k < 3; k++) {
-				sizes[k] = brickHSize.y;
-				if (d == k) {
-					float o = dist1(gen) * maxVariance;
-					if (k == 1 && dist3(gen)) o = -o;
-					sizes[k] += o;
-				}
+			bool rowType = rowTypeDist(gen);
+
+			if (rowType) {
+				sizes[1] += heightDist(gen) * maxVariance;
+			} else {
+				sizes[0] += heightDist(gen) * maxVariance;
+				sizes[2] += heightDist(gen) * maxVariance;
+
 			}
 
 			float rowSize = *std::max_element(sizes.begin(), sizes.end());
