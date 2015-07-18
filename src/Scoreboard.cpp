@@ -13,11 +13,14 @@ Scoreboard::Scoreboard() : m_back(false), m_switch(false), m_special(false), m_s
 	content->get(L"menuButtonFormat", m_buttonFormat);
 	content->get(L"menuButtonStyle", m_buttonStyle);
 
-	gui->createFormat(L"verdana", 20, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, &m_headerFormat);
+	std::wstring fontFamily;
+	content->get(L"fontFamily", fontFamily);
+
+	gui->createFormat(fontFamily, 20, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, &m_headerFormat);
 	m_headerFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	m_headerFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
-	gui->createFormat(L"verdana", 18, &m_tableFormat);
+	gui->createFormat(fontFamily, 18, &m_tableFormat);
 	m_tableFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	m_tableFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 

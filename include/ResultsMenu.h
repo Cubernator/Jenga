@@ -20,6 +20,7 @@ private:
 	std::unique_ptr<GUITextField> m_nameField;
 
 	IDWriteTextFormat *m_labelFormat;
+	ComPtr<IDWriteTextFormat> m_bigDisplayFormat;
 
 	bool m_finishedCounting, m_scoreSaved;
 

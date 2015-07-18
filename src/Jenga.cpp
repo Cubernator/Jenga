@@ -21,17 +21,18 @@ struct Resources
 
 	Resources()
 	{
-		std::wstring fontFamily = L"verdana";
+		std::wstring fontFamily = L"couture";
+		content->put(L"fontFamily", fontFamily);
 
-		gui->createFormat(fontFamily, 50, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, &menuTitleFormat);
+		HRESULT hr = gui->createFormat(fontFamily, 50, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, &menuTitleFormat);
 		menuTitleFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 		menuTitleFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
-		gui->createFormat(fontFamily, 28, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, &menuButtonFormat);
+		hr = gui->createFormat(fontFamily, 28, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, &menuButtonFormat);
 		menuButtonFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 		menuButtonFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
-		gui->createFormat(L"verdana", 20, &menuTextFieldFormat);
+		hr = gui->createFormat(fontFamily, 20, &menuTextFieldFormat);
 		menuTextFieldFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
 		content->put(L"menuTitleFormat", menuTitleFormat.Get());

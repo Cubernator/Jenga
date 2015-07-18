@@ -1,22 +1,26 @@
 #include "ScoreCounter.h"
+#include "Content.h"
 
 #include <sstream>
 #include <iomanip>
 
 ScoreCounter::ScoreCounter() : m_points(0), m_displayedPoints(0)
 {
-	gui->createFormat(L"verdana", 40, &m_displayFormat);
-	m_displayFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
+	std::wstring fontFamily;
+	content->get(L"fontFamily", fontFamily);
+
+	gui->createFormat(fontFamily, 40, &m_displayFormat);
+	//m_displayFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	m_displayFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
-	gui->createFormat(L"verdana", 20, &m_labelFormat);
+	gui->createFormat(fontFamily, 20, &m_labelFormat);
 	m_labelFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	m_labelFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
 	m_label.reset(new GUILabel({ SCREEN_WIDTH - 300, 20, SCREEN_WIDTH - 40, 40 }, L"SCORE:", m_labelFormat.Get()));
 	gui->add(m_label.get());
 
-	m_display.reset(new GUILabel({ SCREEN_WIDTH - 300, 50, SCREEN_WIDTH - 30, 100 }, L"", m_displayFormat.Get()));
+	m_display.reset(new GUILabel({ SCREEN_WIDTH - 190, 50, SCREEN_WIDTH - 30, 100 }, L"", m_displayFormat.Get()));
 	gui->add(m_display.get());
 
 	updateDisplay();

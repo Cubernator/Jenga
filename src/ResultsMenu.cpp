@@ -7,8 +7,13 @@ ResultsMenu::ResultsMenu(MainScene * scene) : m_scene(scene), m_finishedCounting
 {
 	IDWriteTextFormat *titleFormat;
 	content->get(L"menuTitleFormat", titleFormat);
-
 	content->get(L"menuButtonFormat", m_labelFormat);
+
+	std::wstring fontFamily;
+	content->get(L"fontFamily", fontFamily);
+
+	HRESULT hr = gui->createFormat(fontFamily, 50, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, &m_bigDisplayFormat);
+	m_bigDisplayFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
 	m_tintRect.reset(new GUIRectangle({ 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT }, D2D1::ColorF(0, 0.2f)));
 	gui->add(m_tintRect.get());
@@ -32,8 +37,8 @@ ResultsMenu::ResultsMenu(MainScene * scene) : m_scene(scene), m_finishedCounting
 	gui->add(m_scoreLabel.get());
 
 	GUILabel * display = sc->getDisplay();
-	display->setRect({0, 300, SCREEN_WIDTH, 350});
-	display->setFormat(titleFormat);
+	display->setRect({shw - 100, 300, shw + 100, 350});
+	display->setFormat(m_bigDisplayFormat.Get());
 	display->setDepth(-100);
 
 	sc->hideLabel();
@@ -59,7 +64,7 @@ void ResultsMenu::hideMenu()
 
 void ResultsMenu::update()
 {
-	if (m_scene->getScoreCounter()->finishedCounting() && !m_finishedCounting) {
+	if (!m_finishedCounting && m_scene->getScoreCounter()->finishedCounting()) {
 		m_finishedCounting = true;
 		promptName();
 	}

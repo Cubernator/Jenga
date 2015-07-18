@@ -20,12 +20,6 @@ public:
 	}
 
 	template<typename T>
-	void put(const std::wstring& name, T&& v)
-	{
-		m_pool[name] = std::move(v);
-	}
-
-	template<typename T>
 	bool get(const std::wstring& name, T& v) const
 	{
 		if (m_pool.count(name)) {
