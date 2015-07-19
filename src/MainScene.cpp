@@ -33,6 +33,11 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 
 	m_tower.reset(new Tower(this, m_groundShader.get(), m_brickIndices.get()));
 
+	m_background0.reset(new Background(m_groundShader.get(), L"assets\\models\\long_boxes.obj", L"assets\\images\\box1.png"));
+	m_background1.reset(new Background(m_groundShader.get(), L"assets\\models\\wide_boxes.obj", L"assets\\images\\box2.png"));
+	m_background2.reset(new Background(m_groundShader.get(), L"assets\\models\\small_boxes.obj", L"assets\\images\\box3.png"));
+	m_background3.reset(new Background(m_groundShader.get(), L"assets\\models\\tall_boxes.obj", L"assets\\images\\box4.png"));
+
 	m_ground.reset(new Ground(this, m_groundShader.get(), m_brickIndices.get()));
 
 	m_camera.reset(new Camera());
@@ -54,6 +59,10 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 
 	graphics->setLight(l);
 	graphics->setCamera(m_camera.get());
+	objects->add(m_background0.get());
+	objects->add(m_background1.get());
+	objects->add(m_background2.get());
+	objects->add(m_background3.get());
 	objects->add(m_ground.get());
 	objects->add(m_springVisualizer.get());
 	objects->add(m_planeVisualizer.get());
@@ -81,6 +90,11 @@ MainScene::~MainScene()
 	graphics->setCamera(nullptr);
 
 	gui->remove(m_pauseButton.get());
+
+	objects->remove(m_background0.get());
+	objects->remove(m_background1.get());
+	objects->remove(m_background2.get());
+	objects->remove(m_background3.get());
 
 	removeObject(m_ground.get());
 	objects->remove(m_ground.get());

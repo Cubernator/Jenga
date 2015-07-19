@@ -48,3 +48,8 @@ struct VertexPosNormalTex
 	static const D3D11_INPUT_ELEMENT_DESC ied[3];
 	static const UINT num = 3;
 };
+
+bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
+bool operator==(const XMFLOAT2& lhs, const XMFLOAT2& rhs);
+
+bool operator==(const VertexPosNormalTex& lhs, const VertexPosNormalTex& rhs);

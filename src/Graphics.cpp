@@ -316,15 +316,15 @@ XMMATRIX GraphicsInterface::calcLightMatrix()
 		}
 	}
 	
-
+	
 	XMVECTOR sceneMin, sceneMax;
 	objects->getSceneAABB(sceneMin, sceneMax);
 	transformAABB(lightView, sceneMin, sceneMax, sceneMin, sceneMax);
-	minv = XMVectorMax(minv, sceneMin);
-	maxv = XMVectorMin(maxv, sceneMax);
-
-	//minv = sceneMin;
-	//maxv = sceneMax;
+	//minv = XMVectorMax(minv, sceneMin);
+	//maxv = XMVectorMin(maxv, sceneMax);
+	
+	minv = sceneMin;
+	maxv = sceneMax;
 
 	// TODO: properly calculate tightly fitting near and far planes
 

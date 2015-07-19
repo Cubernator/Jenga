@@ -13,7 +13,7 @@ Ground::Ground(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene)
 	m_transform.reset(new PhysicsTransform(this));
 	setTransform(m_transform.get());
 
-	m_texture.reset(new Texture2D(L"assets\\images\\ground.jpg"));
+	m_texture.reset(new Texture2D(L"assets\\images\\ground_specalpha.png"));
 
 	D3D11_SAMPLER_DESC sd;
 	ZeroMemory(&sd, sizeof(D3D11_SAMPLER_DESC));
@@ -29,11 +29,11 @@ Ground::Ground(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene)
 	m_material = {
 		{.6f, .6f, .6f, 1.0f},
 		{1.f, 1.f, 1.f, 1.0f},
-		15.0f,
-		0.4f
+		8.0f,
+		0.6f
 	};
 
-	m_vbuffer.reset(createCuboidBuffer(m_halfSize.x, m_halfSize.y, m_halfSize.z, 30.0f));
+	m_vbuffer.reset(createCuboidBuffer(m_halfSize.x, m_halfSize.y, m_halfSize.z, 20.0f));
 	m_renderer.reset(new MeshRenderer(this, s, m_vbuffer.get(), ib));
 	m_renderer->createConstantBuffer(m_material);
 	m_renderer->addTexture(m_texture.get());

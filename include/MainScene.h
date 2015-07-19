@@ -2,6 +2,7 @@
 #include "PhysicsScene.h"
 
 #include "Tower.h"
+#include "Background.h"
 #include "Ground.h"
 #include "Camera.h"
 #include "DebugArrow.h"
@@ -21,6 +22,7 @@ private:
 
 	unsigned int m_seed;
 
+	std::unique_ptr<Background> m_background0, m_background1, m_background2, m_background3;
 	std::unique_ptr<Ground> m_ground;
 	std::unique_ptr<Camera> m_camera;
 	std::unique_ptr<Shader> m_brickShader, m_groundShader, m_debugShader;

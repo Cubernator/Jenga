@@ -108,6 +108,7 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
   <ItemGroup>
     <ClInclude Include="include\AudioSource.h" />
     <ClInclude Include="include\AudioInterface.h" />
+    <ClInclude Include="include\Background.h" />
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\Collision.h" />
     <ClInclude Include="include\Component.h" />
@@ -117,6 +118,7 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClInclude Include="include\DebugPlane.h" />
     <ClInclude Include="include\DefaultTransform.h" />
     <ClInclude Include="include\DirectX.h" />
+    <ClInclude Include="include\ModelLoader.h" />
     <ClInclude Include="include\Powerup.h" />
     <ClInclude Include="include\ResultsMenu.h" />
     <ClInclude Include="include\Engine.h" />
@@ -131,7 +133,6 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClInclude Include="include\DebugLineRenderer.h" />
     <ClInclude Include="include\MainMenu.h" />
     <ClInclude Include="include\MainScene.h" />
-    <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\MeshRenderer.h" />
     <ClInclude Include="include\Objects.h" />
     <ClInclude Include="include\PauseMenu.h" />
@@ -158,6 +159,7 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
   <ItemGroup>
     <ClCompile Include="src\AudioInterface.cpp" />
     <ClCompile Include="src\AudioSource.cpp" />
+    <ClCompile Include="src\Background.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Component.cpp" />
     <ClCompile Include="src\Content.cpp" />
@@ -165,6 +167,7 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClCompile Include="src\DebugLineRenderer.cpp" />
     <ClCompile Include="src\DebugPlane.cpp" />
     <ClCompile Include="src\DefaultTransform.cpp" />
+    <ClCompile Include="src\ModelLoader.cpp" />
     <ClCompile Include="src\Powerup.cpp" />
     <ClCompile Include="src\ResultsMenu.cpp" />
     <ClCompile Include="src\Engine.cpp" />
@@ -178,7 +181,6 @@ xcopy /s /y /d $(ProjectDir)assets $(OutDir)assets\</Command>
     <ClCompile Include="src\Jenga.cpp" />
     <ClCompile Include="src\MainMenu.cpp" />
     <ClCompile Include="src\MainScene.cpp" />
-    <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\MeshRenderer.cpp" />
     <ClCompile Include="src\Objects.cpp" />
     <ClCompile Include="src\PauseMenu.cpp" />

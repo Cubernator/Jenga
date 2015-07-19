@@ -4,7 +4,12 @@ float4 main(VertexOut input) : SV_TARGET
 {
 	input.normal = normalize(input.normal);
 
-	float4 color = diffuse * colorTex.Sample(samplerState, input.uv);
+	float4 color = colorTex.Sample(samplerState, input.uv);
+
+	// use texture alpha channel as specular map
+	float specInt = specIntensity * color.a;
+
+	color *= diffuse;
 
 	float NdotL = dot(-light.direction, input.normal);
 
@@ -14,7 +19,7 @@ float4 main(VertexOut input) : SV_TARGET
 	// specular lighting
 	float3 R = normalize(reflect(light.direction, input.normal));
 	float3 V = normalize(input.viewDir);
-	lighting += specular.xyz * pow(saturate(dot(R, V)), specPower) * specIntensity;
+	lighting += specular.xyz * pow(saturate(dot(R, V)), specPower) * specInt;
 
 	// shadow
 	lighting *= computeShadow(input.lightSpacePos, NdotL);
