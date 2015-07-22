@@ -122,6 +122,7 @@ public:
 	void setCallback(std::function<void()> callback);
 	void setText(const std::wstring& text);
 	void setStyle(const GUIButtonStyle& style);
+	void setPadding(const D2D_RECT_F& padding);
 };
 
 struct GUITextFieldStyle

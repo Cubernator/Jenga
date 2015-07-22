@@ -10,11 +10,13 @@ class Powerup
 public:
 	virtual ~Powerup() { }
 
-	virtual bool isApplicable() const { return true; };
+	virtual bool isApplicable() const { return true; }
 
 	virtual void apply() = 0;
 
 	virtual void update() { }
+
+	virtual ID2D1Bitmap * getIcon() { return nullptr; }
 };
 
 class MainScene;
@@ -24,12 +26,15 @@ class QuickPlacePowerup : public Powerup
 {
 private:
 	MainScene * m_scene;
+	ComPtr<ID2D1Bitmap> m_icon;
 
 public:
 	QuickPlacePowerup(MainScene * scene);
 
 	bool isApplicable() const final;
 	void apply() final;
+
+	ID2D1Bitmap * getIcon() final;
 };
 
 class StabilizePowerup : public Powerup
@@ -37,23 +42,29 @@ class StabilizePowerup : public Powerup
 private:
 	Tower * m_tower;
 	float m_timer;
+	ComPtr<ID2D1Bitmap> m_icon;
 
 public:
 	StabilizePowerup(MainScene * scene);
 
 	void apply() final;
 	void update() final;
+
+	ID2D1Bitmap * getIcon() final;
 };
 
 class HighlightPowerup : public Powerup
 {
 private:
 	MainScene * m_scene;
+	ComPtr<ID2D1Bitmap> m_icon;
 
 public:
 	HighlightPowerup(MainScene * scene);
 
 	void apply() final;
+
+	ID2D1Bitmap * getIcon() final;
 };
 
 #define NUM_POWERUPS 3

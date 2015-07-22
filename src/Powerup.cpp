@@ -70,13 +70,14 @@ void PowerupManager::makePowerupButtons()
 	for (auto& b : m_powerupButtons) gui->remove(b.get());
 	m_powerupButtons.resize(m_collectedPowerups.size());
 
-	float bw = 64, bh = 64, o = 20, g = 10;
+	float bw = 74, bh = 74, o = 20, g = 10;
 
 	D2D_RECT_F r{ o, SCREEN_HEIGHT - o - bh, o + bw, SCREEN_HEIGHT - o };
 
 	for (std::size_t i = 0; i < m_collectedPowerups.size(); ++i) {
 		unsigned int pwpId = m_collectedPowerups[i];
-		GUIButton * b = new GUIButton(r, std::to_wstring(pwpId), m_buttonStyle);
+		GUIButton * b = new GUIButton(r, m_powerups[pwpId]->getIcon(), m_buttonStyle);
+		b->setPadding({5, 5, 5, 5});
 		b->setCallback([this, i] { usePowerup(i); });
 		m_powerupButtons[i].reset(b);
 		gui->add(b);
@@ -100,7 +101,10 @@ void PowerupManager::clearCollectedPowerups()
 	m_collectedPowerups.clear();
 }
 
-QuickPlacePowerup::QuickPlacePowerup(MainScene * scene) : m_scene(scene) { }
+QuickPlacePowerup::QuickPlacePowerup(MainScene * scene) : m_scene(scene)
+{
+	gui->loadBitmap(L"assets\\images\\quickplace_icon.png", &m_icon);
+}
 
 bool QuickPlacePowerup::isApplicable() const
 {
@@ -112,12 +116,25 @@ void QuickPlacePowerup::apply()
 	m_scene->quickPlace();
 }
 
-StabilizePowerup::StabilizePowerup(MainScene * scene) : m_tower(scene->getTower()), m_timer(0.0f) {}
+ID2D1Bitmap * QuickPlacePowerup::getIcon()
+{
+	return m_icon.Get();
+}
+
+StabilizePowerup::StabilizePowerup(MainScene * scene) : m_tower(scene->getTower()), m_timer(0.0f)
+{
+	gui->loadBitmap(L"assets\\images\\stabilize_icon.png", &m_icon);
+}
 
 void StabilizePowerup::apply()
 {
 	m_tower->setDamping(true);
 	m_timer = 5.0f;
+}
+
+ID2D1Bitmap * StabilizePowerup::getIcon()
+{
+	return m_icon.Get();
 }
 
 void StabilizePowerup::update()
@@ -130,9 +147,17 @@ void StabilizePowerup::update()
 	}
 }
 
-HighlightPowerup::HighlightPowerup(MainScene * scene) : m_scene(scene) {}
+HighlightPowerup::HighlightPowerup(MainScene * scene) : m_scene(scene)
+{
+	gui->loadBitmap(L"assets\\images\\highlight_icon.png", &m_icon);
+}
 
 void HighlightPowerup::apply()
 {
 	m_scene->activateHighlight();
+}
+
+ID2D1Bitmap * HighlightPowerup::getIcon()
+{
+	return m_icon.Get();
 }

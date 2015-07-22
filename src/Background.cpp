@@ -25,15 +25,9 @@ Background::Background(Shader * s, const std::wstring& objFileName, const std::w
 		sd.MaxLOD = FLT_MAX;
 		dev->CreateSamplerState(&sd, &m_samplerState);
 
-		m_material = {
-			{ 1.f, 1.f, 1.f, 1.0f },
-			{ 1.f, 1.f, 1.f, 1.0f },
-			0.0f,
-			0.0f
-		};
-
 		m_renderer->addTexture(m_texture.get());
 		m_renderer->addSampler(m_samplerState.Get());
+		m_renderer->createConstantBuffer(XMFLOAT4(1.f, 1.f, 1.f, 1.f));
 
 		setRenderer(m_renderer.get());
 	}

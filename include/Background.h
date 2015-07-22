@@ -16,8 +16,6 @@ private:
 	std::unique_ptr<Texture2D> m_texture;
 	ComPtr<ID3D11SamplerState> m_samplerState;
 
-	TexSpecular m_material;
-
 public:
 	Background(Shader * s, const std::wstring& objFileName, const std::wstring& texFileName);
 };

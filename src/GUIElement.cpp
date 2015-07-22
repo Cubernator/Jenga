@@ -141,6 +141,11 @@ void GUIButton::setStyle(const GUIButtonStyle& style)
 	m_style = style;
 }
 
+void GUIButton::setPadding(const D2D_RECT_F& padding)
+{
+	m_padding = padding;
+}
+
 GUITextField::GUITextField(const D2D_RECT_F& rect, IDWriteTextFormat * format, const GUITextFieldStyle& style)
 	: GUIElement(rect), m_textFormat(format), m_style(style), m_padding({ 6, 3, 6, 3 }), m_hover(false), m_focused(false)
 {
