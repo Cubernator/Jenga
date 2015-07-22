@@ -25,7 +25,7 @@ private:
 	std::unique_ptr<Background> m_background0, m_background1, m_background2, m_background3;
 	std::unique_ptr<Ground> m_ground;
 	std::unique_ptr<Camera> m_camera;
-	std::unique_ptr<Shader> m_brickShader, m_groundShader, m_debugShader;
+	std::unique_ptr<Shader> m_groundShader, m_backgroundShader, m_brickShader, m_debugShader;
 	std::unique_ptr<IndexBuffer> m_brickIndices;
 
 	std::unique_ptr<Tower> m_tower;

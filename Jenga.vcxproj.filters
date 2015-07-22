@@ -330,6 +330,12 @@
     <FxCompile Include="shader\TexSpecular_ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="shader\BumpSpecular_ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\BumpSpecular_vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\nvToolsExt32_1.dll">
@@ -372,6 +378,9 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shader\shadow.hlsli">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shader\BumpSpecular.hlsli">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

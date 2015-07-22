@@ -4,7 +4,7 @@
 
 #include <array>
 
-typedef VertexPosNormalTex MeshVertex;
+typedef VertexPosTexNormTan MeshVertex;
 typedef VertexBuffer<MeshVertex> MeshVertexBuffer;
 
 struct OBJFaceVertex

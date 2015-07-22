@@ -14,6 +14,7 @@ Ground::Ground(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene)
 	setTransform(m_transform.get());
 
 	m_texture.reset(new Texture2D(L"assets\\images\\ground_specalpha.png"));
+	m_normalMap.reset(new Texture2D(L"assets\\images\\ground_normal.png"));
 
 	D3D11_SAMPLER_DESC sd;
 	ZeroMemory(&sd, sizeof(D3D11_SAMPLER_DESC));
@@ -29,14 +30,15 @@ Ground::Ground(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene)
 	m_material = {
 		{.6f, .6f, .6f, 1.0f},
 		{1.f, 1.f, 1.f, 1.0f},
-		8.0f,
-		0.6f
+		6.0f,
+		0.4f
 	};
 
 	m_vbuffer.reset(createCuboidBuffer(m_halfSize.x, m_halfSize.y, m_halfSize.z, 20.0f));
 	m_renderer.reset(new MeshRenderer(this, s, m_vbuffer.get(), ib));
 	m_renderer->createConstantBuffer(m_material);
 	m_renderer->addTexture(m_texture.get());
+	m_renderer->addTexture(m_normalMap.get());
 	m_renderer->addSampler(m_samplerState);
 	setRenderer(m_renderer.get());
 

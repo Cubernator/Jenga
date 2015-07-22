@@ -63,7 +63,7 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene), 
 
 	std::uniform_real_distribution<float> heightDist(-1.0f, 0.0f); // height variance distribution
 	std::bernoulli_distribution rowTypeDist(0.5f); // row type distribution
-	std::uniform_int_distribution<int> powerupDist(0, NUM_POWERUPS - 1);
+	std::uniform_int_distribution<int> powerupDist(0, NUM_POWERUPS - 1); // powerup type distribution
 
 	m_rows.resize(18);
 
@@ -110,7 +110,10 @@ Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene), 
 				float difficulty = (size.y - minBrickSize) / (rowSize - minBrickSize);
 				difficulty = min(max(difficulty, 0.0f), 1.0f);
 
-				Brick * b = new Brick(this, s, m_brickTex.get(), m_sampler.Get(), ib, size, brickTrans, m_brickMat.get(), difficulty);
+				Brick * b = new Brick(this, s, ib, size, brickTrans, m_brickMat.get(), difficulty);
+				Renderer * r = b->getRenderer();
+				r->addTexture(m_brickTex.get());
+				r->addSampler(m_sampler.Get());
 
 				m_bricks.emplace_back(b);
 				row.setBrickAt(b, k);

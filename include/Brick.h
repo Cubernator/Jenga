@@ -32,7 +32,7 @@ private:
 	px_ptr<PxRigidDynamic> m_actor;
 	std::unique_ptr<PhysicsTransform> m_transform;
 	std::unique_ptr<MeshRenderer> m_renderer;
-	std::unique_ptr<VertexBuffer<VertexPosNormalTex>> m_vbuffer;
+	std::unique_ptr<VertexBuffer<VertexPosTexNormTan>> m_vbuffer;
 
 	std::unique_ptr<AudioSource> m_audioSource;
 
@@ -53,7 +53,7 @@ private:
 	void getLocalAABB(XMVECTOR& min, XMVECTOR& max) const override;
 
 public:
-	Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m, float difficulty);
+	Brick(Tower * tower, Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m, float difficulty);
 
 	void setColor(const XMFLOAT4& c);
 

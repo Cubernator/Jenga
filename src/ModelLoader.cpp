@@ -20,6 +20,8 @@ bool loadMeshFromObjFile(const std::wstring& fileName, MeshVertexBuffer **vb, In
 
 	boost::char_separator<char> wsep(" "), fsep("/");
 
+	// load data
+
 	std::string line;
 	while (std::getline(file, line)) {
 		tokenizer tokens(line, wsep);
@@ -68,6 +70,8 @@ bool loadMeshFromObjFile(const std::wstring& fileName, MeshVertexBuffer **vb, In
 	std::vector<MeshVertex> vertices;
 	std::vector<UINT16> indices;
 
+	// assemble mesh from data
+
 	for (OBJFace face : faces) {
 		for (OBJFaceVertex fvert : face.vertices) {
 			MeshVertex vertex;
@@ -75,6 +79,7 @@ bool loadMeshFromObjFile(const std::wstring& fileName, MeshVertexBuffer **vb, In
 			vertex.tex = uvs[fvert.uv];
 			vertex.tex.y = 1.0f - vertex.tex.y; // invert v coordinate (it's upside down in blender for some reason...)
 			vertex.normal = normals[fvert.normal];
+			XMStoreFloat3(&vertex.tangent, XMVectorZero());
 
 			std::vector<MeshVertex>::iterator l = std::find(vertices.begin(), vertices.end(), vertex);
 			UINT16 i = std::distance(vertices.begin(), l);
@@ -85,6 +90,32 @@ bool loadMeshFromObjFile(const std::wstring& fileName, MeshVertexBuffer **vb, In
 			indices.push_back(i);
 		}
 	}
+
+	// calculate tangents
+
+	float tcU1, tcV1, tcU2, tcV2;
+	XMVECTOR tangent = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	XMVECTOR edge1 = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	XMVECTOR edge2 = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+
+	for (unsigned int i = 0; i < faces.size(); ++i) {
+		edge1 = XMLoadFloat3(&vertices[indices[i * 3]].pos) - XMLoadFloat3(&vertices[indices[i * 3 + 2]].pos);
+		edge2 = XMLoadFloat3(&vertices[indices[i * 3 + 2]].pos) - XMLoadFloat3(&vertices[indices[i * 3 + 1]].pos);
+
+		tcU1 = vertices[indices[(i * 3)]].tex.x - vertices[indices[(i * 3) + 2]].tex.x;
+		tcV1 = vertices[indices[(i * 3)]].tex.y - vertices[indices[(i * 3) + 2]].tex.y;
+
+		tcU2 = vertices[indices[(i * 3) + 2]].tex.x - vertices[indices[(i * 3) + 1]].tex.x;
+		tcV2 = vertices[indices[(i * 3) + 2]].tex.y - vertices[indices[(i * 3) + 1]].tex.y;
+
+		tangent = (tcV1 * edge1 - tcV2 * edge2) * (1.0f / (tcU1 * tcV2 - tcU2 * tcV1));
+
+		for (unsigned int j = 0; j < 3; ++j) {
+			XMStoreFloat3(&vertices[indices[i * 3 + j]].tangent, tangent);
+		}
+	}
+
+	// create buffers
 
 	*vb = new MeshVertexBuffer(vertices.data(), vertices.size());
 	*ib = new IndexBuffer(indices.data(), indices.size());

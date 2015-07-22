@@ -11,7 +11,9 @@ m_camX(30), m_camY(13.5f), m_camDist(30), m_camYANormal(20.0f), m_camYASteep(40.
 m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false), m_maxSpringDist(50.0f),
 m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false), m_highlight(false)
 {
-	m_groundShader.reset(new Shader(L"TexSpecular"));
+	m_groundShader.reset(new Shader(L"BumpSpecular"));
+	m_backgroundShader.reset(new Shader(L"TexDiffuse"));
+	m_brickShader.reset(new Shader(L"TexSpecular"));
 	m_debugShader.reset(new Shader(L"VertexColor"));
 
 	UINT16 indices[] = {
@@ -31,12 +33,12 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 
 	m_brickIndices.reset(new IndexBuffer(indices, 36));
 
-	m_tower.reset(new Tower(this, m_groundShader.get(), m_brickIndices.get()));
+	m_tower.reset(new Tower(this, m_brickShader.get(), m_brickIndices.get()));
 
-	m_background0.reset(new Background(m_groundShader.get(), L"assets\\models\\long_boxes.obj", L"assets\\images\\box1.png"));
-	m_background1.reset(new Background(m_groundShader.get(), L"assets\\models\\wide_boxes.obj", L"assets\\images\\box2.png"));
-	m_background2.reset(new Background(m_groundShader.get(), L"assets\\models\\small_boxes.obj", L"assets\\images\\box3.png"));
-	m_background3.reset(new Background(m_groundShader.get(), L"assets\\models\\tall_boxes.obj", L"assets\\images\\box4.png"));
+	m_background0.reset(new Background(m_backgroundShader.get(), L"assets\\models\\long_boxes.obj", L"assets\\images\\box1.png"));
+	m_background1.reset(new Background(m_backgroundShader.get(), L"assets\\models\\wide_boxes.obj", L"assets\\images\\box2.png"));
+	m_background2.reset(new Background(m_backgroundShader.get(), L"assets\\models\\small_boxes.obj", L"assets\\images\\box3.png"));
+	m_background3.reset(new Background(m_backgroundShader.get(), L"assets\\models\\tall_boxes.obj", L"assets\\images\\box4.png"));
 
 	m_ground.reset(new Ground(this, m_groundShader.get(), m_brickIndices.get()));
 

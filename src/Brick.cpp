@@ -5,7 +5,7 @@
 
 #define MAX_NUMBER_SOUNDS 20
 
-Brick::Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m, float difficulty)
+Brick::Brick(Tower * tower, Shader * s, IndexBuffer * ib, const PxVec3& halfSize, const PxTransform& t, PxMaterial * m, float difficulty)
 	: m_tower(tower), m_halfSize(halfSize), m_rowIndex(0), m_hasPowerup(false), m_powerupId(-1), m_difficulty(difficulty), m_highlight(false)
 {
 	m_actor.reset(PxCreateDynamic(*physics, t, PxBoxGeometry(halfSize), *m, 4.8f));
@@ -24,8 +24,6 @@ Brick::Brick(Tower * tower, Shader * s, Texture2D * tex, ID3D11SamplerState * ss
 	m_vbuffer.reset(createBrickBuffer(halfSize.x, halfSize.y, halfSize.z));
 	m_renderer.reset(new MeshRenderer(this, s, m_vbuffer.get(), ib));
 	m_renderer->createConstantBuffer(m_material);
-	m_renderer->addTexture(tex);
-	m_renderer->addSampler(ss);
 	setRenderer(m_renderer.get());
 
 	m_audioSource.reset(new AudioSource(this));

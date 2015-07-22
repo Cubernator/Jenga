@@ -27,7 +27,7 @@ private:
 
 	MainScene * m_scene;
 
-	std::unique_ptr<Texture2D> m_brickTex;
+	std::unique_ptr<Texture2D> m_brickTex, m_brickNormal;
 	ComPtr<ID3D11SamplerState> m_sampler;
 
 	px_ptr<PxMaterial> m_brickMat;
