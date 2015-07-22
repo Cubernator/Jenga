@@ -44,6 +44,7 @@ PauseMenu::PauseMenu(MainScene * scene) : m_scene(scene)
 	gui->add(m_quitButton.get());
 
 	engine->setTimeScale(0.0f);
+	audio->suspend();
 }
 
 PauseMenu::~PauseMenu()
@@ -53,6 +54,7 @@ PauseMenu::~PauseMenu()
 	gui->remove(m_tintRect.get());
 
 	engine->setTimeScale(1.0f);
+	audio->resume();
 }
 
 void PauseMenu::hideMenu()

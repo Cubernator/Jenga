@@ -77,3 +77,8 @@ void AudioSource::resume()
 {
 	if (m_instance) m_instance->Resume();
 }
+
+void AudioSource::setVolume(float volume)
+{
+	if (m_instance) m_instance->SetVolume(volume);
+}

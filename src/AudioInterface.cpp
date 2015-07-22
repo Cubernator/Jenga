@@ -56,6 +56,11 @@ void AudioInterface::resume()
 	m_engine->Resume();
 }
 
+void AudioInterface::setMasterVolume(float volume)
+{
+	m_engine->SetMasterVolume(volume);
+}
+
 SoundEffect * AudioInterface::loadSoundEffect(const std::wstring& fileName)
 {
 	return new SoundEffect(m_engine.get(), fileName.c_str());

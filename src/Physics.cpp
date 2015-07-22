@@ -100,12 +100,12 @@ void PhysicsInterface::onContact(const PxContactPairHeader& pairHeader, const Px
 	if (!(pairHeader.flags & PxContactPairHeaderFlag::eREMOVED_ACTOR_0)) {
 		c.actor0 = pairHeader.actors[0];
 		c.object0 = (GameObject*)c.actor0->userData;
-		f0 = c.object0->getCollisionCallbackFlags();
+		if (c.object0) f0 = c.object0->getCollisionCallbackFlags();
 	}
 	if (!(pairHeader.flags & PxContactPairHeaderFlag::eREMOVED_ACTOR_1)) {
 		c.actor1 = pairHeader.actors[1];
 		c.object1 = (GameObject*)c.actor1->userData;
-		f1 = c.object1->getCollisionCallbackFlags();
+		if (c.object1) f1 = c.object1->getCollisionCallbackFlags();
 	}
 
 	if ((!f0) && (!f1)) {

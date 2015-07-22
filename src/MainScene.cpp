@@ -71,6 +71,8 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 
 	addObject(m_ground.get());
 
+	createInvWalls();
+
 	gui->loadBitmap(L"assets\\images\\pause_white.png", &m_pauseSymbol);
 	gui->loadBitmap(L"assets\\images\\play_white.png", &m_playSymbol);
 
@@ -85,6 +87,8 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 	m_scoreCounter.reset(new ScoreCounter());
 
 	setCamPos();
+
+	//audio->setMasterVolume(2.0f);
 }
 
 MainScene::~MainScene()
@@ -98,10 +102,36 @@ MainScene::~MainScene()
 	objects->remove(m_background2.get());
 	objects->remove(m_background3.get());
 
+	removeActor(m_wall1.get());
+	removeActor(m_wall2.get());
+	removeActor(m_wall3.get());
+	removeActor(m_wall4.get());
+	removeActor(m_ceiling.get());
+
 	removeObject(m_ground.get());
 	objects->remove(m_ground.get());
 	objects->remove(m_springVisualizer.get());
 	objects->remove(m_planeVisualizer.get());
+}
+
+void MainScene::createInvWalls()
+{
+	m_wallMat.reset(physics->createMaterial(0.0f, 0.0f, 0.0f));
+
+	float dist = 60.0f, height = 100.0f, hheight = height * 0.5f;
+
+	m_wall1.reset(PxCreateStatic(*physics, PxTransform(dist, hheight, 0.0f), PxBoxGeometry(1.0f, hheight, dist), *m_wallMat.get()));
+	m_wall2.reset(PxCreateStatic(*physics, PxTransform(0.0f, hheight, dist), PxBoxGeometry(dist, hheight, 1.0f), *m_wallMat.get()));
+	m_wall3.reset(PxCreateStatic(*physics, PxTransform(-dist, hheight, 0.0f), PxBoxGeometry(1.0f, hheight, dist), *m_wallMat.get()));
+	m_wall4.reset(PxCreateStatic(*physics, PxTransform(0.0f, hheight, -dist), PxBoxGeometry(dist, hheight, 1.0f), *m_wallMat.get()));
+	
+	m_ceiling.reset(PxCreateStatic(*physics, PxTransform(0.0f, height, 0.0f), PxBoxGeometry(dist, 1.0f, dist), *m_wallMat.get()));
+
+	addActor(m_wall1.get());
+	addActor(m_wall2.get());
+	addActor(m_wall3.get());
+	addActor(m_wall4.get());
+	addActor(m_ceiling.get());
 }
 
 ScoreCounter * MainScene::getScoreCounter()
@@ -204,13 +234,6 @@ void MainScene::update()
 			updateSpringPos();
 		} else {
 			updateCamPos();
-
-			/* NOTE: this is a cheat! remove in release version! */
-			if (m_pickedBrick && input->getKeyPressed('B')) {
-				BrickState s = (m_pickedBrick->getRowIndex() == 0) ? BASE : TOWER;
-				m_pickedBrick->setState(s);
-				m_pickedBrick = nullptr;
-			}
 		}
 	}
 
@@ -385,7 +408,7 @@ void MainScene::updateCamPos()
 
 	int md = input->getMouseWheelDelta();
 	if (md != 0) {
-		m_camDist = max(min(m_camDist - md * 2.0f, 100.0f), 6.0f);
+		m_camDist = max(min(m_camDist - md * 2.0f, 60.0f), 6.0f);
 	}
 }
 

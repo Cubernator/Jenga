@@ -23,6 +23,8 @@ public:
 
 	void suspend();
 	void resume();
+
+	void setMasterVolume(float volume);
 };
 
 extern AudioInterface * audio;

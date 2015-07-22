@@ -30,6 +30,9 @@ private:
 
 	std::unique_ptr<Tower> m_tower;
 
+	px_ptr<PxMaterial> m_wallMat;
+	px_ptr<PxRigidStatic> m_wall1, m_wall2, m_wall3, m_wall4, m_ceiling;
+
 	std::unique_ptr<DebugArrow> m_springVisualizer;
 	std::unique_ptr<DebugPlane> m_planeVisualizer;
 
@@ -61,6 +64,8 @@ private:
 	std::unique_ptr<ResultsMenu> m_resultsMenu;
 
 	std::unique_ptr<SeedPrompt> m_seedPrompt;
+
+	void createInvWalls();
 
 	void update() final;
 

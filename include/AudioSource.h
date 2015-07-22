@@ -38,4 +38,6 @@ public:
 	void stop(bool immediate = true);
 	void pause();
 	void resume();
+
+	void setVolume(float volume);
 };
