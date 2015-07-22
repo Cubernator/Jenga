@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 
-ScoreCounter::ScoreCounter() : m_points(0), m_displayedPoints(0)
+ScoreCounter::ScoreCounter() : m_points(0), m_displayedPoints(0), m_speed(1000.0f)
 {
 	std::wstring fontFamily;
 	content->get(L"fontFamily", fontFamily);
@@ -64,10 +64,8 @@ void ScoreCounter::updateDisplay()
 
 void ScoreCounter::update()
 {
-	float pointsPerSecond = 1000.0f; // increase visual counter by this amount every second
-
 	if (m_displayedPoints < m_points) {
-		m_displayedPoints = min(m_displayedPoints + (unsigned int)(engine->getDelta() * pointsPerSecond), m_points);
+		m_displayedPoints = min(m_displayedPoints + (unsigned int)(engine->getDelta() * m_speed), m_points);
 		updateDisplay();
 	}
 }
@@ -82,6 +80,8 @@ void ScoreCounter::brickPlaced(Brick * brick, float accuracy)
 	float accuracyFactor = accuracy * 9.0f + 1.0f;
 
 	m_points += (unsigned int)(basePoints * difficultyFactor * accuracyFactor);
+
+	setCountingDelay(3.0f);
 }
 
 void ScoreCounter::addPowerupScore(unsigned int count)
@@ -89,4 +89,11 @@ void ScoreCounter::addPowerupScore(unsigned int count)
 	unsigned int basePoints = 5000;
 	
 	m_points += basePoints * count;
+
+	setCountingDelay(5.0f);
+}
+
+void ScoreCounter::setCountingDelay(float delay)
+{
+	m_speed = (m_points - m_displayedPoints) / delay;
 }

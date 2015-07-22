@@ -7,6 +7,7 @@ class ScoreCounter
 {
 private:
 	unsigned int m_points, m_displayedPoints;
+	float m_speed;
 
 	std::unique_ptr<GUILabel> m_display, m_label;
 
@@ -31,4 +32,6 @@ public:
 
 	void brickPlaced(Brick * brick, float accuracy);
 	void addPowerupScore(unsigned int count);
+
+	void setCountingDelay(float delay);
 };
