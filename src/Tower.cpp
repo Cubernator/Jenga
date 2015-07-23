@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <numeric>
 
-#define NUM_SPECIAL_BRICKS 20
+#define NUM_SPECIAL_BRICKS 16
 
 void Tower::Row::setState(BrickState state)
 {
@@ -40,7 +40,7 @@ void Tower::Row::removeBrickAt(unsigned int brickIndex)
 
 Tower::Tower(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene), m_positionTolerance(0.3f), m_rotationTolerance(sinf(toRadf(10.0f))), m_brickSize(7.5f, 1.5f, 2.5f)
 {
-	m_brickTex.reset(new Texture2D(L"assets\\images\\brick.jpg"));
+	m_brickTex.reset(new Texture2D(L"assets\\images\\brick.png"));
 
 	D3D11_SAMPLER_DESC sd;
 	ZeroMemory(&sd, sizeof(D3D11_SAMPLER_DESC));

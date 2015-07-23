@@ -12,7 +12,6 @@ m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false), m_maxSpringDis
 m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false), m_highlight(false)
 {
 	m_groundShader.reset(new Shader(L"BumpSpecular"));
-	m_backgroundShader.reset(new Shader(L"TexDiffuse"));
 	m_brickShader.reset(new Shader(L"TexSpecular"));
 	m_debugShader.reset(new Shader(L"VertexColor"));
 
@@ -35,16 +34,16 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 
 	m_tower.reset(new Tower(this, m_brickShader.get(), m_brickIndices.get()));
 
-	m_background0.reset(new Background(m_backgroundShader.get(), L"assets\\models\\long_boxes.obj", L"assets\\images\\box1.png"));
-	m_background1.reset(new Background(m_backgroundShader.get(), L"assets\\models\\wide_boxes.obj", L"assets\\images\\box2.png"));
-	m_background2.reset(new Background(m_backgroundShader.get(), L"assets\\models\\small_boxes.obj", L"assets\\images\\box3.png"));
-	m_background3.reset(new Background(m_backgroundShader.get(), L"assets\\models\\tall_boxes.obj", L"assets\\images\\box4.png"));
+	m_background0.reset(new Background(m_brickShader.get(), L"assets\\models\\long_boxes.obj", L"assets\\images\\box1.png"));
+	m_background1.reset(new Background(m_brickShader.get(), L"assets\\models\\wide_boxes.obj", L"assets\\images\\box2.png"));
+	m_background2.reset(new Background(m_brickShader.get(), L"assets\\models\\small_boxes.obj", L"assets\\images\\box3.png"));
+	m_background3.reset(new Background(m_brickShader.get(), L"assets\\models\\tall_boxes.obj", L"assets\\images\\box4.png"));
 
 	m_ground.reset(new Ground(this, m_groundShader.get(), m_brickIndices.get()));
 
 	m_camera.reset(new Camera());
 	m_camera->setFOV(60.0f);
-	m_camera->setBackColor(XMFLOAT4(0.f, 0.2f, 0.4f, 1.f));
+	m_camera->setBackColor(XMFLOAT4(0.2f, 0.5f, 0.78f, 1.f));
 
 	Light l;
 	XMStoreFloat3(&l.direction, XMVector3Normalize(XMVectorSet(-0.8f, -1.0f, 0.4f, 0.0f)));
@@ -403,7 +402,7 @@ void MainScene::updateCamPos()
 
 		if (m_camX < 0.0f) m_camX += 360.0f;
 		else if (m_camX >= 360.0f) m_camX -= 360.0f;
-		m_camY = max(m_camY, 0.0f);
+		m_camY = min(max(m_camY, 0.0f), 50.0f);
 	}
 
 	int md = input->getMouseWheelDelta();

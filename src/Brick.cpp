@@ -17,8 +17,8 @@ Brick::Brick(Tower * tower, Shader * s, IndexBuffer * ib, const PxVec3& halfSize
 	m_material = {
 		{ 1.0f, 1.0f, 1.0f, 1.0f },
 		{ 1.0f, 1.0f, 1.0f, 1.0f },
-		8.0f,
-		0.5f
+		7.0f,
+		0.4f
 	};
 
 	m_vbuffer.reset(createBrickBuffer(halfSize.x, halfSize.y, halfSize.z));

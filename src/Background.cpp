@@ -25,9 +25,16 @@ Background::Background(Shader * s, const std::wstring& objFileName, const std::w
 		sd.MaxLOD = FLT_MAX;
 		dev->CreateSamplerState(&sd, &m_samplerState);
 
+		TexSpecular material = {
+			{1.f, 1.f, 1.f, 1.f},
+			{1.f, 1.f, 1.f, 1.f},
+			3.f,
+			0.4f
+		};
+
 		m_renderer->addTexture(m_texture.get());
 		m_renderer->addSampler(m_samplerState.Get());
-		m_renderer->createConstantBuffer(XMFLOAT4(1.f, 1.f, 1.f, 1.f));
+		m_renderer->createConstantBuffer(material);
 
 		setRenderer(m_renderer.get());
 	}

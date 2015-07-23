@@ -28,10 +28,10 @@ Ground::Ground(MainScene * scene, Shader * s, IndexBuffer * ib) : m_scene(scene)
 	dev->CreateSamplerState(&sd, &m_samplerState);
 
 	m_material = {
-		{.6f, .6f, .6f, 1.0f},
+		{0.8f, 0.8f, 0.8f, 1.0f},
 		{1.f, 1.f, 1.f, 1.0f},
-		6.0f,
-		0.4f
+		3.0f,
+		0.45f
 	};
 
 	m_vbuffer.reset(createCuboidBuffer(m_halfSize.x, m_halfSize.y, m_halfSize.z, 20.0f));

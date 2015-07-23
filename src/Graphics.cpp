@@ -44,6 +44,20 @@ GraphicsInterface::GraphicsInterface(HWND hWnd) : m_hWnd(hWnd), m_cam(nullptr), 
 #if _DEBUG
 	// acquire debug interface
 	dev->QueryInterface(IID_PPV_ARGS(&m_debug));
+
+	ComPtr<ID3D11InfoQueue> d3dInfoQueue;
+	HRESULT hr = m_debug->QueryInterface(IID_PPV_ARGS(&d3dInfoQueue));
+	if (SUCCEEDED(hr)) {
+		D3D11_MESSAGE_ID hide[] =
+		{
+			D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET,
+		};
+		D3D11_INFO_QUEUE_FILTER filter;
+		memset(&filter, 0, sizeof(filter));
+		filter.DenyList.NumIDs = _countof(hide);
+		filter.DenyList.pIDList = hide;
+		d3dInfoQueue->AddStorageFilterEntries(&filter);
+	}
 #endif
 
 	// set multisampling to 4x
@@ -296,13 +310,19 @@ void GraphicsInterface::present()
 
 XMMATRIX GraphicsInterface::calcLightMatrix()
 {
+	// NOTE: some of these calculations might be wrong or unnecessary, but since shadow maps are such a complex topic, I didn't want to spend too much time on this...
+
+	// calculate light view matrix
 	XMMATRIX lightView = XMMatrixLookToLH(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMLoadFloat3(&m_frame.light.direction), XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
 
+	XMVECTOR minv = XMVectorReplicate(FLT_MAX), maxv = XMVectorReplicate(-FLT_MAX);
+
+	/*
 	XMMATRIX camProj = m_cam->getProjectionMatrix();
 	PxMat44 ivt(m_cam->getTransform()->getTransform());
 	XMMATRIX m = XMMatrixInverse(&XMMatrixDeterminant(camProj), camProj) * XMLoadFloat4x4((XMFLOAT4X4*)&ivt) * lightView;
 
-	XMVECTOR v, minv = XMVectorReplicate(FLT_MAX), maxv = XMVectorReplicate(-FLT_MAX);
+	XMVECTOR v;
 	
 	float c[] = {-1.0f, 1.0f};
 	for (float x : c) {
@@ -315,19 +335,20 @@ XMMATRIX GraphicsInterface::calcLightMatrix()
 			}
 		}
 	}
-	
-	
+	*/
+
+	// for now, we just calculate the light projection matrix in such a way, that the entire scene fits into the shadow map
 	XMVECTOR sceneMin, sceneMax;
 	objects->getSceneAABB(sceneMin, sceneMax);
 	transformAABB(lightView, sceneMin, sceneMax, sceneMin, sceneMax);
+	
 	//minv = XMVectorMax(minv, sceneMin);
 	//maxv = XMVectorMin(maxv, sceneMax);
 	
 	minv = sceneMin;
 	maxv = sceneMax;
 
-	// TODO: properly calculate tightly fitting near and far planes
-
+	// snap to shadow texels
 	float bound = max(XMVectorGetX(maxv) - XMVectorGetX(minv), XMVectorGetY(maxv) - XMVectorGetY(minv));
 	float up = bound / m_shadowMapDimension;
 	XMVECTOR unitsPerTexel = XMVectorSet(up, up, 1.0f, 0.0f);
