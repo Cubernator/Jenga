@@ -132,7 +132,7 @@ void ResultsMenu::showOptions()
 
 	br.top += h;
 	br.bottom += h;
-	m_quitButton.reset(new GUIButton(br, L"Quit Game", buttonFormat, bs));
+	m_quitButton.reset(new GUIButton(br, L"Quit", buttonFormat, bs));
 	m_quitButton->setCallback([this] { engine->stop(); });
 	gui->add(m_quitButton.get());
 }

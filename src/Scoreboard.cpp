@@ -46,7 +46,7 @@ Scoreboard::Scoreboard(MainMenu * menu) : m_menu(menu), m_back(false), m_switch(
 	m_rightButton->setCallback([this] { m_switch = true; });
 	gui->add(m_rightButton.get());
 
-	m_backButton.reset(new GUIButton({ hw - 200, SCREEN_HEIGHT - 100, hw + 200, SCREEN_HEIGHT - 50 }, L"Back to main menu", m_buttonFormat, m_buttonStyle));
+	m_backButton.reset(new GUIButton({ hw - 200, SCREEN_HEIGHT - 100, hw + 200, SCREEN_HEIGHT - 50 }, L"Main Menu", m_buttonFormat, m_buttonStyle));
 	m_backButton->setCallback([this] { m_back = true; });
 	gui->add(m_backButton.get());
 
@@ -69,11 +69,12 @@ Scoreboard::~Scoreboard()
 void Scoreboard::update()
 {
 	if (m_back) {
+		m_back = false;
 		m_menu->reset();
 	} else if (m_start) {
-		unsigned int seed = m_seed;
-		bool special = m_special;
-		engine->enterScene<MainScene>(special, seed);
+		m_start = false;
+		m_menu->startRound(m_special, m_seed);
+		return;
 	} else if (m_switch) {
 		m_switch = false;
 		switchBoards();

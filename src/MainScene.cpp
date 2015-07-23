@@ -6,10 +6,11 @@
 #include "utility.h"
 #include "ScoreFile.h"
 
-MainScene::MainScene(PxSceneDesc desc, bool specialMode, unsigned int seed) : PhysicsScene(desc),
+MainScene::MainScene(PxSceneDesc desc) : PhysicsScene(desc),
 m_camYANormal(20.0f), m_camYASteep(40.0f), m_xSens(5), m_ySens(1.f),
+m_camX(30), m_camY(13.5f), m_camDist(30), m_camYAngle(20.0f),
 m_controlMode(false), m_showDebug(false), m_maxSpringDist(50.0f),
-m_paused(true), m_canPause(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false), m_highlight(false)
+m_paused(false), m_canPause(true), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false), m_highlight(false)
 {
 	m_groundShader.reset(new Shader(L"BumpSpecular"));
 	m_brickShader.reset(new Shader(L"TexSpecular"));
@@ -73,15 +74,9 @@ m_paused(true), m_canPause(false), m_roundOver(false), m_togglePause(false), m_r
 	gui->loadBitmap(L"assets\\images\\pause_white.png", &m_pauseSymbol);
 	gui->loadBitmap(L"assets\\images\\play_white.png", &m_playSymbol);
 
-	m_pauseButton.reset(new GUIButton({ 10, 10, 42, 42 }, L""));
-	m_pauseButton->setCallback([this] { m_togglePause = true; });
-	m_pauseButton->setDepth(-100);
+	m_mainMenu.reset(new MainMenu(this));
 
-	m_powerupManager.reset(new PowerupManager(this));
-
-	m_scoreCounter.reset(new ScoreCounter());
-
-	startRound(specialMode, seed);
+	setCamPos();
 
 	//audio->setMasterVolume(2.0f);
 }
@@ -133,17 +128,43 @@ void MainScene::startRound(bool specialMode, unsigned int seed)
 {
 	m_specialMode = specialMode;
 	m_seed = seed;
-	m_camX = 30; m_camY = 13.5f; m_camDist = 30; m_camYAngle = m_camYANormal;
+	m_camY = 13.5f; m_camDist = 30; m_camYAngle = m_camYANormal;
 	m_pickedBrick = nullptr; m_controlMode = false;
 	m_roundOver = false; m_togglePause = false; m_restart = false; m_backToMain = false; m_highlight = false;
 	m_tower.reset(new Tower(this, m_brickShader.get(), m_brickIndices.get()));
 	m_seedPrompt.reset();
 	m_resultsMenu.reset();
+	m_mainMenu.reset();
+
+	m_canPause = false;
+	m_paused = true;
+	m_pauseButton.reset(new GUIButton({ 10, 10, 42, 42 }, L""));
+	m_pauseButton->setCallback([this] { togglePause(); });
+	m_pauseButton->setDepth(-100);
+
+	m_powerupManager.reset(new PowerupManager(this));
+	m_scoreCounter.reset(new ScoreCounter());
 
 	setCanPause(true);
 	setPaused(false);
 
 	setCamPos();
+}
+
+void MainScene::stop()
+{
+	m_tower.reset();
+	setCanPause(false);
+	m_pauseButton.reset();
+	m_resultsMenu.reset();
+	m_pauseMenu.reset();
+	m_powerupManager.reset();
+	m_scoreCounter.reset();
+
+	m_camYAngle = m_camYANormal;
+	m_camX = 30.0f;
+	m_camY = 13.5f;
+	m_camDist = 30;
 }
 
 ScoreCounter * MainScene::getScoreCounter()
@@ -195,6 +216,11 @@ void MainScene::setPaused(bool paused)
 
 void MainScene::togglePause()
 {
+	m_togglePause = true;
+}
+
+void MainScene::togglePauseInt()
+{
 	setPaused(!m_paused);
 }
 
@@ -210,73 +236,86 @@ void MainScene::backToMainMenu()
 
 void MainScene::update()
 {
-	if (m_togglePause) {
-		m_togglePause = false;
-		togglePause();
-	}
+	if (m_mainMenu) {
+		m_mainMenu->update();
 
-	if (m_restart) {
-		m_restart = false;
-		m_seedPrompt.reset(new SeedPrompt(m_seed));
+		m_camX += engine->getRealDelta() * 2.0f;
+		if (m_camX < 0.0f) m_camX += 360.0f;
+		else if (m_camX >= 360.0f) m_camX -= 360.0f;
 
-		if (m_resultsMenu) m_resultsMenu->hideMenu();
-		if (m_pauseMenu) m_pauseMenu->hideMenu();
-		setCanPause(false);
-	}
-
-	if (m_seedPrompt) {
-		m_seedPrompt->update();
-
-		if (m_seedPrompt->isDone()) {
-			startRound(m_specialMode, m_seedPrompt->getSeed());
-		}
-	}
-
-	if (m_backToMain) {
-		engine->enterScene<MainMenu>();
-		return;
-	}
-
-	if (input->getKeyPressed('D')) {
-		m_showDebug = !m_showDebug;
-		if (!m_showDebug) {
-			m_springVisualizer->getRenderer()->setEnabled(false);
-			m_planeVisualizer->getRenderer()->setEnabled(false);
-		} else if (m_spring) {
-			m_springVisualizer->getRenderer()->setEnabled(true);
-			m_planeVisualizer->getRenderer()->setEnabled(true);
-		}
-	}
-
-	if (!(m_paused || m_roundOver)) {
-		if (input->getMouseButtonPressed(MBUTTON1)) {
-			tryPickBrick();
+	} else {
+		if (m_togglePause) {
+			m_togglePause = false;
+			togglePauseInt();
 		}
 
-		if (input->getMouseButtonDown(MBUTTON1) && m_spring) {
-			updateSpringPos();
-		} else {
-			updateCamPos();
-		}
-	}
+		if (m_restart) {
+			m_restart = false;
+			m_seedPrompt.reset(new SeedPrompt(m_seed));
 
-	if (input->getMouseButtonReleased(MBUTTON1)) {
-		releaseBrick();
+			if (m_resultsMenu) m_resultsMenu->hideMenu();
+			if (m_pauseMenu) m_pauseMenu->hideMenu();
+			setCanPause(false);
+		}
+
+		if (m_seedPrompt) {
+			m_seedPrompt->update();
+
+			if (m_seedPrompt->isDone()) {
+				startRound(m_specialMode, m_seedPrompt->getSeed());
+			}
+		}
+
+		if (m_backToMain) {
+			stop();
+			m_mainMenu.reset(new MainMenu(this));
+			return;
+		}
+
+		if (input->getKeyPressed('D')) {
+			m_showDebug = !m_showDebug;
+			if (!m_showDebug) {
+				m_springVisualizer->getRenderer()->setEnabled(false);
+				m_planeVisualizer->getRenderer()->setEnabled(false);
+			} else if (m_spring) {
+				m_springVisualizer->getRenderer()->setEnabled(true);
+				m_planeVisualizer->getRenderer()->setEnabled(true);
+			}
+		}
+
+		if (!(m_paused || m_roundOver)) {
+			if (input->getMouseButtonPressed(MBUTTON1)) {
+				tryPickBrick();
+			}
+
+			if (input->getMouseButtonDown(MBUTTON1) && m_spring) {
+				updateSpringPos();
+			} else {
+				updateCamPos();
+			}
+		}
+
+		if (input->getMouseButtonReleased(MBUTTON1)) {
+			releaseBrick();
+		}
+
+		if (m_spring) {
+			PxVec3 lp = m_spring->getLocalPose(PxJointActorIndex::eACTOR1).p;
+			lp = m_pickedBrick->getTransform()->getTransform().transform(lp);
+			m_springVisualizer->setProps(lp, m_springPos);
+		}
+
+		if (m_resultsMenu) {
+			m_resultsMenu->update();
+		} else if (m_powerupManager) {
+			m_powerupManager->update();
+		}
+
+		if (m_tower) m_tower->update();
+		if (m_scoreCounter) m_scoreCounter->update();
 	}
 
 	setCamPos();
-
-	if (m_spring) {
-		PxVec3 lp = m_spring->getLocalPose(PxJointActorIndex::eACTOR1).p;
-		lp = m_pickedBrick->getTransform()->getTransform().transform(lp);
-		m_springVisualizer->setProps(lp, m_springPos);
-	}
-
-	m_tower->update();
-	m_powerupManager->update();
-	m_scoreCounter->update();
-
-	if (m_resultsMenu) m_resultsMenu->update();
 }
 
 void MainScene::tryPickBrick()

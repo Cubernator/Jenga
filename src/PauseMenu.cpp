@@ -33,13 +33,13 @@ PauseMenu::PauseMenu(MainScene * scene) : m_scene(scene)
 
 	br.top += h;
 	br.bottom += h;
-	m_mainMenuButton.reset(new GUIButton(br, L"Back to Main Menu", buttonFormat, bs));
+	m_mainMenuButton.reset(new GUIButton(br, L"Main Menu", buttonFormat, bs));
 	m_mainMenuButton->setCallback([this] { m_scene->backToMainMenu(); });
 	gui->add(m_mainMenuButton.get());
 
 	br.top += h;
 	br.bottom += h;
-	m_quitButton.reset(new GUIButton(br, L"Quit Game", buttonFormat, bs));
+	m_quitButton.reset(new GUIButton(br, L"Quit", buttonFormat, bs));
 	m_quitButton->setCallback([this] { engine->stop(); });
 	gui->add(m_quitButton.get());
 

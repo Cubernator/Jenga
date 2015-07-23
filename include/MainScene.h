@@ -11,6 +11,7 @@
 #include "GUIElement.h"
 #include "ResultsMenu.h"
 #include "PauseMenu.h"
+#include "MainMenu.h"
 #include "ScoreCounter.h"
 
 #include <vector>
@@ -66,6 +67,8 @@ private:
 
 	std::unique_ptr<SeedPrompt> m_seedPrompt;
 
+	std::unique_ptr<MainMenu> m_mainMenu;
+
 	void createInvWalls();
 
 	void update() final;
@@ -76,8 +79,11 @@ private:
 	void releaseBrick();
 	void setCamPos();
 
+	void stop();
+	void togglePauseInt();
+
 public:
-	MainScene(PxSceneDesc desc, bool specialMode, unsigned int seed);
+	MainScene(PxSceneDesc desc);
 	~MainScene();
 
 	void startRound(bool specialMode, unsigned int seed);
@@ -99,8 +105,8 @@ public:
 
 	void setCanPause(bool canPause);
 	void setPaused(bool paused);
-	void togglePause();
 	void restart();
 	void backToMainMenu();
+	void togglePause();
 };
 

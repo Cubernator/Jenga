@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <windowsx.h>
 #include "Engine.h"
-#include "MainMenu.h"
+#include "MainScene.h"
 
 #include "constants.h"
 #include "GUI.h"
@@ -117,7 +117,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		Resources r;
 
-		e.enterScene<MainMenu>();
+		e.enterScene<MainScene>();
 
 		result = e.run();
 	}

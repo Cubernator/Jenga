@@ -5,7 +5,7 @@
 #include "Content.h"
 #include "Scoreboard.h"
 
-MainMenu::MainMenu() : m_start(false), m_viewScoreboard(false), m_hidden(true)
+MainMenu::MainMenu(MainScene * scene) : m_scene(scene), m_start(false), m_viewScoreboard(false), m_hidden(true)
 {
 	IDWriteTextFormat *buttonFormat, *titleFormat;
 	content->get(L"menuButtonFormat", buttonFormat);
@@ -13,6 +13,9 @@ MainMenu::MainMenu() : m_start(false), m_viewScoreboard(false), m_hidden(true)
 
 	GUIButtonStyle bs;
 	content->get(L"menuButtonStyle", bs);
+
+	m_tintRect.reset(new GUIRectangle({ 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT }, D2D1::ColorF(0, 0.2f)));
+	gui->add(m_tintRect.get());
 
 	m_titleLabel.reset(new GUILabel({ 0, 0, SCREEN_WIDTH, 200 }, L"Jenga 3D", titleFormat));
 
@@ -37,12 +40,12 @@ MainMenu::MainMenu() : m_start(false), m_viewScoreboard(false), m_hidden(true)
 
 	br.top += h;
 	br.bottom += h;
-	m_scoreButton.reset(new GUIButton(br, L"View Scoreboard", buttonFormat, bs));
+	m_scoreButton.reset(new GUIButton(br, L"Highscores", buttonFormat, bs));
 	m_scoreButton->setCallback([this] { m_viewScoreboard = true; });
 
 	br.top += h;
 	br.bottom += h;
-	m_quitButton.reset(new GUIButton(br, L"Quit Game", buttonFormat, bs));
+	m_quitButton.reset(new GUIButton(br, L"Quit", buttonFormat, bs));
 	m_quitButton->setCallback([this] { engine->stop(); });
 
 	setHidden(false);
@@ -51,6 +54,12 @@ MainMenu::MainMenu() : m_start(false), m_viewScoreboard(false), m_hidden(true)
 MainMenu::~MainMenu()
 {
 	setHidden(true);
+	gui->remove(m_tintRect.get());
+}
+
+void MainMenu::startRound(bool specialMode, unsigned int seed)
+{
+	m_scene->startRound(specialMode, seed);
 }
 
 void MainMenu::reset()
@@ -64,9 +73,7 @@ void MainMenu::update()
 		m_seedPrompt->update();
 
 		if (m_seedPrompt->isDone()) {
-			bool sm = m_specialMode;
-			unsigned int seed = m_seedPrompt->getSeed();
-			engine->enterScene<MainScene>(sm, seed);
+			startRound(m_specialMode, m_seedPrompt->getSeed());
 			return;
 		} else if (m_seedPrompt->isCanceled()) {
 			reset();
