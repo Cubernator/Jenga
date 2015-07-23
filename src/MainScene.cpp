@@ -6,10 +6,10 @@
 #include "utility.h"
 #include "ScoreFile.h"
 
-MainScene::MainScene(PxSceneDesc desc, bool specialMode, unsigned int seed) : PhysicsScene(desc), m_specialMode(specialMode), m_seed(seed),
-m_camX(30), m_camY(13.5f), m_camDist(30), m_camYANormal(20.0f), m_camYASteep(40.0f), m_camYAngle(20.0f), m_xSens(5), m_ySens(1.f),
-m_pickedBrick(nullptr), m_controlMode(false), m_showDebug(false), m_maxSpringDist(50.0f),
-m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false), m_highlight(false)
+MainScene::MainScene(PxSceneDesc desc, bool specialMode, unsigned int seed) : PhysicsScene(desc),
+m_camYANormal(20.0f), m_camYASteep(40.0f), m_xSens(5), m_ySens(1.f),
+m_controlMode(false), m_showDebug(false), m_maxSpringDist(50.0f),
+m_paused(true), m_canPause(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_backToMain(false), m_highlight(false)
 {
 	m_groundShader.reset(new Shader(L"BumpSpecular"));
 	m_brickShader.reset(new Shader(L"TexSpecular"));
@@ -31,8 +31,6 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 	};
 
 	m_brickIndices.reset(new IndexBuffer(indices, 36));
-
-	m_tower.reset(new Tower(this, m_brickShader.get(), m_brickIndices.get()));
 
 	m_background0.reset(new Background(m_brickShader.get(), L"assets\\models\\long_boxes.obj", L"assets\\images\\box1.png"));
 	m_background1.reset(new Background(m_brickShader.get(), L"assets\\models\\wide_boxes.obj", L"assets\\images\\box2.png"));
@@ -75,17 +73,15 @@ m_paused(false), m_roundOver(false), m_togglePause(false), m_restart(false), m_b
 	gui->loadBitmap(L"assets\\images\\pause_white.png", &m_pauseSymbol);
 	gui->loadBitmap(L"assets\\images\\play_white.png", &m_playSymbol);
 
-	GUIButtonStyle pbs = { GUIStyleState(m_pauseSymbol.Get()) };
-	m_pauseButton.reset(new GUIButton({ 10, 10, 42, 42 }, L"", pbs));
-	m_pauseButton->setCallback([this] { togglePause(); });
+	m_pauseButton.reset(new GUIButton({ 10, 10, 42, 42 }, L""));
+	m_pauseButton->setCallback([this] { m_togglePause = true; });
 	m_pauseButton->setDepth(-100);
-	gui->add(m_pauseButton.get());
 
 	m_powerupManager.reset(new PowerupManager(this));
 
 	m_scoreCounter.reset(new ScoreCounter());
 
-	setCamPos();
+	startRound(specialMode, seed);
 
 	//audio->setMasterVolume(2.0f);
 }
@@ -133,6 +129,23 @@ void MainScene::createInvWalls()
 	addActor(m_ceiling.get());
 }
 
+void MainScene::startRound(bool specialMode, unsigned int seed)
+{
+	m_specialMode = specialMode;
+	m_seed = seed;
+	m_camX = 30; m_camY = 13.5f; m_camDist = 30; m_camYAngle = m_camYANormal;
+	m_pickedBrick = nullptr; m_controlMode = false;
+	m_roundOver = false; m_togglePause = false; m_restart = false; m_backToMain = false; m_highlight = false;
+	m_tower.reset(new Tower(this, m_brickShader.get(), m_brickIndices.get()));
+	m_seedPrompt.reset();
+	m_resultsMenu.reset();
+
+	setCanPause(true);
+	setPaused(false);
+
+	setCamPos();
+}
+
 ScoreCounter * MainScene::getScoreCounter()
 {
 	return m_scoreCounter.get();
@@ -158,13 +171,31 @@ void MainScene::brickFaulted()
 	if (!m_roundOver) {
 		m_roundOver = true;
 		m_resultsMenu.reset(new ResultsMenu(this));
-		gui->remove(m_pauseButton.get());
+		setCanPause(false);
+	}
+}
+
+void MainScene::setCanPause(bool canPause)
+{
+	if (canPause != m_canPause) {
+		m_canPause = canPause;
+		if (m_canPause) gui->add(m_pauseButton.get());
+		else gui->remove(m_pauseButton.get());
+	}
+}
+
+void MainScene::setPaused(bool paused)
+{
+	if (paused != m_paused) {
+		m_paused = paused;
+		m_pauseButton->setStyle({ GUIStyleState(m_paused ? m_playSymbol.Get() : m_pauseSymbol.Get()) });
+		m_pauseMenu.reset(m_paused ? new PauseMenu(this) : nullptr);
 	}
 }
 
 void MainScene::togglePause()
 {
-	m_togglePause = true;
+	setPaused(!m_paused);
 }
 
 void MainScene::restart()
@@ -181,11 +212,7 @@ void MainScene::update()
 {
 	if (m_togglePause) {
 		m_togglePause = false;
-
-		m_paused = !m_paused;
-
-		m_pauseButton->setStyle({ GUIStyleState(m_paused ? m_playSymbol.Get() : m_pauseSymbol.Get()) });
-		m_pauseMenu.reset(m_paused ? new PauseMenu(this) : nullptr);
+		togglePause();
 	}
 
 	if (m_restart) {
@@ -194,17 +221,14 @@ void MainScene::update()
 
 		if (m_resultsMenu) m_resultsMenu->hideMenu();
 		if (m_pauseMenu) m_pauseMenu->hideMenu();
-		gui->remove(m_pauseButton.get());
+		setCanPause(false);
 	}
 
 	if (m_seedPrompt) {
 		m_seedPrompt->update();
 
 		if (m_seedPrompt->isDone()) {
-			bool sm = m_specialMode;
-			unsigned int seed = m_seedPrompt->getSeed();
-			engine->enterScene<MainScene>(sm, seed); // restart
-			return;
+			startRound(m_specialMode, m_seedPrompt->getSeed());
 		}
 	}
 

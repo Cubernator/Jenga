@@ -4,6 +4,7 @@
 #include "GUIElement.h"
 #include "AudioInterface.h"
 #include "SeedPrompt.h"
+#include "Scoreboard.h"
 
 class MainMenu : public Scene
 {
@@ -13,16 +14,20 @@ private:
 
 	std::unique_ptr<SeedPrompt> m_seedPrompt;
 
-	bool m_start, m_specialMode, m_viewScoreboard;
+	std::unique_ptr<Scoreboard> m_scoreboard;
+
+	bool m_start, m_specialMode, m_viewScoreboard, m_hidden, m_reset;
 
 	void update() final;
 
 	void showSeedPrompt();
-	void hideMenu();
 
 	void loadResources();
 
 public:
 	MainMenu();
 	~MainMenu();
+
+	void setHidden(bool hidden);
+	void reset();
 };

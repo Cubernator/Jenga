@@ -5,7 +5,7 @@
 #include "Content.h"
 #include "Scoreboard.h"
 
-MainMenu::MainMenu() : m_start(false), m_viewScoreboard(false)
+MainMenu::MainMenu() : m_start(false), m_viewScoreboard(false), m_hidden(true)
 {
 	IDWriteTextFormat *buttonFormat, *titleFormat;
 	content->get(L"menuButtonFormat", buttonFormat);
@@ -15,7 +15,6 @@ MainMenu::MainMenu() : m_start(false), m_viewScoreboard(false)
 	content->get(L"menuButtonStyle", bs);
 
 	m_titleLabel.reset(new GUILabel({ 0, 0, SCREEN_WIDTH, 200 }, L"Jenga 3D", titleFormat));
-	gui->add(m_titleLabel.get());
 
 	float hw = SCREEN_WIDTH * 0.5f, hh = SCREEN_HEIGHT * 0.5f;
 
@@ -27,7 +26,6 @@ MainMenu::MainMenu() : m_start(false), m_viewScoreboard(false)
 		m_start = true;
 		m_specialMode = false;
 	});
-	gui->add(m_classicButton.get());
 
 	br.top += h;
 	br.bottom += h;
@@ -36,24 +34,28 @@ MainMenu::MainMenu() : m_start(false), m_viewScoreboard(false)
 		m_start = true;
 		m_specialMode = true;
 	});
-	gui->add(m_specialButton.get());
 
 	br.top += h;
 	br.bottom += h;
 	m_scoreButton.reset(new GUIButton(br, L"View Scoreboard", buttonFormat, bs));
 	m_scoreButton->setCallback([this] { m_viewScoreboard = true; });
-	gui->add(m_scoreButton.get());
 
 	br.top += h;
 	br.bottom += h;
 	m_quitButton.reset(new GUIButton(br, L"Quit Game", buttonFormat, bs));
 	m_quitButton->setCallback([this] { engine->stop(); });
-	gui->add(m_quitButton.get());
+
+	setHidden(false);
 }
 
 MainMenu::~MainMenu()
 {
-	hideMenu();
+	setHidden(true);
+}
+
+void MainMenu::reset()
+{
+	m_reset = true;
 }
 
 void MainMenu::update()
@@ -65,26 +67,53 @@ void MainMenu::update()
 			bool sm = m_specialMode;
 			unsigned int seed = m_seedPrompt->getSeed();
 			engine->enterScene<MainScene>(sm, seed);
+			return;
+		} else if (m_seedPrompt->isCanceled()) {
+			reset();
 		}
 	} else if (m_start) {
 		m_start = false;
 		showSeedPrompt();
 	} else if (m_viewScoreboard) {
-		engine->enterScene<Scoreboard>();
+		m_viewScoreboard = false;
+		setHidden(true);
+		m_scoreboard.reset(new Scoreboard(this));
+	}
+
+	if (m_reset) {
+		m_reset = false;
+		m_scoreboard.reset();
+		m_seedPrompt.reset();
+		setHidden(false);
+	}
+
+	if (m_scoreboard) {
+		m_scoreboard->update();
 	}
 }
 
 void MainMenu::showSeedPrompt()
 {
 	m_seedPrompt.reset(new SeedPrompt);
-	hideMenu();
+	setHidden(true);
 }
 
-void MainMenu::hideMenu()
+void MainMenu::setHidden(bool hidden)
 {
-	gui->remove(m_quitButton.get());
-	gui->remove(m_scoreButton.get());
-	gui->remove(m_specialButton.get());
-	gui->remove(m_classicButton.get());
-	gui->remove(m_titleLabel.get());
+	if (hidden != m_hidden) {
+		m_hidden = hidden;
+		if (m_hidden) {
+			gui->remove(m_quitButton.get());
+			gui->remove(m_scoreButton.get());
+			gui->remove(m_specialButton.get());
+			gui->remove(m_classicButton.get());
+			gui->remove(m_titleLabel.get());
+		} else {
+			gui->add(m_titleLabel.get());
+			gui->add(m_classicButton.get());
+			gui->add(m_specialButton.get());
+			gui->add(m_scoreButton.get());
+			gui->add(m_quitButton.get());
+		}
+	}
 }

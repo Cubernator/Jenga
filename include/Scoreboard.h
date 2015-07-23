@@ -1,10 +1,15 @@
-#include "Scene.h"
+#pragma once
+
 #include "GUI.h"
 #include "ScoreFile.h"
 
-class Scoreboard : public Scene
+class MainMenu;
+
+class Scoreboard
 {
 private:
+	MainMenu * m_menu;
+
 	std::vector<ScoreEntry> m_entries;
 
 	std::unique_ptr<GUIButton> m_backButton, m_leftButton, m_rightButton;
@@ -20,8 +25,6 @@ private:
 	bool m_switch, m_special, m_start, m_back;
 	unsigned int m_seed;
 
-	void update() final;
-
 	void loadEntries();
 	void switchBoards();
 
@@ -30,6 +33,8 @@ private:
 	void reuseSeed(unsigned int index);
 
 public:
-	Scoreboard();
+	Scoreboard(MainMenu * menu);
 	~Scoreboard();
+
+	void update();
 };

@@ -161,6 +161,7 @@ void GUIInterface::update()
 	}
 
 	// at the end of each update cycle, sort elements by depth if any changes were registered
+	
 	if (m_elementsNotSorted) {
 		std::stable_sort(m_elements.begin(), m_elements.end(), [](GUIElement * lhs, GUIElement * rhs) {
 			return lhs->getDepth() > rhs->getDepth();
@@ -168,4 +169,5 @@ void GUIInterface::update()
 
 		m_elementsNotSorted = false;
 	}
+	
 }

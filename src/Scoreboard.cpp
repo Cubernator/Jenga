@@ -6,7 +6,7 @@
 #include "MainScene.h"
 #include "utility.h"
 
-Scoreboard::Scoreboard() : m_back(false), m_switch(false), m_special(false), m_start(false)
+Scoreboard::Scoreboard(MainMenu * menu) : m_menu(menu), m_back(false), m_switch(false), m_special(false), m_start(false)
 {
 	IDWriteTextFormat *titleFormat;
 	content->get(L"menuTitleFormat", titleFormat);
@@ -69,7 +69,7 @@ Scoreboard::~Scoreboard()
 void Scoreboard::update()
 {
 	if (m_back) {
-		engine->enterScene<MainMenu>();
+		m_menu->reset();
 	} else if (m_start) {
 		unsigned int seed = m_seed;
 		bool special = m_special;

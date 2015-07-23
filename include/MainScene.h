@@ -1,4 +1,5 @@
 #pragma once
+
 #include "PhysicsScene.h"
 
 #include "Tower.h"
@@ -39,7 +40,7 @@ private:
 	px_ptr<PxD6Joint> m_spring;
 
 	PxVec3 m_planeOrigin, m_springPos;
-	float m_maxSpringDist;
+	const float m_maxSpringDist;
 	bool m_controlMode, m_showDebug;
 
 	Brick *m_pickedBrick;
@@ -47,12 +48,12 @@ private:
 	bool m_highlight;
 
 	float m_camX, m_camY, m_camDist, m_camYAngle;
-	float m_camYANormal, m_camYASteep;
-	float m_xSens, m_ySens;
+	const float m_camYANormal, m_camYASteep;
+	const float m_xSens, m_ySens;
 
 	bool m_togglePause, m_restart, m_backToMain;
 
-	bool m_paused, m_roundOver;
+	bool m_paused, m_canPause, m_roundOver;
 
 	std::unique_ptr<PowerupManager> m_powerupManager;
 	std::unique_ptr<ScoreCounter> m_scoreCounter;
@@ -79,6 +80,8 @@ public:
 	MainScene(PxSceneDesc desc, bool specialMode, unsigned int seed);
 	~MainScene();
 
+	void startRound(bool specialMode, unsigned int seed);
+
 	PowerupManager * getPowerupManager();
 	ScoreCounter * getScoreCounter();
 
@@ -94,6 +97,8 @@ public:
 
 	void brickFaulted();
 
+	void setCanPause(bool canPause);
+	void setPaused(bool paused);
 	void togglePause();
 	void restart();
 	void backToMainMenu();
