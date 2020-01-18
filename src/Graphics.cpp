@@ -11,8 +11,8 @@
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"dxgi.lib")
 
-ID3D11Device *dev;                     // the pointer to our Direct3D device interface
-ID3D11DeviceContext *devcon;           // the pointer to our Direct3D device context
+ID3D11Device *dev;
+ID3D11DeviceContext *devcon;
 
 GraphicsInterface * graphics;
 

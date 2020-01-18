@@ -16,7 +16,6 @@
 #pragma comment(lib,"PhysX3Extensions.lib")
 #pragma comment(lib,"PhysX3Gpu_x86.lib")
 #pragma comment(lib,"PxTask.lib")
-#pragma comment(lib,"PhysXVisualDebuggerSDK.lib")
 #endif
 
 

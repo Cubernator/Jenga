@@ -78,7 +78,7 @@ m_paused(false), m_canPause(true), m_roundOver(false), m_togglePause(false), m_r
 
 	setCamPos();
 
-	//audio->setMasterVolume(2.0f);
+	audio->setMasterVolume(5.0f);
 }
 
 MainScene::~MainScene()

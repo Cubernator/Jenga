@@ -1,4 +1,3 @@
-// include the basic windows header files and the Direct3D header file
 #include <windows.h>
 #include <windowsx.h>
 #include "Engine.h"
@@ -115,6 +114,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	try {
 		Engine e(hWnd);
 
+		// load resources
 		Resources r;
 
 		e.enterScene<MainScene>();

@@ -21,9 +21,9 @@ Engine::Engine(HWND hWnd) : m_realDelta(1.f / 60.f), m_realTime(0.f), m_time(0.f
 	m_gui = new GUIInterface(m_graphics->getSwapChain());
 	m_audio = new AudioInterface();
 	m_physics = new PhysicsInterface();
-	m_input = new Input(m_hWnd);
+	m_input = new InputInterface(m_hWnd);
 	m_objectManager = new ObjectManager();
-	m_content = new Content();
+	m_content = new ContentPool();
 }
 
 Engine::~Engine()
@@ -136,9 +136,9 @@ void Engine::update()
 
 void Engine::render(float alpha)
 {
-	graphics->render(alpha);
-	gui->render();
-	graphics->present();
+	m_graphics->render(alpha);
+	m_gui->render();
+	m_graphics->present();
 }
 
 LRESULT Engine::processMessages(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

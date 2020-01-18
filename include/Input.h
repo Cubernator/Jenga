@@ -44,7 +44,7 @@ public:
 	void insertChar(wchar_t c);
 };
 
-class Input
+class InputInterface
 {
 private:
 	std::unordered_map<USHORT, Button> m_keyboardState;
@@ -66,7 +66,7 @@ private:
 	friend class Engine;
 
 public:
-	Input(HWND hWnd);
+	InputInterface(HWND hWnd);
 
 	bool getKeyDown(USHORT key);
 	bool getKeyPressed(USHORT key);
@@ -89,4 +89,4 @@ public:
 	void unregisterTextEditor(TextEditor * editor);
 };
 
-extern Input * input;
+extern InputInterface * input;

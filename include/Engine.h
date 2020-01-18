@@ -9,14 +9,14 @@
 
 typedef std::chrono::duration<float> fsec;
 
-class Input;
+class InputInterface;
 class ObjectManager;
 class GraphicsInterface;
 class GUIInterface;
 class AudioInterface;
 class Scene;
 class PhysicsScene;
-class Content;
+class ContentPool;
 
 class Engine
 {
@@ -29,12 +29,12 @@ private:
 	bool m_running;
 
 	ObjectManager * m_objectManager;
-	Input * m_input;
+	InputInterface * m_input;
 	PhysicsInterface * m_physics;
 	GraphicsInterface * m_graphics;
 	GUIInterface * m_gui;
 	AudioInterface * m_audio;
-	Content * m_content;
+	ContentPool * m_content;
 
 	std::unique_ptr<Scene> m_activeScene;
 

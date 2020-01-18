@@ -1,8 +1,8 @@
 #include "Content.h"
 
-Content * content;
+ContentPool * content;
 
-Content::Content()
+ContentPool::ContentPool()
 {
 	content = this;
 }

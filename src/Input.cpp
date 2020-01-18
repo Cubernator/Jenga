@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-Input * input;
+InputInterface * input;
 
 TextEditor::TextEditor() { }
 TextEditor::TextEditor(const std::wstring& text) : m_text(text) {}
@@ -50,7 +50,7 @@ void TextEditor::insertChar(wchar_t c)
 }
 
 
-Input::Input(HWND hWnd) : m_mx(0), m_my(0), m_mxDelta(0), m_myDelta(0), m_wheelDelta(0), m_hWnd(hWnd)
+InputInterface::InputInterface(HWND hWnd) : m_mx(0), m_my(0), m_mxDelta(0), m_myDelta(0), m_wheelDelta(0), m_hWnd(hWnd)
 {
 	input = this;
 
@@ -75,7 +75,7 @@ Input::Input(HWND hWnd) : m_mx(0), m_my(0), m_mxDelta(0), m_myDelta(0), m_wheelD
 	retrieveCursorPos();
 }
 
-void Input::retrieveCursorPos()
+void InputInterface::retrieveCursorPos()
 {
 	POINT p;
 	if (GetCursorPos(&p)) {
@@ -86,7 +86,7 @@ void Input::retrieveCursorPos()
 	}
 }
 
-void Input::preUpdate()
+void InputInterface::preUpdate()
 {
 	int mx = m_mx, my = m_my;
 	retrieveCursorPos();
@@ -95,7 +95,7 @@ void Input::preUpdate()
 	m_myDelta = m_my - my;
 }
 
-void Input::update()
+void InputInterface::update()
 {
 	for (auto& bp : m_keyboardState) {
 		bp.second.pressed = false;
@@ -110,7 +110,7 @@ void Input::update()
 	m_wheelDelta = 0;
 }
 
-void Input::updateButton(Button& b, bool down)
+void InputInterface::updateButton(Button& b, bool down)
 {
 	if (down && !b.down) {
 		b.pressed = true;
@@ -121,7 +121,7 @@ void Input::updateButton(Button& b, bool down)
 	b.down = down;
 }
 
-void Input::handle(RAWINPUT * raw)
+void InputInterface::handle(RAWINPUT * raw)
 {
 	if (raw->header.dwType == RIM_TYPEKEYBOARD) {
 		USHORT f = raw->data.keyboard.Flags;
@@ -161,7 +161,7 @@ void Input::handle(RAWINPUT * raw)
 	}
 }
 
-void Input::characterInput(TCHAR character)
+void InputInterface::characterInput(TCHAR character)
 {
 	switch (character) {
 	case 0x0A: // linefeed
@@ -184,62 +184,62 @@ void Input::characterInput(TCHAR character)
 	}
 }
 
-bool Input::getKeyDown(USHORT key)
+bool InputInterface::getKeyDown(USHORT key)
 {
 	return m_keyboardState[key].down;
 }
 
-bool Input::getKeyPressed(USHORT key)
+bool InputInterface::getKeyPressed(USHORT key)
 {
 	return m_keyboardState[key].pressed;
 }
 
-bool Input::getKeyReleased(USHORT key)
+bool InputInterface::getKeyReleased(USHORT key)
 {
 	return m_keyboardState[key].released;
 }
 
-bool Input::getMouseButtonDown(MouseButton button)
+bool InputInterface::getMouseButtonDown(MouseButton button)
 {
 	return m_mouseButtons[button].down;
 }
 
-bool Input::getMouseButtonPressed(MouseButton button)
+bool InputInterface::getMouseButtonPressed(MouseButton button)
 {
 	return m_mouseButtons[button].pressed;
 }
 
-bool Input::getMouseButtonReleased(MouseButton button)
+bool InputInterface::getMouseButtonReleased(MouseButton button)
 {
 	return m_mouseButtons[button].released;
 }
 
-int Input::getMouseX() const
+int InputInterface::getMouseX() const
 {
 	return m_mx;
 }
 
-int Input::getMouseY() const
+int InputInterface::getMouseY() const
 {
 	return m_my;
 }
 
-int Input::getMouseDeltaX() const
+int InputInterface::getMouseDeltaX() const
 {
 	return m_mxDelta;
 }
 
-int Input::getMouseDeltaY() const
+int InputInterface::getMouseDeltaY() const
 {
 	return m_myDelta;
 }
 
-int Input::getMouseWheelDelta() const
+int InputInterface::getMouseWheelDelta() const
 {
 	return m_wheelDelta;
 }
 
-void Input::setMousePos(int x, int y)
+void InputInterface::setMousePos(int x, int y)
 {
 	x = max(min(x, SCREEN_WIDTH), 0);
 	y = max(min(y, SCREEN_HEIGHT), 0);
@@ -254,12 +254,12 @@ void Input::setMousePos(int x, int y)
 	m_my = y;
 }
 
-void Input::registerTextEditor(TextEditor * editor)
+void InputInterface::registerTextEditor(TextEditor * editor)
 {
 	m_textEditors.push_back(editor);
 }
 
-void Input::unregisterTextEditor(TextEditor * editor)
+void InputInterface::unregisterTextEditor(TextEditor * editor)
 {
 	m_textEditors.erase(std::remove(m_textEditors.begin(), m_textEditors.end(), editor), m_textEditors.end());
 }

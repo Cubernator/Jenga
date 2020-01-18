@@ -5,13 +5,13 @@
 #include <string>
 #include <boost/any.hpp>
 
-class Content
+class ContentPool
 {
 private:
 	std::unordered_map<std::wstring, boost::any> m_pool;
 
 public:
-	Content();
+	ContentPool();
 
 	template<typename T>
 	void put(const std::wstring& name, const T& v)
@@ -32,4 +32,4 @@ public:
 	}
 };
 
-extern Content * content;
+extern ContentPool * content;
